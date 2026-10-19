@@ -9,5 +9,5 @@
 ## Static evidence / limits
 
 - Parameter registration count in source: 158 (the project validator's initial static check agrees).
-- The source has 7 selectable camera profiles; it should not be described as having 20 selectable profiles.
+- That earlier audit predates the 20-profile expansion and the current 21-profile repair pass; see `WORK_COMPLETION_REPORT.md` for the current source state.
 - This is a source-level audit, not a visual acceptance test. The validator's first static checks pass, but its full run stops because `cargo` is not installed in this environment. No Windows MSVC build or After Effects render was run here.

@@ -3,7 +3,7 @@
 The native After Effects effect UI is organized as a single effect parameter stack with collapsible AE topic groups. This revision keeps parameter IDs stable and gives each section a numbered, task-oriented label so it is easier to navigate in the Effect Controls panel.
 
 ## Top-level controls
-- `CAMERA ENGINE | Profile`: 20 selectable profiles.
+- `CAMERA ENGINE | Profile`: 21 selectable profiles.
 - `MASTER | VHS Strength`: global processing amount; 0 is an exact source bypass and 350 is the default.
 - `MASTER | Continuous Signal Treatment`: continuous analog signal stages.
 - `MASTER | Event Glitches`: enables timed damage events.

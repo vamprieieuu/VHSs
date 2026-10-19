@@ -20,4 +20,4 @@
 - NOT TESTED: Windows/MSVC build and AE 2023 runtime; this environment lacks `cargo`, so the full project validator cannot complete its Rust-side check.
 - NOT TESTED: rendered frame comparisons, visual strength calibration, audio sync, and performance at full resolution.
 
-This report distinguishes static code inspection from runtime verification; it does not claim all 158 parameters have been perceptually validated.
+This report distinguishes static code inspection from runtime verification; it does not claim all 187 parameters have been perceptually validated.

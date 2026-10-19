@@ -22,9 +22,3 @@ The built-in numbered animated overlay asset library (Glitch Cam GIFs, Retro VHS
 - Added separate event-gated render branches for RGB convergence, vertical hold roll, color smear, head-switch noise, horizontal fold, solarized flash, tape stretch, ghost echo, signal crush, and chroma-bar interference.
 - Added `tools/test_glitch_cam_modes.py` to guard selector count, unique labels, and render-branch presence.
 - See `docs/GLITCH_CAM_15_STYLE_EXPANSION.md` for validation and limitations.
-
-## Built-in overlay asset selector follow-up
-- Added a dedicated built-in overlay selector with 21 bundled reference choices (15 Glitch Cam, 4 Retro VHS, 2 CRT TV), plus independent opacity and speed controls.
-- Embedded six RGB565 frame samples per reference in `src/BundledOverlayFrames.h`, so the selected asset is composited in the render path without relying on an external footage layer or file path.
-- Full-resolution originals remain under `assets/overlay-library/`; embedded frames are compact 96x72 preview renditions, not lossless/full-resolution copies.
-- Added `tools/test_bundled_overlay_library.py` and `docs/BUILTIN_OVERLAY_LIBRARY_IMPLEMENTATION.md`.

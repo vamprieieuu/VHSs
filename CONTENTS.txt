@@ -1,6 +1,19 @@
-Replacement payload files (paths preserved):
-src/VHS6RIFT.cpp	54581 bytes
-include/VHS6RIFT.h	7333 bytes
-resources/VHS6RIFTPiPL.r	798 bytes
-CMakeLists.txt	2535 bytes
-tools/validate_project.py	4658 bytes
+VHS6RIFT source repository repair pass (2026-10-19)
+
+Primary implementation:
+src/VHS6RIFT.cpp
+include/VHS6RIFT.h
+resources/VHS6RIFTPiPL.r
+CMakeLists.txt
+.github/workflows/build.yml
+
+Validation tools:
+tools/validate_project.py
+tools/audit_parameter_wiring.py
+tools/test_vhs6rift.py
+tools/test_glitch_cam_modes.py
+tools/test_repair_regressions.py
+
+Current source state: 192 registered parameters; 21 camera profiles; 21 built-in procedural overlay styles; built-in OSD position/scale; Glitch Cam palette/blend-in; advanced grain and signal controls.
+
+This archive contains source only, not VHS6RIFT.aex. The licensed Adobe SDK headers/PiPLtool and Cargo must be available for the Windows build. See docs/KNOWN_LIMITATIONS.md and docs/WORK_COMPLETION_REPORT.md.

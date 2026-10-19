@@ -1,3 +1,5 @@
+> **Superseded status note:** This historical note predates the 2026-10-19 repair pass. Current parameter count and verification status are in `WORK_COMPLETION_REPORT.md` and `FEATURE_VALIDATION.md`.
+
 # VHS6RIFT — Final Parameter Wiring and Independence Audit
 
 Date: 2026-10-19
@@ -26,7 +28,7 @@ Date: 2026-10-19
 
 ## Static checks performed
 
-- Parameter enum / registration order: 158 registered parameters (excluding implicit input and sentinel) is expected by the project validator.
+- Parameter enum / registration order: 192 registered parameters (excluding implicit input and sentinel) is expected by the project validator.
 - All non-structural registered control IDs have source references beyond the enum and registration declarations.
 - Verified source contains explicit neutral selection for Other VHS Engine Off and Tape Type Off.
 - Verified the master-strength zero-copy bypass, CRT opt-in, and Glitch Cam effective-rate gate remain present.
