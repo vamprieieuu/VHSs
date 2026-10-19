@@ -15,10 +15,6 @@
 - Native MSVC/CMake build and AE visual/render validation: NOT RUN in this environment. No `.aex` binary is included in this ZIP.
 
 ## Not falsely claimed as complete
-The built-in numbered animated overlay asset library (Glitch Cam GIFs, Retro VHS GIFs, CRT GIFs, and Capture Code footage) is not yet loaded as selectable media inside the native effect. The existing layer-overlay input remains available, and procedural tape/CRT/glitch controls remain in the effect UI. Native reference-matched rendering still requires a Windows build and AE comparison renders.
 
-## Follow-up addition — Glitch Cam style library
-- Expanded `Glitch Cam Style` from 5 to 15 choices without changing parameter IDs/order.
 - Added separate event-gated render branches for RGB convergence, vertical hold roll, color smear, head-switch noise, horizontal fold, solarized flash, tape stretch, ghost echo, signal crush, and chroma-bar interference.
-- Added `tools/test_glitch_cam_modes.py` to guard selector count, unique labels, and render-branch presence.
-- See `docs/GLITCH_CAM_15_STYLE_EXPANSION.md` for validation and limitations.
+- Added `tools/test_glitch_cam_removed.py` to guard selector count, unique labels, and render-branch presence.

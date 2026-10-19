@@ -9,7 +9,6 @@ This is a source-level static audit of `src/VHS6RIFT.cpp`, not a rendered-frame 
 1. **Camera profile controls are selection-dependent.** Only the four sliders for the currently selected camera profile are read through `cameraParamIds[ci]`; other profiles' sliders are dormant until that profile is selected. This is intentional profile-specific behavior, but can look like sliders do nothing if the wrong profile is selected.
 2. **CRT is independently opt-in.** `P_CRT_ENABLE` gates scanlines, curvature, glow, RGB triad, flicker and vignette. These should be tested with CRT enabled and Master VHS Strength above zero; curvature is a geometry remap.
 3. **Tape engine is gated by `P_TAPE_ENABLE`.** The tape-type, strength, size, speed and direction are applied only when the module is enabled and effective strength is nonzero. The selected tape type also needs to be non-Off. The prior fallback that silently changed `Off` into `Horizontal Band` when the module checkbox was enabled has been removed; `Off` is now a true neutral selection.
-4. **Glitch Cam has two gates.** `P_EVENTS` must be on, and event-rate/amount/mode parameters then control its event path. `P_GLITCH_CAM_RATE` overrides the base event rate when positive.
 5. **Other VHS engines are gated by `P_OTHER_ENABLE` and `P_OTHER_STRENGTH`.** Craft, Legend and Signal Reference controls are only processed inside the selected Other Engine branch. Therefore the Signal Reference sliders do not act as a global independent Signal stage; select Signal Reference and enable Other VHS to test them. The prior fallback that silently substituted Craft when the popup was `Off` has been removed; `Off` is now a true neutral selection.
 6. **Signal Reference controls share the Other Engine strength multiplier.** The source computes `signalDrive = SignalStrength * OtherStrength` after percentage normalization. Reducing Other Strength reduces all Signal Reference subcontrols together.
 7. **Continuous VHS Treatment is a separate master gate** for the continuous treatment path. Event glitches, CRT and procedural tape overlays have separate paths/gates and should not be confused with the continuous VHS pass.
@@ -21,7 +20,6 @@ This is a source-level static audit of `src/VHS6RIFT.cpp`, not a rendered-frame 
 - Enable CRT only, then sweep one CRT control at a time.
 - Enable Tape only, select a non-Off tape type, then sweep strength/size/speed/direction.
 - Enable Other VHS, select **Signal Reference**, then sweep Signal Strength, Luma Noise, Chroma Noise and Tape Errors individually.
-- Enable Event Glitches and compare Glitch Cam modes/rates on the same frame/time range.
 - Test zero values as bypasses and capture screenshots/frames; do not infer motion from a single still frame.
 
 ## Automated source checks

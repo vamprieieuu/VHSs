@@ -4,7 +4,6 @@ This file is a source-level implementation checklist derived from the supplied `
 
 ## Asset groups verified in the reference archive
 
-- `glitch cam/`: numbered 1–14; GIFs are temporal references, while JPGs are still designs. The duplicate `new vhs overlays/glitch cam/` folder is not a second set of effects. One extra item, `glitch cam 15.gif`, appears in the nested set.
 - `new vhs overlays/crt tvs/`: `crt 1.gif`, `crt2.gif`; these are moving CRT/display references, not static scanline presets.
 - `retro vhs/` and `new vhs overlays/retro vhs/`: four unique designs by content, with repeated files across folders.
 - `new vhs overlays/text/`: date, play/OSD, and text references; some reuse the numbered glitch assets.

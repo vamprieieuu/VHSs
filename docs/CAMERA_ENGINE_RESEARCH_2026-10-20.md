@@ -12,7 +12,11 @@ The current selector contains five actual JVC analog camcorder models. JVC and S
 
 ## What is implemented
 
-Each profile changes luminance softness/bandwidth, horizontal line timing wobble, chroma bleed and delay, edge response, low-level chroma noise, tonal response, and the amount of NTSC-RS tracking noise. This is a deliberately controllable approximation based on format generation and documented processing features. It is **not** claimed to be a pixel-perfect match to each camera: that requires clean sample clips shot by each exact model, captured through a consistent playback/capture chain, then measured and compared.
+The profiles are now deliberately separated strongly enough to compare in a side-by-side A/B: the GR-C7U is much softer/warmer with the broadest chroma smear and highest line instability; the AX220U is muted/green-leaning with moderate softness and noise; the AX920U has firmer edges and stronger contrast with steadier timing; the SXM37US has higher luma detail, stronger edge response and cleaner chroma; the SXM740U has the cleanest/stablest S-VHS-C response with low noise and neutral color. Each profile changes luminance softness/bandwidth, horizontal line timing wobble, chroma bleed and delay, edge response, low-level chroma noise, tonal response, and the amount of NTSC-RS tracking noise. This is a deliberately controllable approximation based on format generation and documented processing features. It is **not** claimed to be a pixel-perfect match to each camera: that requires clean sample clips shot by each exact model, captured through a consistent playback/capture chain, then measured and compared.
+
+## Tracking-damage research basis
+
+Tracking error is modeled as a rolling horizontal band with line-by-line timing displacement, chroma breakup, and animated noise rather than a fixed overlay. This follows descriptions of real tracking failure as horizontal noise bands that can roll vertically and, when severe, obscure most or all of the image. NTSC composite signal simulation also treats horizontal/vertical sync noise as timing instability and VHS tracking as a distinct approximate tape artifact.
 
 ## Primary references
 
@@ -21,3 +25,5 @@ Each profile changes luminance softness/bandwidth, horizontal line timing wobble
 - JVC GR-AX920U product archive: https://jvc-america.com/camcorders/gr_ax920u.html
 - JVC GR-SXM37US official archived product page: https://support.jvc.com/consumer/product.jsp?modelId=MODL027357&page=1
 - JVC GR-SXM740U official archived product page: https://support.jvc.com/consumer/product.jsp?modelId=MODL026778
+- Analog.NTSC signal-domain VHS/NTSC model and tracking limitations: https://github.com/kdkd/Analog-NTSC
+- Canadian Conservation Institute, VHS digitization artifacts and tracking failure: https://www.canada.ca/en/conservation-institute/services/conservation-preservation-publications/technical-bulletins/digitization-vhs-video-tapes.html

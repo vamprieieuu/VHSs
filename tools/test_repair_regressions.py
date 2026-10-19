@@ -18,6 +18,18 @@ def test_main_vhs_defaults_on_and_five_real_jvc_camera_engines_are_selected():
     assert 'PF_ADD_FLOAT_SLIDERX("VHS Strength", 0, 2000, 0, 2000, 350' in SRC
 
 
+
+def test_camera_profiles_have_materially_different_signal_signatures():
+    profile_lines = [line.strip() for line in SRC.splitlines() if line.strip().startswith("{") and "f," in line and "//" not in line and line.count("f") >= 10]
+    assert len(profile_lines) >= 5
+    assert len(set(profile_lines[-5:])) == 5
+    # The render path gives per-camera softness and chroma response substantial weight.
+    assert "prof.lumaSoftness * 0.82f * drive" in SRC
+    assert "0.45f + prof.chromaBleed" in SRC
+    assert "prof.timebaseWobble * (0.5f + 0.5f * drive) * 2.0f" in SRC
+    assert "prof.chromaNoise * drive" in SRC
+
+
 def test_real_ntsc_rs_is_active_and_independently_switchable():
     assert 'PF_ADD_CHECKBOX("Enable NTSC-RS Signal Engine", "Enable", TRUE' in SRC
     assert 'PF_ADD_FLOAT_SLIDERX("NTSC Chroma Delay", 0, 100, 0, 100, 18' in SRC
@@ -36,11 +48,11 @@ def test_grain_is_zero_by_default_and_has_size_speed_amount_controls():
     assert 'PF_ADD_POPUP("Grain Size Preset", 5, 2' in SRC
     assert SRC.index('PF_ADD_TOPIC("IMAGE - Grain and Colored Signal Lines"') < SRC.index('PF_ADD_POPUP("Grain Size Preset"') < SRC.index('PF_END_TOPIC(P_TOPIC_GRAIN_END)')
     assert '64mm (Very Fine)' in SRC
-    assert 'const float grainAmplitude = grainAmount * 0.18f' in SRC
+    assert 'const float grainAmplitude = grainAmount * 0.72f' in SRC
 
 
 def test_colored_lines_are_separate_and_survive_monochrome():
-    assert 'PF_ADD_CHECKBOX("Enable Colored Signal Lines", "Enable", FALSE' in SRC
+    assert 'PF_ADD_CHECKBOX("Enable Colored Signal Lines", "Enable", TRUE' in SRC
     assert 'PF_ADD_FLOAT_SLIDERX("Colored Lines Amount"' in SRC
     assert 'PF_ADD_FLOAT_SLIDERX("Colored Lines Size"' in SRC
     assert 'PF_ADD_FLOAT_SLIDERX("Colored Lines Speed"' in SRC
@@ -68,13 +80,15 @@ def test_signal_reference_is_removed_and_legend_remains_independent():
     assert 'const bool otherEnabled = getCheck(params, P_OTHER_ENABLE);' in SRC
 
 
-def test_glitch_cam_has_own_toggle_and_visible_event_strength():
-    assert 'PF_ADD_CHECKBOX("Enable Glitch Cam Events", "Enable", FALSE' in SRC
-    assert 'if (chosenEvent && glitchCamEnabled)' in SRC
-    assert 'const bool chosenEvent = effectiveEventRate > 0.0f' in SRC
-    assert 'const float amount = clamp01(glitchCamAmount * eventEnv * (0.75f + 0.25f * drive));' in SRC
-    assert 'const float tearChance = (glitchCamMode == 0 || glitchCamMode == 1 || glitchCamMode == 4 ? 0.24f : 0.06f) * amount;' in SRC
-    assert 'const float eventLength = std::max(s.eventDuration, 0.60f);' in SRC
+def test_glitch_cam_is_removed_and_tracking_is_a_real_main_vhs_stage():
+    assert "GLITCH_CAM" not in SRC
+    assert "Glitch Cam" not in SRC
+    assert 'PF_ADD_FLOAT_SLIDERX("Tracking Noise", 0, 100, 0, 100, 45' in SRC
+    assert 'PF_ADD_FLOAT_SLIDERX("Tracking Band Width", 1, 100, 1, 100, 24' in SRC
+    assert "const float trackingHalfWidth = 0.012f + clamp01(s.trackWidth) * 0.47f;" in SRC
+    assert "const float trackBand = effTracking * (1.0f - smooth(trackingHalfWidth * 0.72f, trackingHalfWidth, trackDist));" in SRC
+    assert "const float chromaBreak = trackBand" in SRC
+    assert "const float snowGate = trackBand" in SRC
 
 
 def test_advanced_filters_osd_and_optional_overlay_remain_wired():
@@ -83,7 +97,7 @@ def test_advanced_filters_osd_and_optional_overlay_remain_wired():
         'Vertical Composite Noise', 'Small Circular Dot Noise', 'Head-Switch Position',
         'Head-Switch Height', 'Head-Switch Motion', 'Head-Switch Random Bursts',
         'Built-in OSD / Text Overlay', 'Built-in Overlay Style', 'OSD Position X (%)',
-        'OSD Text Scale (%)', 'Glitch Cam Color Palette', 'Glitch Cam Blend-in',
+        'OSD Text Scale (%)',
         'Enable Built-in Signal Overlay',
     ]:
         assert control in SRC

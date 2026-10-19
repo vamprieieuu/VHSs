@@ -1,6 +1,6 @@
 # VHS6RIFT — Analog Video Suite
 
-VHS6RIFT is a native After Effects effect for VHS/composite-signal degradation. The source uses the included `ntsc-rs` Rust C-FFI stage as the base signal path and additional C++ processing for chroma, camera-transfer response, grain, optional colored signal lines, Glitch Cam events, signal engines, OSD, and audio degradation.
+VHS6RIFT is a native After Effects effect for VHS/composite-signal degradation. The source uses the included `ntsc-rs` Rust C-FFI stage as the base signal path and additional C++ processing for chroma, camera-transfer response, grain, optional colored signal lines, rolling tracking damage, signal engines, OSD, and audio degradation.
 
 ## Changes in this source revision
 
@@ -9,7 +9,7 @@ VHS6RIFT is a native After Effects effect for VHS/composite-signal degradation. 
 - Removed the Tape Behavior model, transparent-tape sweep controls, the source-footage overlay toggle, and VHS Craft.
 - Kept the advanced built-in signal overlay library behind its own explicit enable checkbox.
 - Replaced the earlier visual-reference selector with five real JVC VHS-C/S-VHS-C camera engines, each changing luminance bandwidth, line stability, chroma behavior, edge response, and noise characteristics.
-- Removed the Signal Reference engine, standalone Tape Dropouts and Block Corruption controls. The Glitch Cam's former block-artifact style is now a coherent Horizontal Slip effect.
+- Removed the Signal Reference engine, standalone Tape Dropouts, Block Corruption, and the entire Glitch Cam module. Tracking damage is part of Main VHS.
 - Preserved the NTSC-RS engine and its native tracking-noise implementation.
 
 ## Build requirements

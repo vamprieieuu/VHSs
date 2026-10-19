@@ -24,7 +24,6 @@ Date: 2026-10-19
 | Overlay | Enable Overlay Layer and assign a valid Overlay Layer | Overlay opacity, blend mode, speed, offset and looping require a valid layer |
 | Other VHS engine | Enable Other Signal Engines, choose a non-Off engine, nonzero Other Strength | Craft, Legend, NTSC-RS and Signal Reference have distinct branches; Off remains Off |
 | Signal Reference controls | Other engine = Signal Reference | Signal Strength scales Luma Noise, Chroma Noise and Tape Errors; these controls are not a global signal stage |
-| Glitch Cam | Event Glitches on and effective event rate > 0 | Event Rate override takes precedence over the base event rate when positive |
 | Audio processing | Audio Glitch Enable on | Requires audio render support; effect is wet/dry mixed and uses event controls |
 | Procedural transparent tape / tape sweep | Their individual checkboxes | Separate from the selected Tape Type module |
 
@@ -33,7 +32,6 @@ Date: 2026-10-19
 - Parameter enum / registration order: 192 registered parameters (excluding implicit input and sentinel) is expected by the project validator.
 - All non-structural registered control IDs have source references beyond the enum and registration declarations.
 - Verified source contains explicit neutral selection for Other VHS Engine Off and Tape Type Off.
-- Verified the master-strength zero-copy bypass, CRT opt-in, and Glitch Cam effective-rate gate remain present.
 - ZIP archive integrity is checked after packaging.
 
 ## Limits — not represented as passes

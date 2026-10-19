@@ -6,7 +6,6 @@ Implemented in source:
 - Removed Tape Behavior, transparent tape/tape sweep, source-footage overlay toggle, and VHS Craft from the parameter UI and render path.
 - Added an independent checkbox for the advanced built-in overlay library.
 - Restored seven reference-derived camera profiles using the existing camera profile matrix and supplied before/after reference contact sheets.
-- Strengthened the Signal Reference error events and Glitch Cam event windows; preserved the NTSC-RS tracking-noise path.
 
 Checks actually run:
 - `tools/validate_project.py`: PASS, 112 registered parameter slots in matching order.

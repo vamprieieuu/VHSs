@@ -55,8 +55,8 @@ int main() {
     params[P_SATURATION]->u.fs_d.value = 100.0;
     params[P_SOFTNESS]->u.fs_d.value = 12.0;
     params[P_CHROMA_BLEED]->u.fs_d.value = 40.0;
-    params[P_GRAIN_AMOUNT]->u.fs_d.value = 65.0;
-    params[P_GRAIN_LINES_ENABLE]->u.bd.value = FALSE;
+    params[P_GRAIN_AMOUNT]->u.fs_d.value = 100.0;
+    params[P_GRAIN_LINES_ENABLE]->u.bd.value = TRUE;
     params[P_GRAIN_SCALE]->u.fs_d.value = 28.0;
     params[P_GRAIN_SPEED]->u.fs_d.value = 100.0;
     params[P_NTSC_ENABLE]->u.bd.value = TRUE;
@@ -70,14 +70,7 @@ int main() {
     params[P_ADV_GRAIN_COLOR]->u.pd.value = 1;
     params[P_OTHER_STRENGTH]->u.fs_d.value = 65.0;
     params[P_OTHER_ENABLE]->u.bd.value = TRUE;
-    params[P_ADV_GLITCH_ENABLE]->u.bd.value = FALSE;
     params[P_CAMERA]->u.pd.value = 1;
-    params[P_GLITCH_CAM_AMOUNT]->u.fs_d.value = 70.0;
-    params[P_GLITCH_CAM_RATE]->u.fs_d.value = 30.0;
-    params[P_GLITCH_CAM_MODE]->u.pd.value = 1;
-    params[P_GLITCH_CAM_CHROMA]->u.fs_d.value = 3.0;
-    params[P_GLITCH_CAM_BLOCKS]->u.fs_d.value = 16.0;
-    params[P_ADV_GLITCH_BLENDIN]->u.fs_d.value = 15.0;
   };
   auto render = [&]() { std::fill(dst.begin(), dst.end(), PF_Pixel{}); output.data = dst.data(); return Render(&in, params.data(), &output); };
 
@@ -94,9 +87,9 @@ int main() {
   if (baseChanged < N / 3) { std::cerr << "FAIL: default VHS/NTSC signal treatment is too weak. changed=" << baseChanged << "\n"; return 3; }
   std::cout << "PASS: default VHS/NTSC signal path changes " << baseChanged << " pixels.\n";
 
-  defaults(); in.current_time = 1000; params[P_ADV_GLITCH_ENABLE]->u.bd.value = TRUE; params[P_GLITCH_CAM_AMOUNT]->u.fs_d.value = 150.0; render();
-  if (changed(baseline, dst) < N / 50) { std::cerr << "FAIL: Glitch Cam did not materially affect the full frame.\n"; return 4; }
-  std::cout << "PASS: Glitch Cam event stage changes the rendered frame.\n";
+  defaults(); in.current_time = 1000; params[P_TRACKING]->u.fs_d.value = 100.0; params[P_TRACK_WIDTH]->u.fs_d.value = 100.0; render();
+  if (changed(baseline, dst) < N / 20) { std::cerr << "FAIL: tracking damage did not materially affect the frame.\n"; return 4; }
+  std::cout << "PASS: wide tracking damage materially affects the frame.\n";
 
   defaults(); params[P_MASTER]->u.fs_d.value = 350.0; in.current_time = 1000; render(); const auto frame1 = dst;
   in.current_time = 2000; render();

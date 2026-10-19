@@ -63,7 +63,7 @@ required_controls = [
     "Colored Lines Amount", "Colored Lines Size", "Colored Lines Speed", "VHS Legend - Signal Controls",
     "Enable VHS Legend Engine", "NTSC-RS - Base Signal Controls", "Enable NTSC-RS Signal Engine",
     "Audio Glitch Enable", "Audio Event Glitches", "Audio Wet / Dry Mix", "Enable Tracking Damage",
-    "Enable Other Signal Engines", "Enable Glitch Cam Events", "Built-in OSD / Text Overlay",
+    "Enable Other Signal Engines", "Built-in OSD / Text Overlay",
     "Enable Built-in Signal Overlay", "Built-in Overlay Style", "Grain Size Preset", "Grain Softness",
     "Lowpass Filter Type", "Composite Signal Sharpen", "Chroma Demodulation Filter"
 ]
@@ -100,21 +100,25 @@ if "P_CRT_ENABLE" in source or "CRT TV Engine" in source:
 if 'SUFFIX ".aex"' not in cmake or 'OUTPUT_NAME "VHS6RIFT"' not in cmake:
     fail("CMake target is not configured to emit VHS6RIFT.aex")
 
+if "Glitch Cam" in source or "GLITCH_CAM" in source:
+    fail("ineffective Glitch Cam module must be removed completely")
+if "trackingHalfWidth = 0.012f + clamp01(s.trackWidth) * 0.47f" not in source:
+    fail("tracking band must be able to expand across most of the frame")
+if "const float grainAmplitude = grainAmount * 0.72f" not in source:
+    fail("grain strength multiplier was not raised")
+if "coloredLinesAmount * 0.78f" not in source:
+    fail("colored signal line strength multiplier was not raised")
+
 print(f"PASS: {len(expected)} registered parameters are ordered consistently.")
 print("PASS: Main VHS toggle, five real JVC camera engines, NTSC-RS, grain/color-line controls and audio controls are present.")
 for removed in ["Tape Behavior Model", "Enable Tape Effects", "Enable VHS Overlay on Source Footage", "VHS Craft - Signal Controls"]:
     if removed in source:
         fail(f"removed UI feature remains in source: {removed}")
-for control in ["Grain Size", "Grain Softness", "Grain Structure", "Grain Color Mode", "Lowpass Filter Type", "Composite Signal Sharpen", "Chroma Demodulation Filter", "Vertical Composite Noise", "Small Circular Dot Noise", "Head-Switch Position", "Head-Switch Height", "Head-Switch Motion", "Built-in OSD / Text Overlay", "Enable Glitch Cam Events", "Built-in Overlay Library", "Built-in Overlay Style", "OSD Position X (%)", "OSD Position Y (%)", "OSD Text Scale (%)", "Glitch Cam Color Palette", "Glitch Cam Blend-in"]:
+for control in ["Grain Size", "Grain Softness", "Grain Structure", "Grain Color Mode", "Lowpass Filter Type", "Composite Signal Sharpen", "Chroma Demodulation Filter", "Vertical Composite Noise", "Small Circular Dot Noise", "Head-Switch Position", "Head-Switch Height", "Head-Switch Motion", "Built-in OSD / Text Overlay", "Built-in Overlay Library", "Built-in Overlay Style", "OSD Position X (%)", "OSD Position Y (%)", "OSD Text Scale (%)"]:
     if control not in source:
         fail(f"advanced signal/grain/OSD control missing: {control}")
-print("PASS: five real JVC VHS-C/S-VHS-C camera engines drive distinct transfer, bandwidth, line-stability and noise responses.")
+print("PASS: five researched JVC VHS-C/S-VHS-C camera profiles drive distinct transfer, bandwidth, line-stability and noise responses.")
 print("PASS: PiPL identity, version (591361) and outflags (0x48000006) match the source.")
-
-# Regression guard: Glitch Cam's effective rate must drive both slot timing and gating.
-if "const bool chosenEvent = effectiveEventRate > 0.0f" not in source:
-    fail("Glitch Cam event gate is not using effectiveEventRate; its rate override can be ignored.")
-print("PASS: Glitch Cam event gating uses the effective event rate override.")
 
 # Regression guards for the 2026-10-19 repair pass.
 if "const float charScale = drive;" not in source or "const float colorScale = 1.0f;" not in source:
@@ -125,9 +129,7 @@ if 'PF_ADD_CHECKBOX("Enable Main VHS Engine", "Enable", TRUE' not in source:
     fail("Main VHS must be enabled by default")
 if 'PF_ADD_FLOAT_SLIDERX("VHS Strength", 0, 2000, 0, 2000, 350' not in source:
     fail("VHS Strength control label/range/default mismatch.")
-if "const bool chosenEvent = effectiveEventRate > 0.0f" not in source:
-    fail("Glitch Cam must not depend on the removed legacy event toggle.")
-print("PASS: default Main VHS, removed Tape Dropouts/Block Corruption/Signal Reference, and dedicated Glitch Cam regressions are guarded.")
+print("PASS: default Main VHS, removed Tape Dropouts/Block Corruption/Signal Reference, and rolling tracking regressions are guarded.")
 
 # 4. Native C++ Image Processing Test Suite Execution
 # This harness is a GCC/Linux-oriented test and includes the Adobe SDK headers.

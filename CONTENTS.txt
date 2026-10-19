@@ -1,29 +1,28 @@
-VHS6RIFT source repository repair pass (2026-10-20)
+VHS6RIFT — Native After Effects VHS/Analog Video Suite
+Source-only repository revision: 2026-10-20
 
-Primary implementation:
-src/VHS6RIFT.cpp
-include/VHS6RIFT.h
-resources/VHS6RIFTPiPL.r
-CMakeLists.txt
-.github/workflows/build.yml
-extern/ntsc-rs/
-extern/ntscrs_c/
+Core implementation:
+- src/VHS6RIFT.cpp — native effect UI, camera profiles, VHS rendering, tracking damage, grain, colored signal lines, overlays/OSD, audio processing
+- include/VHS6RIFT.h — parameter/header definitions
+- resources/VHS6RIFTPiPL.r — effect identity and PiPL metadata
+- CMakeLists.txt / build.ps1 / .github/workflows/build.yml — native Windows build configuration
+- extern/ntscrs_c/ — Rust C-FFI wrapper for the ntsc-rs signal engine
+- docs/CAMERA_ENGINE_RESEARCH_2026-10-20.md — model-by-model JVC camera research and sources
 
-Key repair decisions:
-- Removed Camera Engine selector and camera-profile color banks.
-- Kept the fixed VHS signal response and real NTSC-RS base engine.
-- Added independent VHS Craft, VHS Legend-style, NTSC-RS, and Signal Reference switches.
-- Strengthened smooth time-varying grain; reworked tape behavior.
-- Changed the footage overlay to a yes/no switch; no external layer selector.
-- Removed the CRT TV system as requested.
-- Retained Glitch Cam, advanced signal controls, procedural overlay styles, and OSD.
+Current design decisions:
+- Main VHS defaults enabled; VHS Strength 0 is an identity bypass.
+- Five distinct JVC VHS-C/S-VHS-C camera-engine approximations.
+- Tracking damage is integrated into Main VHS, animated, and can expand across most of the frame.
+- Grain Amount remains 0 by default; raising it now produces clearly visible moving grain.
+- Colored Signal Lines are enabled by default with independent amount/size/speed controls.
+- Removed the ineffective Glitch Cam module, Signal Reference, standalone Tape Dropouts and Block Corruption, VHS Craft, source-footage overlay selector, and CRT TV system.
+- Built-in procedural overlay library and OSD remain optional.
 
-Validation:
+Validation scripts:
 - tools/validate_project.py
 - tools/audit_parameter_wiring.py
 - tools/test_repair_regressions.py
-- tools/test_vhs6rift.py
-- tools/test_glitch_cam_modes.py
+- tools/test_native_render.cpp
 
-Current parameter inventory: 135 registered parameters plus the implicit input parameter.
-This is a source-only archive. It does not contain VHS6RIFT.aex. A complete licensed Adobe SDK/PiPLtool and Cargo/Rust are required for native Windows build verification.
+Build caveat:
+This is a source-only archive and contains no .aex. The supplied Adobe SDK snapshot is incomplete; the full licensed After Effects SDK and Rust/Cargo are needed for a native Windows/MSVC build. Static tests do not prove that AE visual output is correct.

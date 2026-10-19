@@ -6,7 +6,6 @@
 - Grain with amount, continuous size, speed, softness, and 4mm/8mm/16mm/32mm/64mm presets; default amount is zero and the module is disabled on load.
 - Separate optional colored signal lines with amount, size, and speed controls; colored lines are processed after the monochrome image conversion.
 - Tracking and dropout controls, VHS Legend, NTSC-RS, and Signal Reference engines.
-- Glitch Cam styles, amount, chroma split, block size, event rate, and enable switch.
 - Optional advanced built-in overlays and OSD, each separately gated.
 - Audio degradation controls.
 

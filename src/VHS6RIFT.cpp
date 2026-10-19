@@ -26,7 +26,7 @@
 
 // Stable parameter IDs. Topic parameters are included in sequence; do not reorder without updating IDs.
 enum {
-  P_INPUT = 0, P_CAMERA, P_MAIN_ENABLE, P_MASTER, P_CONTINUOUS, P_EVENTS, P_SEED,
+  P_INPUT = 0, P_CAMERA, P_MAIN_ENABLE, P_MASTER, P_CONTINUOUS, P_SEED,
   P_TOPIC_COLOR, P_SATURATION, P_BLACK, P_SOFTNESS, P_CHROMA_BLEED, P_CHROMA_X, P_CHROMA_Y, P_TOPIC_COLOR_END,
   P_TOPIC_GRAIN, P_GRAIN_AMOUNT, P_GRAIN_SCALE, P_GRAIN_PRESET, P_GRAIN_SPEED, P_GRAIN_LINES_ENABLE, P_GRAIN_LINES_AMOUNT, P_GRAIN_LINES_SIZE, P_GRAIN_LINES_SPEED, P_TOPIC_GRAIN_END,
   P_TOPIC_DAMAGE, P_TRACKING_ENABLE, P_TRACKING, P_TRACK_FREQ, P_TRACK_WIDTH, P_EVENT_RATE, P_EVENT_DURATION, P_RECOVERY, P_TOPIC_DAMAGE_END,
@@ -36,11 +36,10 @@ enum {
   P_TOPIC_OTHER_END,
   P_TOPIC_AUDIO, P_AUDIO_ENABLE, P_AUDIO_EVENTS, P_AUDIO_MIX, P_AUDIO_EVENT_AMOUNT, P_AUDIO_CRACKLE, P_AUDIO_DROPOUT, P_AUDIO_SATURATION, P_AUDIO_LOFI, P_TOPIC_AUDIO_END,
   P_TOPIC_MODULES, P_OTHER_ENABLE, P_TOPIC_MODULES_END,
-  P_TOPIC_GLITCH_CAM, P_GLITCH_CAM_MODE, P_GLITCH_CAM_AMOUNT, P_GLITCH_CAM_CHROMA, P_GLITCH_CAM_BLOCKS, P_GLITCH_CAM_RATE, P_ADV_GLITCH_ENABLE, P_TOPIC_GLITCH_CAM_END,
   P_TOPIC_ADVANCED, P_ADV_GRAIN_SOFTNESS, P_ADV_GRAIN_MODE, P_ADV_GRAIN_COLOR, P_ADV_GRAIN_RED, P_ADV_GRAIN_GREEN, P_ADV_GRAIN_BLUE,
   P_ADV_LOWPASS_TYPE, P_ADV_SHARPEN, P_ADV_CHROMA_DEMOD, P_ADV_VERTICAL_NOISE, P_ADV_DOT_NOISE, P_ADV_NOISE_COLOR,
   P_ADV_HEADSWITCH_POS, P_ADV_HEADSWITCH_HEIGHT, P_ADV_HEADSWITCH_MOTION, P_ADV_HEADSWITCH_RANDOM,
-  P_ADV_OSD_ENABLE, P_ADV_OSD_MODE, P_ADV_OSD_OPACITY, P_ADV_OSD_COLOR, P_ADV_BUILTIN_OVERLAY_ENABLE, P_ADV_BUILTIN_OVERLAY_STYLE, P_ADV_BUILTIN_OVERLAY_OPACITY, P_ADV_BUILTIN_OVERLAY_SPEED, P_ADV_BUILTIN_OVERLAY_BLEND, P_ADV_OSD_POS_X, P_ADV_OSD_POS_Y, P_ADV_OSD_SCALE, P_ADV_GLITCH_COLOR, P_ADV_GLITCH_BLENDIN, P_TOPIC_ADVANCED_END, P_COUNT
+  P_ADV_OSD_ENABLE, P_ADV_OSD_MODE, P_ADV_OSD_OPACITY, P_ADV_OSD_COLOR, P_ADV_BUILTIN_OVERLAY_ENABLE, P_ADV_BUILTIN_OVERLAY_STYLE, P_ADV_BUILTIN_OVERLAY_OPACITY, P_ADV_BUILTIN_OVERLAY_SPEED, P_ADV_BUILTIN_OVERLAY_BLEND, P_ADV_OSD_POS_X, P_ADV_OSD_POS_Y, P_ADV_OSD_SCALE, P_TOPIC_ADVANCED_END, P_COUNT
 };
 static PF_Err About(PF_InData *in_data, PF_OutData *out_data, PF_ParamDef *params[], PF_LayerDef *output) {
   PF_SPRINTF(out_data->return_msg, "%s 1.2 | Native VHS video processing for After Effects 23.x", PLUGIN_NAME);
@@ -67,8 +66,6 @@ static PF_Err ParamsSetup(PF_InData *in_data, PF_OutData *out_data) {
   PF_ADD_FLOAT_SLIDERX("VHS Strength", 0, 2000, 0, 2000, 350, PF_Precision_TENTHS, 0, 0, P_MASTER);
   AEFX_CLR_STRUCT(def);
   PF_ADD_CHECKBOX("Continuous VHS Signal Treatment", "Enable", TRUE, 0, P_CONTINUOUS);
-  AEFX_CLR_STRUCT(def);
-  PF_ADD_CHECKBOX("Legacy Event Toggle (unused)", "Reserved", FALSE, 0, P_EVENTS);
   AEFX_CLR_STRUCT(def);
   PF_ADD_SLIDER("Random Seed", 0, 9999, 0, 9999, 17, P_SEED);
   AEFX_CLR_STRUCT(def);
@@ -101,9 +98,9 @@ static PF_Err ParamsSetup(PF_InData *in_data, PF_OutData *out_data) {
   AEFX_CLR_STRUCT(def);
   PF_ADD_FLOAT_SLIDERX("Grain Motion Speed", 0, 400, 0, 400, 100, PF_Precision_TENTHS, 0, 0, P_GRAIN_SPEED);
   AEFX_CLR_STRUCT(def);
-  PF_ADD_CHECKBOX("Enable Colored Signal Lines", "Enable", FALSE, 0, P_GRAIN_LINES_ENABLE);
+  PF_ADD_CHECKBOX("Enable Colored Signal Lines", "Enable", TRUE, 0, P_GRAIN_LINES_ENABLE);
   AEFX_CLR_STRUCT(def);
-  PF_ADD_FLOAT_SLIDERX("Colored Lines Amount", 0, 100, 0, 100, 35, PF_Precision_TENTHS, 0, 0, P_GRAIN_LINES_AMOUNT);
+  PF_ADD_FLOAT_SLIDERX("Colored Lines Amount", 0, 100, 0, 100, 65, PF_Precision_TENTHS, 0, 0, P_GRAIN_LINES_AMOUNT);
   AEFX_CLR_STRUCT(def);
   PF_ADD_FLOAT_SLIDERX("Colored Lines Size", 1, 100, 1, 100, 18, PF_Precision_TENTHS, 0, 0, P_GRAIN_LINES_SIZE);
   AEFX_CLR_STRUCT(def);
@@ -117,11 +114,11 @@ static PF_Err ParamsSetup(PF_InData *in_data, PF_OutData *out_data) {
   AEFX_CLR_STRUCT(def);
   PF_ADD_CHECKBOX("Enable Tracking Damage", "Enable", TRUE, 0, P_TRACKING_ENABLE);
   AEFX_CLR_STRUCT(def);
-  PF_ADD_FLOAT_SLIDERX("Tracking Noise", 0, 100, 0, 100, 0, PF_Precision_TENTHS, 0, 0, P_TRACKING);
+  PF_ADD_FLOAT_SLIDERX("Tracking Noise", 0, 100, 0, 100, 45, PF_Precision_TENTHS, 0, 0, P_TRACKING);
   AEFX_CLR_STRUCT(def);
   PF_ADD_FLOAT_SLIDERX("Tracking Event Frequency", 0, 100, 0, 100, 25, PF_Precision_TENTHS, 0, 0, P_TRACK_FREQ);
   AEFX_CLR_STRUCT(def);
-  PF_ADD_FLOAT_SLIDERX("Tracking Band Width", 1, 100, 1, 100, 18, PF_Precision_TENTHS, 0, 0, P_TRACK_WIDTH);
+  PF_ADD_FLOAT_SLIDERX("Tracking Band Width", 1, 100, 1, 100, 24, PF_Precision_TENTHS, 0, 0, P_TRACK_WIDTH);
   AEFX_CLR_STRUCT(def);
   PF_ADD_FLOAT_SLIDERX("Events per Minute", 0, 60, 0, 60, 8, PF_Precision_TENTHS, 0, 0, P_EVENT_RATE);
   AEFX_CLR_STRUCT(def);
@@ -201,24 +198,6 @@ static PF_Err ParamsSetup(PF_InData *in_data, PF_OutData *out_data) {
 
   AEFX_CLR_STRUCT(def);
   AEFX_CLR_STRUCT(def);
-  PF_ADD_TOPIC("GLITCH CAM - Event Style and Timing", P_TOPIC_GLITCH_CAM);
-  AEFX_CLR_STRUCT(def);
-  PF_ADD_POPUP("Glitch Cam Style", 15, 1,
-    "Sync Tear|Chroma Breakup|Horizontal Slip|Luma Dropout|Mixed Signal Burst|RGB Convergence Burst|Vertical Hold Roll|Color Smear|Head-Switch Noise|Horizontal Fold|Solarized Flash|Tape Stretch|Ghost Echo|Signal Crush|Chroma Bar Interference", P_GLITCH_CAM_MODE);
-  AEFX_CLR_STRUCT(def);
-  PF_ADD_FLOAT_SLIDERX("Glitch Cam Amount", 0, 200, 0, 200, 70, PF_Precision_TENTHS, 0, 0, P_GLITCH_CAM_AMOUNT);
-  AEFX_CLR_STRUCT(def);
-  PF_ADD_FLOAT_SLIDERX("Glitch Cam Chroma Split", 0, 12, 0, 12, 3, PF_Precision_TENTHS, 0, 0, P_GLITCH_CAM_CHROMA);
-  AEFX_CLR_STRUCT(def);
-  PF_ADD_FLOAT_SLIDERX("Glitch Cam Segment Size", 2, 64, 2, 64, 16, PF_Precision_TENTHS, 0, 0, P_GLITCH_CAM_BLOCKS);
-  AEFX_CLR_STRUCT(def);
-  PF_ADD_FLOAT_SLIDERX("Glitch Cam Event Rate (events/minute)", 0, 60, 0, 60, 30, PF_Precision_TENTHS, 0, 0, P_GLITCH_CAM_RATE);
-  AEFX_CLR_STRUCT(def);
-  PF_ADD_CHECKBOX("Enable Glitch Cam Events", "Enable", FALSE, 0, P_ADV_GLITCH_ENABLE);
-  AEFX_CLR_STRUCT(def);
-  PF_END_TOPIC(P_TOPIC_GLITCH_CAM_END);
-
-  AEFX_CLR_STRUCT(def);
   PF_ADD_TOPIC("ADVANCED - Grain, Signal Filters and OSD", P_TOPIC_ADVANCED);
   AEFX_CLR_STRUCT(def);
   PF_ADD_FLOAT_SLIDERX("Grain Softness", 0, 100, 0, 100, 35, PF_Precision_TENTHS, 0, 0, P_ADV_GRAIN_SOFTNESS);
@@ -277,10 +256,6 @@ static PF_Err ParamsSetup(PF_InData *in_data, PF_OutData *out_data) {
   AEFX_CLR_STRUCT(def);
   PF_ADD_FLOAT_SLIDERX("OSD Text Scale (%)", 50, 300, 50, 300, 100, PF_Precision_TENTHS, 0, 0, P_ADV_OSD_SCALE);
   AEFX_CLR_STRUCT(def);
-  PF_ADD_POPUP("Glitch Cam Color Palette", 5, 1, "Original Signal|RGB Split|Cyan / Red|Magenta / Green|Amber / Blue", P_ADV_GLITCH_COLOR);
-  AEFX_CLR_STRUCT(def);
-  PF_ADD_FLOAT_SLIDERX("Glitch Cam Blend-in", 0, 100, 0, 100, 15, PF_Precision_TENTHS, 0, 0, P_ADV_GLITCH_BLENDIN);
-  AEFX_CLR_STRUCT(def);
   PF_END_TOPIC(P_TOPIC_ADVANCED_END);
 
   out_data->num_params = P_COUNT;
@@ -297,7 +272,7 @@ static inline int clampi(int v, int a, int b) { return std::max(a, std::min(b, v
 
 struct Settings {
   int seed=17;
-  float master=.35f, continuous=1, events=1, saturation=1, black=0, softness=.12f, bleed=.20f;
+  float master=.35f, continuous=1, saturation=1, black=0, softness=.12f, bleed=.20f;
   float chromaX=2, chromaY=0, grain=.08f, grainScale=28, grainSpeed=1, tracking=.18f, trackFreq=.25f, trackWidth=.18f;
   float eventRate=8, eventDuration=.18f, recovery=.12f;
 };
@@ -309,7 +284,6 @@ static Settings ReadSettings(PF_ParamDef *p[]) {
   Settings s;
   s.master = getSlider(p,P_MASTER,100.0f);
   s.continuous = getCheck(p,P_CONTINUOUS) ? 1.0f : 0.0f;
-  s.events = getCheck(p,P_EVENTS) ? 1.0f : 0.0f; // Read for stable parameter compatibility; dedicated Glitch Cam no longer depends on it.
   s.seed = getInt(p,P_SEED);
   s.saturation = getSlider(p,P_SATURATION,100.0f);
   s.black = getSlider(p,P_BLACK,100.0f);
@@ -339,16 +313,16 @@ struct VhsSignalProfile {
 // Numerical values are engineering approximations based on documented format/features and era,
 // not measurements claimed to have been taken from a lab capture of each camera.
 static const VhsSignalProfile kVhsSignalProfiles[5] = {
-  // GR-C7U (1986): early CCD VHS-C; soft luminance, wider color smear, less stable line timing.
-  {1.02f,1.04f, 0.04f,-0.01f,1.03f,1.00f,0.97f,1.03f,0.03f,0.06f,0.42f,2.0f,0.0f,0.06f,0.055f,0.32f,0.78f,0.050f,0.72f},
-  // GR-AX220U (late-1990s basic Compact VHS): consumer HQ path, soft but steadier picture.
-  {0.99f,1.05f, 0.02f, 0.00f,1.01f,1.00f,0.98f,1.04f,0.035f,0.08f,0.35f,2.0f,0.0f,0.045f,0.045f,0.25f,0.54f,0.038f,0.50f},
-  // GR-AX920U: VHS-C with stabilizer / stronger processing; firmer edges and less line wander.
-  {1.00f,1.08f, 0.015f,0.005f,1.02f,1.00f,0.98f,1.02f,0.025f,0.12f,0.31f,1.5f,0.0f,0.085f,0.035f,0.18f,0.30f,0.028f,0.30f},
-  // GR-SXM37US: S-VHS-C / S-VHS ET, better luminance bandwidth, TBC/CNR processing.
-  {1.02f,1.09f, 0.01f,-0.005f,1.02f,1.01f,0.99f,1.01f,0.015f,0.14f,0.22f,1.0f,0.0f,0.10f,0.025f,0.10f,0.17f,0.020f,0.18f},
-  // GR-SXM740U: later S-VHS-C with digital TBC/CNR and stabilizer; cleanest/stablest of set.
-  {0.99f,1.06f, 0.0f,0.0f,1.00f,1.00f,1.00f,1.00f,0.01f,0.16f,0.19f,0.75f,0.0f,0.075f,0.018f,0.075f,0.075f,0.014f,0.10f}
+  // GR-C7U (1986): early CCD VHS-C; visibly soft, warm, broad chroma smear, pronounced servo wander.
+  {0.84f,0.91f, 0.105f,-0.020f,1.08f,0.99f,0.88f,1.10f,0.055f,0.025f,0.78f,4.0f,0.5f,0.025f,0.16f,0.56f,1.65f,0.15f,1.00f},
+  // GR-AX220U (1997): entry Compact VHS/HQ; softened detail, slightly green/muted mids, moderate jitter.
+  {0.91f,0.96f, 0.025f,0.060f,1.00f,1.04f,0.92f,1.07f,0.045f,0.045f,0.58f,3.0f,0.0f,0.035f,0.12f,0.40f,1.10f,0.105f,0.78f},
+  // GR-AX920U (1997): stabilizer and higher-end processing; stronger edges, firmer contrast, steadier lines.
+  {0.98f,1.15f, 0.015f,0.010f,1.04f,1.00f,0.94f,1.00f,0.018f,0.12f,0.43f,2.0f,0.0f,0.16f,0.075f,0.24f,0.52f,0.065f,0.48f},
+  // GR-SXM37US: S-VHS-C / S-VHS ET; higher luma bandwidth and detail, cleaner chroma, visible edge crispness.
+  {1.08f,1.12f, 0.008f,-0.008f,1.02f,1.01f,1.00f,0.98f,0.010f,0.16f,0.25f,1.1f,0.0f,0.21f,0.050f,0.13f,0.28f,0.038f,0.26f},
+  // GR-SXM740U: later S-VHS-C with TBC/CNR and stabilizer; neutral, clean, low-noise, stable but not VHS-C soft.
+  {1.02f,1.04f, -0.005f,0.0f,1.00f,1.00f,1.02f,0.98f,0.005f,0.18f,0.18f,0.7f,0.0f,0.12f,0.025f,0.09f,0.10f,0.018f,0.12f}
 };
 
 static PF_Err Render(PF_InData *in_data, PF_ParamDef *params[], PF_LayerDef *output) {
@@ -456,12 +430,12 @@ static PF_Err Render(PF_InData *in_data, PF_ParamDef *params[], PF_LayerDef *out
 
   // Color response & chroma behavior
   const float sat = s.saturation * prof.saturation * colorScale;
-  const float bleed = clamp01(s.bleed * prof.chromaBleed * (0.3f + 0.7f * drive));
+  const float bleed = clamp01(s.bleed * (0.45f + prof.chromaBleed) * (0.3f + 0.7f * drive));
   const float totalChromaX = s.chromaX * drive + prof.chromaOffsetX;
   const float totalChromaY = s.chromaY * drive + prof.chromaOffsetY;
 
   // Luma Softness is strictly controlled by P_SOFTNESS slider (0..100).
-  const float soft = clamp01(s.softness * 0.01f + prof.lumaSoftness * 0.30f * drive);
+  const float soft = clamp01(s.softness * 0.01f + prof.lumaSoftness * 0.82f * drive);
   const int lowpassType = std::max(0, params[P_ADV_LOWPASS_TYPE]->u.pd.value - 1);
   const int blurRadius = clampi((int)std::ceil(soft * (lowpassType == 0 ? 5.0f : 2.0f)), 0, 5);
 
@@ -493,15 +467,12 @@ static PF_Err Render(PF_InData *in_data, PF_ParamDef *params[], PF_LayerDef *out
   const float headSwitchMotion = getSlider(params, P_ADV_HEADSWITCH_MOTION, 100.0f);
   const float headSwitchRandom = getSlider(params, P_ADV_HEADSWITCH_RANDOM, 100.0f);
   const bool osdEnabled = getCheck(params, P_ADV_OSD_ENABLE);
-  const bool glitchCamEnabled = getCheck(params, P_ADV_GLITCH_ENABLE);
   const int osdMode = clampi(params[P_ADV_OSD_MODE]->u.pd.value - 1, 0, 3);
   const float osdOpacity = getSlider(params, P_ADV_OSD_OPACITY, 100.0f);
   const int osdColor = clampi(params[P_ADV_OSD_COLOR]->u.pd.value - 1, 0, 2);
   const float osdPosX = getSlider(params, P_ADV_OSD_POS_X, 100.0f);
   const float osdPosY = getSlider(params, P_ADV_OSD_POS_Y, 100.0f);
   const int osdScalePx = clampi((int)std::round(getSlider(params, P_ADV_OSD_SCALE, 100.0f)), 1, 3);
-  const int glitchCamColor = clampi(params[P_ADV_GLITCH_COLOR]->u.pd.value - 1, 0, 4);
-  const float glitchCamBlendIn = getSlider(params, P_ADV_GLITCH_BLENDIN, 100.0f);
   const bool builtinOverlayEnabled = getCheck(params, P_ADV_BUILTIN_OVERLAY_ENABLE);
   const int builtinOverlayStyle = clampi(params[P_ADV_BUILTIN_OVERLAY_STYLE]->u.pd.value - 1, 0, 20);
   const float builtinOverlayOpacity = getSlider(params, P_ADV_BUILTIN_OVERLAY_OPACITY, 100.0f);
@@ -521,29 +492,6 @@ static PF_Err Render(PF_InData *in_data, PF_ParamDef *params[], PF_LayerDef *out
   const int osdTextLength = (int)std::strlen(osdText);
   const int osdLeft = clampi((int)std::round(osdPosX * (float)w), 0, std::max(0, w - 1));
   const int osdTop = clampi((int)std::round(osdPosY * (float)h), 0, std::max(0, h - 1));
-  const int glitchCamMode = std::max(0, params[P_GLITCH_CAM_MODE]->u.pd.value - 1);
-  const float glitchCamAmount = getSlider(params, P_GLITCH_CAM_AMOUNT, 100.0f);
-  const int glitchCamChroma = std::max(0, (int)getSlider(params, P_GLITCH_CAM_CHROMA, 1.0f));
-  const int glitchCamBlockSize = std::max(2, (int)getSlider(params, P_GLITCH_CAM_BLOCKS, 1.0f));
-  const float glitchCamRate = getSlider(params, P_GLITCH_CAM_RATE, 1.0f);
-  const float effectiveEventRate = glitchCamRate > 0.001f ? glitchCamRate : s.eventRate;
-  const float eventPeriod = effectiveEventRate > 0.001f ? 60.0f / effectiveEventRate : 1.0e9f;
-  const int eventSlot = (int)std::floor(timeSec / eventPeriod);
-  const float slotTime = timeSec - eventSlot * eventPeriod;
-  // Use the same effective rate for both slot timing and event gating.
-  // Previously the Glitch Cam Event Rate could change eventPeriod while the
-  // gate still checked s.eventRate, so setting the base rate to zero silently
-  // disabled all events even when the Glitch Cam rate slider was non-zero.
-  const bool chosenEvent = effectiveEventRate > 0.0f && rand01((uint32_t)(eventSlot * 747796405u) ^ (uint32_t)s.seed) < 0.98f;
-  float eventEnv = 0.0f;
-  if (chosenEvent && glitchCamEnabled) {
-    const float eventLength = std::max(s.eventDuration, 0.60f);
-    const float attack = 0.015f + 0.18f * glitchCamBlendIn;
-    if (slotTime < attack) eventEnv = smooth(0.0f, attack, slotTime);
-    else if (slotTime < eventLength) eventEnv = 1.0f;
-    else if (s.recovery > 0.0f) eventEnv = 1.0f - smooth(eventLength, eventLength + s.recovery, slotTime);
-  }
-
   const float otherStrengthRaw = getSlider(params, P_OTHER_STRENGTH, 100.0f);
   const float otherStrength = clamp01(otherStrengthRaw) * drive;
   const bool legendEngineEnabled = getCheck(params, P_LEGEND_ENABLE) && otherEnabled;
@@ -564,6 +512,8 @@ static PF_Err Render(PF_InData *in_data, PF_ParamDef *params[], PF_LayerDef *out
   // sigScale already includes normalized master drive, so do not multiply by
   // raw master strength again (which over-amplified tracking at the default 3.5).
   const float effTracking = trackingEnabled ? clamp01(s.tracking * sigScale) : 0.0f;
+  const float trackingHalfWidth = 0.012f + clamp01(s.trackWidth) * 0.47f;
+  const float trackingCenter = std::fmod(timeSec * (0.045f + s.trackFreq * 1.15f) + 0.13f, 1.0f);
 
   for (int y = 0; y < h; ++y) {
     PF_Pixel *dst = outBase + y * outStride;
@@ -573,6 +523,23 @@ static PF_Err Render(PF_InData *in_data, PF_ParamDef *params[], PF_LayerDef *out
       const float cameraLineWobble = std::sin((float)y * 0.17f + timeSec * (2.0f + prof.timebaseWobble * 4.0f))
           * prof.timebaseWobble * (0.5f + 0.5f * drive) * 2.0f;
       int sx = clampi(nominalSx + (int)std::round(cameraLineWobble), 0, inW - 1);
+      const float ynTracking = (float)y / (float)std::max(1, h - 1);
+      const float rawTrackDist = std::fabs(ynTracking - trackingCenter);
+      const float trackDist = std::min(rawTrackDist, 1.0f - rawTrackDist);
+      const float trackBand = effTracking * (1.0f - smooth(trackingHalfWidth * 0.72f, trackingHalfWidth, trackDist));
+      if (trackBand > 0.001f) {
+        const uint32_t th = (uint32_t)s.seed ^ (uint32_t)(frame * 2246822519u) ^ (uint32_t)((y / 2) * 3266489917u);
+        const float lineJitter = (rand01(th) * 2.0f - 1.0f) * (0.015f + 0.34f * trackBand);
+        const float wave = std::sin((float)y * (0.09f + 0.21f * s.trackFreq) + timeSec * 8.0f + s.seed * 0.03f) * 0.035f * trackBand;
+        const int trackShift = (int)std::round((lineJitter + wave) * (float)inW);
+        sx = clampi(sx + trackShift, 0, inW - 1);
+        // A second line-dependent vertical phase slip makes large tracking values
+        // distort the picture itself instead of merely drawing a bright stripe.
+        if (trackBand > 0.45f) {
+          const int verticalSlip = (int)std::round((rand01(th + 7u) - 0.5f) * trackBand * 0.10f * (float)inH);
+          sy = clampi(sy + verticalSlip, 0, inH - 1);
+        }
+      }
 
       PF_Pixel p = inBase[sy * inStride + sx];
       float r = p.red / 255.0f, g = p.green / 255.0f, b = p.blue / 255.0f;
@@ -705,6 +672,30 @@ static PF_Err Render(PF_InData *in_data, PF_ParamDef *params[], PF_LayerDef *out
           r = g = b = mono;
         }
 
+        // Tracking damage belongs to the Main VHS engine. A broad moving band combines
+        // horizontal sync tears, color breakup and animated snow; width can approach full frame.
+        if (trackBand > 0.001f) {
+          const uint32_t trh = (uint32_t)s.seed ^ (uint32_t)(frame * 668265263u)
+              ^ (uint32_t)((x / 2) * 2246822519u) ^ (uint32_t)((y / 2) * 3266489917u);
+          const float snow = rand01(trh);
+          const float snowGate = trackBand * (0.12f + 0.42f * trackBand);
+          if (snow < snowGate) {
+            const float snowMix = clamp01(trackBand * (0.35f + 0.65f * rand01(trh + 13u)));
+            const float snowV = snow < snowGate * 0.45f ? 1.0f : 0.02f;
+            r = clamp01(r * (1.0f - snowMix) + snowV * snowMix);
+            g = clamp01(g * (1.0f - snowMix) + snowV * snowMix);
+            b = clamp01(b * (1.0f - snowMix) + snowV * snowMix);
+          }
+          const float chromaBreak = trackBand * (rand01(trh + 29u) * 2.0f - 1.0f) * 0.42f;
+          r = clamp01(r + chromaBreak);
+          b = clamp01(b - chromaBreak * 0.92f);
+          const float tearEdge = std::fabs(std::sin((float)x * 0.025f + timeSec * 11.0f + (float)(trh & 255u) * 0.02f));
+          const float tearMix = trackBand * (0.12f + 0.38f * tearEdge);
+          r = clamp01(r * (1.0f - tearMix) + 0.92f * tearMix);
+          g = clamp01(g * (1.0f - tearMix) + 0.96f * tearMix);
+          b = clamp01(b * (1.0f - tearMix) + 1.00f * tearMix);
+        }
+
         // Optional colored analog signal lines are composited after monochrome conversion,
         // so Saturation=0 desaturates the image but never desaturates these independent artifacts.
         if (coloredLinesEnabled && coloredLinesAmount > 0.001f) {
@@ -713,7 +704,7 @@ static PF_Err Render(PF_InData *in_data, PF_ParamDef *params[], PF_LayerDef *out
           const float rowPhase = std::fmod((float)y + phase * linePeriod, linePeriod);
           const float lineCore = 1.0f - smooth(0.35f, 1.1f + coloredLinesSize * 0.015f, std::min(rowPhase, linePeriod - rowPhase));
           const float wobble = 0.5f + 0.5f * std::sin((float)x * 0.021f + phase * 2.7f + (float)(s.seed % 31));
-          const float a = clamp01(lineCore * coloredLinesAmount * 0.16f * (0.45f + 0.55f * wobble));
+          const float a = clamp01(lineCore * coloredLinesAmount * 0.78f * (0.40f + 0.60f * wobble));
           if (a > 0.001f) {
             const float stripe = (std::sin((float)x * 0.009f + phase * 1.3f) + 1.0f) * 0.5f;
             r = clamp01(r * (1.0f-a) + (0.85f + 0.15f * stripe) * a);
@@ -752,9 +743,9 @@ static PF_Err Render(PF_InData *in_data, PF_ParamDef *params[], PF_LayerDef *out
           const float c11 = lattice(ix + 1, iy + 1, 0xA511E9B3u);
           const float rawN = (n00 * (1.0f-fx) + n10 * fx) * (1.0f-fy) + (n01 * (1.0f-fx) + n11 * fx) * fy;
           const float chromaRaw = (c00 * (1.0f-fx) + c10 * fx) * (1.0f-fy) + (c01 * (1.0f-fx) + c11 * fx) * fy;
-          const float grainAmplitude = grainAmount * 0.18f * (1.0f - 0.80f * advGrainSoftness) / std::max(1.0f, grainRadius * 0.22f);
+          const float grainAmplitude = grainAmount * 0.72f * (1.0f - 0.72f * advGrainSoftness) / std::max(1.0f, grainRadius * 0.18f);
           const float n = rawN * grainAmplitude;
-          const float chromaN = chromaRaw * grainAmount * 0.12f / std::max(1.0f, grainRadius * 0.25f);
+          const float chromaN = chromaRaw * grainAmount * 0.48f / std::max(1.0f, grainRadius * 0.20f);
           const float lumaWeight = advGrainMode == 1 ? 0.0f : 1.0f;
           const float chromaWeight = advGrainMode == 0 ? 0.0f : 1.0f;
           const float softMix = advGrainSoftness;
@@ -807,118 +798,6 @@ static PF_Err Render(PF_InData *in_data, PF_ParamDef *params[], PF_LayerDef *out
           const float hn = (rand01(hh) - 0.5f) * hs * 0.85f;
           const float tint = noiseColor * hs * (rand01(hh + 1u) * 2.0f - 1.0f);
           r = clamp01(r + hn + tint); g = clamp01(g + hn * 0.25f); b = clamp01(b + hn - tint);
-        }
-      }
-
-      // Discrete glitch events: deterministic horizontal sync tears plus chroma breakup.
-      // The same composition time/seed always yields the same frame; no history-dependent state.
-      if (eventEnv > 0.001f) {
-        const int bandHeight = std::max(2, h / 90);
-        const int bandIndex = y / bandHeight;
-        const uint32_t eh = (uint32_t)s.seed ^ (uint32_t)(eventSlot * 2654435761u) ^ (uint32_t)(bandIndex * 2246822519u);
-        const float lineNoise = rand01(eh);
-        const float amount = clamp01(glitchCamAmount * eventEnv * (0.75f + 0.25f * drive));
-        const float tearChance = (glitchCamMode == 0 || glitchCamMode == 1 || glitchCamMode == 4 ? 0.24f : 0.06f) * amount;
-        if ((glitchCamMode == 0 || glitchCamMode == 4) && lineNoise < tearChance) {
-          const float signedShift = (rand01(eh + 31u) * 2.0f - 1.0f);
-          const int maxShift = std::max(2, (int)(w / 12 * amount));
-          const int shift = (int)std::round(signedShift * maxShift * eventEnv);
-          const int tx = clampi(sx + shift, 0, inW - 1);
-          const PF_Pixel tear = inBase[sy * inStride + tx];
-          const PF_Pixel tearR = inBase[sy * inStride + clampi(tx + glitchCamChroma, 0, inW - 1)];
-          const PF_Pixel tearB = inBase[sy * inStride + clampi(tx - glitchCamChroma, 0, inW - 1)];
-          const float mix = clamp01(eventEnv * amount * (0.35f + 0.45f * rand01(eh + 37u)));
-          const float tr = tear.red / 255.0f, tg = tear.green / 255.0f, tb = tear.blue / 255.0f;
-          r = clamp01(r * (1.0f - mix) + tr * mix + (tearR.red / 255.0f - tr) * mix * 0.28f);
-          g = clamp01(g * (1.0f - mix) + tg * mix);
-          b = clamp01(b * (1.0f - mix) + tb * mix + (tearB.blue / 255.0f - tb) * mix * 0.28f);
-        }
-        if ((glitchCamMode == 1 || glitchCamMode == 4) && lineNoise < 0.22f * amount) {
-          const int cx = clampi(sx + (rand01(eh + 41u) < 0.5f ? -glitchCamChroma : glitchCamChroma), 0, inW - 1);
-          const PF_Pixel cp = inBase[sy * inStride + cx];
-          const float cm = clamp01(0.6f * amount * eventEnv);
-          r = clamp01(r * (1.0f - cm) + (cp.red / 255.0f) * cm);
-          b = clamp01(b * (1.0f - cm) + (cp.blue / 255.0f) * cm);
-        }
-        if ((glitchCamMode == 2 || glitchCamMode == 4) && lineNoise < 0.35f * amount) {
-          // Horizontal Slip: coherent scanline-segment displacement, never a block-corruption mosaic.
-          const int segmentH = std::max(2, glitchCamBlockSize / 2);
-          const int segmentRow = y / segmentH;
-          const int slipLimit = std::max(1, (int)std::round(glitchCamBlockSize * (0.35f + 0.65f * amount)));
-          const int slip = (int)std::round((rand01(eh + (uint32_t)(segmentRow * 97) + 7u) * 2.0f - 1.0f) * slipLimit);
-          const PF_Pixel sp = inBase[sy * inStride + clampi(sx + slip, 0, inW - 1)];
-          const float slipMix = clamp01(amount * eventEnv * 0.82f);
-          r = clamp01(r * (1.0f - slipMix) + (sp.red / 255.0f) * slipMix);
-          g = clamp01(g * (1.0f - slipMix) + (sp.green / 255.0f) * slipMix);
-          b = clamp01(b * (1.0f - slipMix) + (sp.blue / 255.0f) * slipMix);
-        }
-        if ((glitchCamMode == 3 || glitchCamMode == 4) && lineNoise < 0.20f * amount) {
-          const float dropMix = clamp01(amount * eventEnv);
-          r *= 1.0f - 0.92f * dropMix; g *= 1.0f - 0.92f * dropMix; b *= 1.0f - 0.92f * dropMix;
-        }
-        if (glitchCamMode == 4 && lineNoise < 0.08f * amount) { r = clamp01(r + 0.25f * amount); g *= 1.0f - 0.4f * amount; b = clamp01(b + 0.35f * amount); }
-
-        // Additional reference-inspired Glitch Cam modes (indices 5..14).
-        // Each mode has a different image operation; eventEnv makes them intermittent,
-        // while coordinate/time/seed hashes keep frame renders deterministic.
-        if (glitchCamMode == 5 && lineNoise < 0.30f * amount) { // RGB convergence burst
-          const int d = std::max(1, (int)std::round((1.0f + glitchCamChroma) * amount));
-          const PF_Pixel rp = inBase[sy * inStride + clampi(sx + d, 0, inW - 1)];
-          const PF_Pixel bp = inBase[sy * inStride + clampi(sx - d, 0, inW - 1)];
-          const float m = clamp01(amount * eventEnv * 0.85f);
-          r = clamp01(r * (1.0f-m) + (rp.red/255.0f)*m);
-          b = clamp01(b * (1.0f-m) + (bp.blue/255.0f)*m);
-        } else if (glitchCamMode == 6 && lineNoise < 0.22f * amount) { // vertical hold roll
-          const int roll = std::max(1, (int)std::round((h / 18.0f) * amount * (0.5f + rand01(eh+51u))));
-          const int ry = clampi(sy + ((eh & 1u) ? roll : -roll), 0, inH - 1);
-          const PF_Pixel rp = inBase[ry * inStride + sx];
-          const float m = clamp01(0.75f * amount * eventEnv);
-          r = clamp01(r*(1.0f-m)+(rp.red/255.0f)*m); g = clamp01(g*(1.0f-m)+(rp.green/255.0f)*m); b = clamp01(b*(1.0f-m)+(rp.blue/255.0f)*m);
-        } else if (glitchCamMode == 7 && lineNoise < 0.28f * amount) { // color smear
-          const int d = std::max(1, (int)std::round(glitchCamChroma + 2.0f * amount));
-          const PF_Pixel cp = inBase[sy * inStride + clampi(sx-d, 0, inW-1)];
-          const float m = clamp01(amount * eventEnv * 0.72f);
-          r = clamp01(r*(1.0f-m)+(cp.red/255.0f)*m); b = clamp01(b*(1.0f-m)+(cp.blue/255.0f)*m);
-        } else if (glitchCamMode == 8 && (float)y / (float)std::max(1,h) > 0.86f && lineNoise < 0.72f * amount) { // head-switch noise
-          const float noise = rand01(eh + (uint32_t)(x/3));
-          const float m = clamp01(amount * eventEnv * (0.35f + 0.65f*noise));
-          r = clamp01(r*(1.0f-m)+noise*m); g = clamp01(g*(1.0f-m)+noise*m); b = clamp01(b*(1.0f-m)+noise*m);
-        } else if (glitchCamMode == 9 && lineNoise < 0.24f * amount) { // horizontal fold
-          const int fold = std::max(1, (int)std::round((w/10.0f)*amount*(rand01(eh+61u)*2.0f-1.0f)));
-          const PF_Pixel fp = inBase[sy * inStride + clampi(sx+fold,0,inW-1)];
-          const float m = clamp01(amount*eventEnv*0.9f);
-          r=clamp01(r*(1.0f-m)+(fp.red/255.0f)*m); g=clamp01(g*(1.0f-m)+(fp.green/255.0f)*m); b=clamp01(b*(1.0f-m)+(fp.blue/255.0f)*m);
-        } else if (glitchCamMode == 10 && lineNoise < 0.18f * amount) { // brief solarized flash
-          const float l=0.2126f*r+0.7152f*g+0.0722f*b; const float inv=clamp01(1.0f-l);
-          const float m=clamp01(amount*eventEnv*0.8f);
-          r=clamp01(r*(1.0f-m)+inv*m); g=clamp01(g*(1.0f-m)+inv*m); b=clamp01(b*(1.0f-m)+inv*m);
-        } else if (glitchCamMode == 11 && lineNoise < 0.20f * amount) { // tape stretch / horizontal smear
-          const int d=std::max(1,(int)std::round((w/24.0f)*amount*(0.3f+rand01(eh+71u))));
-          const PF_Pixel sp=inBase[sy*inStride+clampi(sx-d,0,inW-1)]; const float m=clamp01(amount*eventEnv*0.65f);
-          r=clamp01(r*(1.0f-m)+(sp.red/255.0f)*m); g=clamp01(g*(1.0f-m)+(sp.green/255.0f)*m); b=clamp01(b*(1.0f-m)+(sp.blue/255.0f)*m);
-        } else if (glitchCamMode == 12 && lineNoise < 0.26f * amount) { // short ghost echo
-          const PF_Pixel gp=inBase[sy*inStride+clampi(sx-std::max(1,w/160),0,inW-1)]; const float m=clamp01(amount*eventEnv*0.45f);
-          r=clamp01(r*(1.0f-m)+(gp.red/255.0f)*m); g=clamp01(g*(1.0f-m)+(gp.green/255.0f)*m); b=clamp01(b*(1.0f-m)+(gp.blue/255.0f)*m);
-        } else if (glitchCamMode == 13 && lineNoise < 0.32f * amount) { // reduced-bit-depth signal crush
-          const int levels=std::max(2, 12-(int)std::round(amount*8.0f));
-          r=std::round(r*levels)/levels; g=std::round(g*levels)/levels; b=std::round(b*levels)/levels;
-        } else if (glitchCamMode == 14 && lineNoise < 0.24f * amount) { // chroma bar interference
-          const float phase=std::sin((float)y*0.43f+timeSec*18.0f+(float)(eh&255u)*0.02f);
-          const float m=clamp01(amount*eventEnv*0.38f);
-          r=clamp01(r+m*std::max(0.0f,phase)); g=clamp01(g-m*0.45f*std::fabs(phase)); b=clamp01(b+m*std::max(0.0f,-phase));
-        }
-        // Optional event palette: changes the chroma signature without replacing
-        // the selected mode's geometry or turning the whole image into a tint.
-        if (glitchCamColor > 0 && amount > 0.001f) {
-          const float paletteMix = clamp01(amount * eventEnv * 0.18f);
-          float pr = r, pg = g, pb = b;
-          if (glitchCamColor == 1) { pr = clamp01(r + paletteMix * 0.35f); pb = clamp01(b + paletteMix * 0.35f); }
-          else if (glitchCamColor == 2) { pr = clamp01(r + paletteMix * 0.3f); pg = clamp01(g + paletteMix * 0.2f); pb = clamp01(b + paletteMix * 0.4f); }
-          else if (glitchCamColor == 3) { pr = clamp01(r + paletteMix * 0.35f); pg = clamp01(g - paletteMix * 0.2f); pb = clamp01(b + paletteMix * 0.35f); }
-          else if (glitchCamColor == 4) { pr = clamp01(r + paletteMix * 0.35f); pg = clamp01(g + paletteMix * 0.08f); pb = clamp01(b - paletteMix * 0.25f); }
-          r = clamp01(r * (1.0f - paletteMix) + pr * paletteMix);
-          g = clamp01(g * (1.0f - paletteMix) + pg * paletteMix);
-          b = clamp01(b * (1.0f - paletteMix) + pb * paletteMix);
         }
       }
 
