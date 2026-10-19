@@ -1,3 +1,5 @@
+> **Historical note (2026-10-20):** This document describes an earlier source revision and is superseded where it mentions the Camera Engine selector, CRT TV system, or external layer-based overlay. See `WORK_COMPLETION_REPORT.md`, `IMPLEMENTED_FEATURES.md`, and `KNOWN_LIMITATIONS.md` for the current repair status.
+
 # VHS6RIFT — Organized Effect Controls
 
 The native After Effects effect UI is organized as a single effect parameter stack with collapsible AE topic groups. This revision keeps parameter IDs stable and gives each section a numbered, task-oriented label so it is easier to navigate in the Effect Controls panel.

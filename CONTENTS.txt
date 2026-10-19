@@ -1,4 +1,4 @@
-VHS6RIFT source repository repair pass (2026-10-19)
+VHS6RIFT source repository repair pass (2026-10-20)
 
 Primary implementation:
 src/VHS6RIFT.cpp
@@ -6,14 +6,24 @@ include/VHS6RIFT.h
 resources/VHS6RIFTPiPL.r
 CMakeLists.txt
 .github/workflows/build.yml
+extern/ntsc-rs/
+extern/ntscrs_c/
 
-Validation tools:
-tools/validate_project.py
-tools/audit_parameter_wiring.py
-tools/test_vhs6rift.py
-tools/test_glitch_cam_modes.py
-tools/test_repair_regressions.py
+Key repair decisions:
+- Removed Camera Engine selector and camera-profile color banks.
+- Kept the fixed VHS signal response and real NTSC-RS base engine.
+- Added independent VHS Craft, VHS Legend-style, NTSC-RS, and Signal Reference switches.
+- Strengthened smooth time-varying grain; reworked tape behavior.
+- Changed the footage overlay to a yes/no switch; no external layer selector.
+- Removed the CRT TV system as requested.
+- Retained Glitch Cam, advanced signal controls, procedural overlay styles, and OSD.
 
-Current source state: 192 registered parameters; 21 camera profiles; 21 built-in procedural overlay styles; built-in OSD position/scale; Glitch Cam palette/blend-in; advanced grain and signal controls.
+Validation:
+- tools/validate_project.py
+- tools/audit_parameter_wiring.py
+- tools/test_repair_regressions.py
+- tools/test_vhs6rift.py
+- tools/test_glitch_cam_modes.py
 
-This archive contains source only, not VHS6RIFT.aex. The licensed Adobe SDK headers/PiPLtool and Cargo must be available for the Windows build. See docs/KNOWN_LIMITATIONS.md and docs/WORK_COMPLETION_REPORT.md.
+Current parameter inventory: 135 registered parameters plus the implicit input parameter.
+This is a source-only archive. It does not contain VHS6RIFT.aex. A complete licensed Adobe SDK/PiPLtool and Cargo/Rust are required for native Windows build verification.

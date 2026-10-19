@@ -1,3 +1,5 @@
+> **Historical note (2026-10-20):** This document describes an earlier source revision and is superseded where it mentions the Camera Engine selector, CRT TV system, or external layer-based overlay. See `WORK_COMPLETION_REPORT.md`, `IMPLEMENTED_FEATURES.md`, and `KNOWN_LIMITATIONS.md` for the current repair status.
+
 # VHS6RIFT — Camera-by-Camera Reference Analysis & Verification
 
 This document catalogs every camera profile implemented in the VHS6RIFT engine, documenting observable characteristics, tonal curves, color response, and validation metrics.

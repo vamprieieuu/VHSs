@@ -5,7 +5,7 @@ Verifies:
   1. Static parameter enum & registration consistency.
   2. Required UI controls, selectors, and outflags in source and PiPL.
   3. Version numbers (1.2.0.r1 / 591361) and outflags (0x48000006).
-  4. Native C++ pixel-processing test execution (Master=0 identity, camera profiles, CRT TV opt-in, module toggles).
+  4. Native C++ pixel-processing test source and source-level wiring checks (no AE runtime claim).
   5. Embedded PiPL outflags in compiled binary artifacts (.aex) if present.
 """
 
@@ -58,15 +58,15 @@ if ops != expected:
 
 # 2. Required UI Controls Check
 required_controls = [
-    "CAMERA ENGINE | Profile", "Fxc6 Character", "Gen 7 Character", "JVC GR-C7U Character",
-    "VHS-R20 Character", "Fall-78 Character", "ERC-V2S Character", "JVC GR-SXM740U Character",
-    "Continuous Signal Treatment", "Legacy Event Toggle (unused)", "Random Seed", "Colored Grain Amount",
-    "Tape Type", "External Footage Overlay Source (optional)", "Other VHS Engine", "VHS Craft — Signal Controls",
-    "NTSC-RS — Base Signal Controls", "Signal Reference — Controls", "Audio Glitch Enable",
-    "Audio Event Glitches", "Audio Wet / Dry Mix", "PF_Cmd_AUDIO_RENDER",
-    "Enable Grain / Noise", "Enable Tracking Damage", "Enable Tape Effects",
-    "Enable Overlay Layer", "Enable Other Signal Engines", "Enable CRT TV Engine",
-    "Procedural Transparent Tape", "Moving Tape Sweep", "CRT Scanline Strength"
+    "VHS Strength", "Continuous VHS Signal Treatment", "Random Seed", "Colored Grain Amount",
+    "Tape Behavior Model", "Enable VHS Overlay on Source Footage", "VHS Craft — Signal Controls",
+    "Enable VHS Craft Engine", "VHS Legend — Signal Controls", "Enable VHS Legend Engine",
+    "NTSC-RS — Base Signal Controls", "Enable NTSC-RS Signal Engine", "Signal Reference — Controls",
+    "Enable Signal Reference Engine", "Audio Glitch Enable", "Audio Event Glitches", "Audio Wet / Dry Mix",
+    "Enable Grain / Noise", "Enable Tracking Damage", "Enable Tape Effects", "Enable Other Signal Engines",
+    "Procedural Transparent Tape", "Moving Tape Sweep", "Enable Glitch Cam Events",
+    "Built-in OSD / Text Overlay", "Built-in Overlay Style", "Grain Size", "Grain Softness",
+    "Lowpass Filter Type", "Composite Signal Sharpen", "Chroma Demodulation Filter"
 ]
 for item in required_controls:
     if item not in source:
@@ -96,19 +96,19 @@ if '#include "entry.h"' in source:
     fail("missing entry.h dependency remains; this SDK snapshot does not contain entry.h")
 if 'PF_ADD_FLOAT_SLIDERX("VHS Strength", 0, 2000, 0, 2000, 350' not in source:
     fail("Master VHS Strength range/default is not configured as expected")
-if 'PF_ADD_CHECKBOX("Enable CRT TV Engine", "Enable", FALSE' not in source:
-    fail("CRT engine must be optional and disabled by default")
+if "P_CRT_ENABLE" in source or "CRT TV Engine" in source:
+    fail("the removed CRT TV system must not remain in the source/UI")
 if 'SUFFIX ".aex"' not in cmake or 'OUTPUT_NAME "VHS6RIFT"' not in cmake:
     fail("CMake target is not configured to emit VHS6RIFT.aex")
 
 print(f"PASS: {len(expected)} registered parameters are ordered consistently.")
-print("PASS: camera, signal, tape, overlay, Other VHS and audio controls are present.")
-if "kCameraProfiles[21]" not in source or 'PF_ADD_POPUP("CAMERA ENGINE | Profile", 21, 1' not in source:
-    fail("the 21-profile camera engine selector/table is missing")
+print("PASS: VHS signal, independent signal engines, tape, source-footage overlay and audio controls are present.")
+if "CAMERA ENGINE" in source or "kCameraProfiles" in source or "P_CAMERA" in source:
+    fail("obsolete selectable camera/color engine must be removed")
 for control in ["Grain Size", "Grain Softness", "Grain Structure", "Grain Color Mode", "Lowpass Filter Type", "Composite Signal Sharpen", "Chroma Demodulation Filter", "Vertical Composite Noise", "Small Circular Dot Noise", "Head-Switch Position", "Head-Switch Height", "Head-Switch Motion", "Built-in OSD / Text Overlay", "Enable Glitch Cam Events", "Built-in Overlay Library", "Built-in Overlay Style", "OSD Position X (%)", "OSD Position Y (%)", "OSD Text Scale (%)", "Glitch Cam Color Palette", "Glitch Cam Blend-in"]:
     if control not in source:
         fail(f"advanced signal/grain/OSD control missing: {control}")
-print("PASS: all 21 camera profiles, including B&W Surveillance VHS, are registered.")
+print("PASS: selectable camera/color engine removed; fixed VHS signal response remains.")
 print("PASS: PiPL identity, version (591361) and outflags (0x48000006) match the source.")
 
 # Regression guard: Glitch Cam's effective rate must drive both slot timing and gating.
@@ -117,15 +117,15 @@ if "const bool chosenEvent = effectiveEventRate > 0.0f" not in source:
 print("PASS: Glitch Cam event gating uses the effective event rate override.")
 
 # Regression guards for the 2026-10-19 repair pass.
-if "const float charScale = cameraCharacter / 65.0f;" not in source or "const float colorScale = cameraColor / 55.0f;" not in source:
-    fail("Camera identity must remain independent from low master strength; grayscale-at-30 regression detected.")
+if "const float charScale = 1.0f;" not in source or "const float colorScale = 1.0f;" not in source:
+    fail("fixed VHS signal response must not depend on a removed camera/color selector")
 if 'PF_ADD_FLOAT_SLIDERX("Block Corruption", 0, 100, 0, 100, 0' not in source:
     fail("Block corruption must default to zero to avoid unwanted square artifacts on load.")
 if 'PF_ADD_FLOAT_SLIDERX("VHS Strength", 0, 2000, 0, 2000, 350' not in source:
     fail("VHS Strength control label/range/default mismatch.")
 if "const bool chosenEvent = effectiveEventRate > 0.0f" not in source:
     fail("Glitch Cam must not depend on the removed legacy event toggle.")
-print("PASS: low-strength camera color, default block corruption, and dedicated Glitch Cam regressions are guarded.")
+print("PASS: fixed VHS signal response, default block corruption, and dedicated Glitch Cam regressions are guarded.")
 
 # 4. Native C++ Image Processing Test Suite Execution
 # This harness is a GCC/Linux-oriented test and includes the Adobe SDK headers.

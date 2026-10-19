@@ -1,3 +1,5 @@
+> **Historical note (2026-10-20):** This document describes an earlier source revision and is superseded where it mentions the Camera Engine selector, CRT TV system, or external layer-based overlay. See `WORK_COMPLETION_REPORT.md`, `IMPLEMENTED_FEATURES.md`, and `KNOWN_LIMITATIONS.md` for the current repair status.
+
 # VHS6RIFT — Reference Inventory & Asset Index
 
 This document presents a complete inventory of reference media, folders, images, and inspection material used to reconstruct the VHS6RIFT visual processing engine.

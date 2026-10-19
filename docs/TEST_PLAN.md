@@ -1,28 +1,22 @@
-# VHS6RIFT manual verification plan
+# VHS6RIFT Native and After Effects Test Plan
 
-Record AE version, OS, project dimensions, frame rate, bit depth, source clip, settings, and outcome for every test. Use a short test clip with fine text, high-contrast edges, skin tones, and dark areas; also test a clip with audio.
+## Before building
+1. Add the licensed After Effects SDK headers and `PiPLtool.exe` under `extern/AfterEffectsSDK/`.
+2. Install Rust/Cargo for the `ntscrs_c` static library.
+3. Run `python tools/validate_project.py`, `python tools/audit_parameter_wiring.py`, and `python -m pytest -q`.
 
-1. **Load / PiPL:** install only the built `VHS6RIFT.aex`; verify AE 23.2.1 lists VHS6RIFT and applies it without version, flags, or reinstall errors.
-2. **Neutral bypass:** set Master Strength to 0, disable Continuous Treatment and Event Glitches, set Tape Type Off, Overlay Opacity 0, Other VHS Engine Off, Audio Glitch Enable off. Compare output to source.
-3. **Camera profiles:** render the same frame for all seven profiles. Record differences in color response, softness, grain and signal behavior; confirm profile sliders affect only their selected profile.
-4. **Continuous-only:** enable Continuous Treatment and disable Event Glitches. Verify color/chroma/grain/tracking treatment without sudden event bursts.
-5. **Events-only:** disable Continuous Treatment and enable Event Glitches. Verify short, irregular events separated by quiet frames. Change rate, duration, recovery and seed one at a time.
-6. **Repeatability:** render frame N, scrub away and back, render again. Repeat with same settings and seed. Compare images. Then change only Seed and confirm the event pattern changes.
-7. **Color controls:** individually test Saturation, Black Level, Luma Softness, Chroma Bleed, Chroma Offset X and Y. Verify each control has a visible and isolated effect.
-8. **Grain:** vary Amount, Scale and Motion Speed; compare frames at different times and render the same time twice.
-9. **Tape types:** test every Tape Type, Strength, Size, Speed and Direction. Confirm Off disables the tape band and each other type has distinct behavior.
-10. **Overlay:** select an actual overlay footage layer in the comp. Test Normal with black background retained; then Add, Screen, Multiply and explicit Luma Key. Test opacity, speed 0/50/100/200%, negative/positive offset, loop off/on and several loop periods. Inspect end-to-start discontinuities.
-11. **Other VHS:** test each engine separately and move one control at a time. Confirm only the selected engine's bank affects its output.
-12. **Audio independent toggles:** apply the effect to a layer containing audio. Toggle Audio Glitch Enable; test Audio Event Glitches with visual Event Glitches off and vice versa. Test Wet/Dry, Event Amount, Crackle, Dropouts, Saturation and Lo-Fi Quantization individually.
-13. **Audio sync:** render a 5–10 second segment containing audible transients. Compare waveform/sample timestamps to visual event onsets. Repeat after scrubbing and in final render. Record measured offset in milliseconds.
-14. **Stability:** test 8-bpc and 16-bpc comps; this initial renderer advertises no deep-color flag, so AE's actual conversion path must be recorded. Test overlay layer empty/unassigned, missing source, layer start/end, negative offset and loop boundary.
-15. **Performance:** test 720p and 1080p; record preview and render time. CPU processing is expected in this baseline.
+## Native build / render checks
+1. Run the Windows/MSVC CMake build and confirm exactly one `VHS6RIFT.aex` artifact is produced.
+2. Run the native render harness; confirm Master Strength 0 is an identity copy, the NTSC-RS base changes the source, Glitch Cam alters the whole image during an event, and moving grain changes across frames.
+3. Record any compile or test failure; do not infer native success from static Python tests.
 
-## Results log template
-
-| Test | Settings / source | Expected | Actual | Status | Evidence |
-|---|---|---|---|---|---|
-| AE load | | Loads without errors | | Not run | |
-| Neutral bypass | | Matches source | | Not run | |
-| Camera profiles | | Each has distinct signal/color behavior | | Not run | |
-| Audio sync | | Measured offset documented | | Not run | |
+## AE 23.2.1 visual checks
+1. Apply VHS6RIFT to a color-bar chart, portrait, and detailed street footage. Confirm the default is a recognizable VHS signal, not only a color tint.
+2. Toggle NTSC-RS and adjust chroma delay/head switching/edge wave/composite noise individually.
+3. Enable each alternate signal engine separately and verify that its controls produce visible, distinct effects.
+4. Test all Tape Behavior models one at a time; confirm Off is neutral and each enabled model is moving/temporal.
+5. Enable the source-footage overlay checkbox and cycle through the 21 procedural overlay styles; confirm no external layer selection is required.
+6. Enable Glitch Cam and scrub through at least 10 seconds; check event visibility, full-frame coverage, rate, amount, palette and blend-in.
+7. Compare grain at multiple sizes and softness values; confirm there are no square pixel-cell artifacts and motion follows timeline time.
+8. Verify alpha edges, full-resolution performance, preview/render consistency, and saved-project parameter behavior.
+9. Confirm the removed Camera Engine selector and CRT TV system no longer appear in the UI.

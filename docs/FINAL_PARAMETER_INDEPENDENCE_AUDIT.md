@@ -1,3 +1,5 @@
+> **Historical note (2026-10-20):** This document describes an earlier source revision and is superseded where it mentions the Camera Engine selector, CRT TV system, or external layer-based overlay. See `WORK_COMPLETION_REPORT.md`, `IMPLEMENTED_FEATURES.md`, and `KNOWN_LIMITATIONS.md` for the current repair status.
+
 > **Superseded status note:** This historical note predates the 2026-10-19 repair pass. Current parameter count and verification status are in `WORK_COMPLETION_REPORT.md` and `FEATURE_VALIDATION.md`.
 
 # VHS6RIFT — Final Parameter Wiring and Independence Audit

@@ -1,9 +1,10 @@
 # VHS6RIFT — Known Limitations and Verification Boundaries
 
-- The current deliverable is the **source repository only**. No `.aex` binary is included or claimed as built.
-- This environment did not have Cargo installed, so the Rust `ntscrs_c` static library and native C++ render harness could not be built or executed here.
-- The repository archive does not include the full licensed Adobe After Effects SDK headers and `PiPLtool.exe`; supply the licensed SDK at `extern/AfterEffectsSDK` before running the Windows 2022 / MSVC build workflow.
-- The added rendering stages have source-level wiring and static validation, but require Windows MSVC compilation and actual AE 23.x visual checks to verify behavior, performance, alpha handling, and temporal appearance.
-- OSD uses a compact built-in 5x7 bitmap glyph set and preset display modes; it is not a general-purpose custom text/font loader.
-- Built-in overlay styles are generated procedurally. They are editable animated signal graphics inspired by analog-video artifact families, not copies of reference clips or proprietary plugin algorithms.
-- Audio code is present but needs verification during After Effects RAM preview and audio export, because static image rendering does not exercise audio selectors.
+- This deliverable is source-only; no `.aex` binary is included or claimed as built.
+- Cargo/Rust and the complete licensed Adobe After Effects SDK headers plus `PiPLtool.exe` were not available in the local verification environment. The Rust `ntscrs_c` library and native C++ render harness have therefore not been compiled or executed here.
+- Static tests validate parameter registration and source wiring, not perceived image quality, frame-to-frame behavior, alpha correctness, performance, or successful plugin loading.
+- The built-in overlay library is procedural. It does not embed or play the user's reference GIF files as actual overlay footage.
+- VHS Craft-style, VHS Legend-style, and Signal Reference are separate original processing paths, not wrappers around third-party AEX binaries. Visual similarity to reference plugins is not yet validated.
+- The CRT TV system was removed from the source/UI as requested.
+- Audio processing is present but has not been verified during AE RAM preview or final audio export.
+- The updated native render test source needs to be run on a Windows environment with the complete SDK and Rust toolchain before the code can be treated as build-verified.

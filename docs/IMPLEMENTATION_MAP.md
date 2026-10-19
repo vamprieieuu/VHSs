@@ -1,22 +1,21 @@
-# Requirements-to-implementation map — current repair pass
+# VHS6RIFT Implementation Map — Current Repair Pass
 
-| Requirement | Source path | Status / boundary |
+| Stage | Current implementation | Status boundary |
 |---|---|---|
-| Native effect identity and build files | `src/VHS6RIFT.cpp`, `resources/VHS6RIFTPiPL.r`, `CMakeLists.txt` | Source and identity statically validated; Windows build not run in this environment. |
-| 21 camera profiles | `kCameraProfiles[21]`, `P_CAMERA` | Registered; B&W Surveillance VHS is a separate explicit profile. Visual camera-by-camera matching still requires AE renders. |
-| Low-strength camera color | `drive`, `sat`, profile transform | Camera color is independent of master drive; NTSC-RS stage now uses strength-scaled blending and is bypassed when its controls are zero. |
-| Grain sizes, softness, structure, color | `P_ADV_GRAIN_*`, grain stage in `Render` | Wired in source; temporal/spatial appearance still requires AE visual validation. |
-| Lowpass, sharpening, chroma demod | `P_ADV_LOWPASS_TYPE`, `P_ADV_SHARPEN`, `P_ADV_CHROMA_DEMOD` | Wired in source; filter behavior needs perceptual validation in AE. |
-| Composite vertical noise and dots | `P_ADV_VERTICAL_NOISE`, `P_ADV_DOT_NOISE`, `P_ADV_NOISE_COLOR` | Procedural, deterministic by time/seed, and opt-in through nonzero sliders. |
-| Head-switching controls | `P_ADV_HEADSWITCH_*` | Procedural moving band with position, height, motion, and burst randomness; disabled by default. |
-| Glitch Cam | `P_ADV_GLITCH_ENABLE`, `P_GLITCH_CAM_*` | 15 event styles; separate enable switch; normalized event rate/amount/chroma/block size. |
-| Built-in OSD | `P_ADV_OSD_*` | Direct 5x7 bitmap rendering; no footage layer required; preset text modes. |
-| Built-in overlay library | `P_ADV_BUILTIN_OVERLAY_*` | 21 direct procedural animated styles, opacity, speed, blend, and enable. This is not a copy of the reference clips. |
-| External footage overlays | `P_OVERLAY_*` | Still optional and independent of built-in overlays; checkout/loop behavior needs AE host validation. |
-| Tape behavior | `P_TAPE_*`, `P_TRANSPARENT_TAPE_*`, `P_TAPE_SWEEP_*` | Strength/size/speed normalization corrected; visual calibration still pending. |
-| CRT | `P_CRT_*` | Scanlines, curvature/glass mask, glow, RGB convergence/phosphor mask, flicker, vignette; opt-in. |
-| Audio | `AudioRender` and `P_AUDIO_*` | Source path present; audio selector and sync validation not run in AE. |
-| Parameter registration | `tools/validate_project.py` | PASS: 192 registered parameters in enum/setup order. |
-| Static wiring | `tools/audit_parameter_wiring.py` | PASS: non-structural IDs referenced in render/source. |
-| Python smoke/regression tests | `tools/test_*.py` | PASS: 11 Python tests. These are not native-pixel or host-render tests. |
-| Native build and AE render | GitHub Actions / After Effects 23.2.1 | NOT RUN here: Cargo unavailable and full licensed SDK headers/PiPLtool are not in this archive. |
+| Core VHS transfer | Fixed VHS signal response plus real `ntsc-rs` Rust C-FFI processing | Source-wired; native build and AE visuals not run here |
+| Signal engines | Independent VHS Craft, VHS Legend-style, NTSC-RS, and Signal Reference switches and settings | Separate C++/Rust paths; perceptual matching not validated |
+| Moving grain | Time/seed-driven interpolated noise, size/softness/structure/color controls | Static source checks pass; compiled render test pending |
+| Tape behavior | Horizontal band, head-switch, vertical roll, side tear, signal snow; animated edge irregularity and chroma/luma damage | Source-wired; AE visual check pending |
+| Overlay | One yes/no switch gates 21 procedural overlays on the source footage; no layer selector | Procedural graphics, not source GIF playback |
+| Glitch Cam | Separate opt-in temporal event stage and 15 styles | Source-wired; runtime visual check pending |
+| CRT TV system | Removed from source/UI per request | Not present |
+| OSD | Native bitmap text and timeline-driven timecode/date/time/camera label | Source-wired; host render pending |
+| Audio | AE audio render selector and signal controls | Host validation pending |
+| Parameters | 135 registered parameters, checked against the enum order | Static validator passes |
+
+## Validation
+
+- `python tools/validate_project.py` — PASS (static source and parameter checks).
+- `python tools/audit_parameter_wiring.py` — PASS (static wiring audit).
+- `python -m pytest -q` — PASS (13 Python tests).
+- Native C++/Rust build and After Effects visual test — NOT RUN in this environment.
