@@ -106,8 +106,14 @@ if "trackingHalfWidth = 0.012f + clamp01(s.trackWidth) * 0.47f" not in source:
     fail("tracking band must be able to expand across most of the frame")
 if "const float grainAmplitude = grainAmount * 0.72f" not in source:
     fail("grain strength multiplier was not raised")
-if "coloredLinesAmount * 0.78f" not in source:
-    fail("colored signal line strength multiplier was not raised")
+if 'PF_ADD_CHECKBOX("Enable Colored Signal Lines", "Enable", FALSE' not in source:
+    fail("colored signal lines must be opt-in by default")
+if 'PF_ADD_CHECKBOX("Enable Tracking Damage", "Enable", FALSE' not in source:
+    fail("tracking damage must be opt-in by default")
+if 'PF_ADD_FLOAT_SLIDERX("NTSC Edge Wave", 0, 100, 0, 100, 0' not in source:
+    fail("NTSC edge waves must not be injected by default")
+if "snowGate = trackBand" in source or "tearMix = trackBand" in source:
+    fail("unrequested tracking snow/white tears remain in the Main VHS path")
 
 print(f"PASS: {len(expected)} registered parameters are ordered consistently.")
 print("PASS: Main VHS toggle, five real JVC camera engines, NTSC-RS, grain/color-line controls and audio controls are present.")

@@ -24,17 +24,17 @@ def test_camera_profiles_have_materially_different_signal_signatures():
     assert len(profile_lines) >= 5
     assert len(set(profile_lines[-5:])) == 5
     # The render path gives per-camera softness and chroma response substantial weight.
-    assert "prof.lumaSoftness * 0.82f * drive" in SRC
-    assert "0.45f + prof.chromaBleed" in SRC
-    assert "prof.timebaseWobble * (0.5f + 0.5f * drive) * 2.0f" in SRC
-    assert "prof.chromaNoise * drive" in SRC
+    assert "prof.lumaSoftness * 1.05f * drive" in SRC
+    assert "0.25f + prof.chromaBleed * 1.35f" in SRC
+    assert "prof.timebaseWobble * (0.5f + 0.5f * drive) * 2.2f" in SRC
+    assert "prof.chromaNoise * drive * 0.35f" in SRC
 
 
 def test_real_ntsc_rs_is_active_and_independently_switchable():
     assert 'PF_ADD_CHECKBOX("Enable NTSC-RS Signal Engine", "Enable", TRUE' in SRC
     assert 'PF_ADD_FLOAT_SLIDERX("NTSC Chroma Delay", 0, 100, 0, 100, 18' in SRC
     assert 'baseNtscParams.chroma_delay = getSlider(params, P_NTSC_CHROMA_DELAY, 1.0f)' in SRC
-    assert 'baseNtscParams.tracking_noise = getCheck(params, P_TRACKING_ENABLE)' in SRC
+    assert 'baseNtscParams.tracking_noise = 0.0f; // Tracking is handled once by the adjustable Main VHS band below.' in SRC
     assert 'effect.tracking_noise.enabled = true;' in (ROOT / "extern/ntscrs_c/src/lib.rs").read_text(encoding="utf-8")
 
 
@@ -52,7 +52,7 @@ def test_grain_is_zero_by_default_and_has_size_speed_amount_controls():
 
 
 def test_colored_lines_are_separate_and_survive_monochrome():
-    assert 'PF_ADD_CHECKBOX("Enable Colored Signal Lines", "Enable", TRUE' in SRC
+    assert 'PF_ADD_CHECKBOX("Enable Colored Signal Lines", "Enable", FALSE' in SRC
     assert 'PF_ADD_FLOAT_SLIDERX("Colored Lines Amount"' in SRC
     assert 'PF_ADD_FLOAT_SLIDERX("Colored Lines Size"' in SRC
     assert 'PF_ADD_FLOAT_SLIDERX("Colored Lines Speed"' in SRC
@@ -83,12 +83,16 @@ def test_signal_reference_is_removed_and_legend_remains_independent():
 def test_glitch_cam_is_removed_and_tracking_is_a_real_main_vhs_stage():
     assert "GLITCH_CAM" not in SRC
     assert "Glitch Cam" not in SRC
-    assert 'PF_ADD_FLOAT_SLIDERX("Tracking Noise", 0, 100, 0, 100, 45' in SRC
-    assert 'PF_ADD_FLOAT_SLIDERX("Tracking Band Width", 1, 100, 1, 100, 24' in SRC
+    assert 'PF_ADD_CHECKBOX("Enable Tracking Damage", "Enable", FALSE' in SRC
+    assert 'PF_ADD_FLOAT_SLIDERX("Tracking Noise", 0, 100, 0, 100, 0' in SRC
+    assert 'PF_ADD_FLOAT_SLIDERX("Tracking Band Width", 1, 100, 1, 100, 18' in SRC
     assert "const float trackingHalfWidth = 0.012f + clamp01(s.trackWidth) * 0.47f;" in SRC
     assert "const float trackBand = effTracking * (1.0f - smooth(trackingHalfWidth * 0.72f, trackingHalfWidth, trackDist));" in SRC
-    assert "const float chromaBreak = trackBand" in SRC
-    assert "const float snowGate = trackBand" in SRC
+    assert "const int trackShift = (int)std::round(lineJitter * (float)inW);" in SRC
+    assert "const float snowGate = trackBand" not in SRC
+    assert "const float chromaBreak = trackBand" not in SRC
+    assert "const float tearMix = trackBand" not in SRC
+    assert 'PF_ADD_CHECKBOX("Enable Tracking Damage", "Enable", FALSE' in SRC
 
 
 def test_advanced_filters_osd_and_optional_overlay_remain_wired():

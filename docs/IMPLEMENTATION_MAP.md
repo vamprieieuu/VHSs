@@ -6,7 +6,7 @@
 | Base signal | Included `ntscrs_c` Rust C-FFI wrapper calling the actual `ntsc-rs` signal engine | Source wired; native build/runtime not run here |
 | Image color/chroma | Saturation, black level, luma softness, chroma bleed and X/Y offsets | Static wiring tests pass |
 | Grain | Amount, continuous size, speed, softness, and 4mm/8mm/16mm/32mm/64mm preset; zero amount by default; interpolated moving lattice texture rather than per-pixel square cells | Static tests pass; visual test pending |
-| Colored signal lines | Separate amount/size/speed controls, enabled by default; applied after monochrome conversion | Static tests pass; visual test pending |
+| Colored signal lines | Separate amount/size/speed controls, disabled with amount zero by default; applied after monochrome conversion | Static tests pass; visual test pending |
 | Signal engines | NTSC-RS and VHS Legend-style; no Signal Reference or VHS Craft | Source wired; visual test pending |
 | Overlay/OSD | Optional built-in overlay library and OSD behind explicit checkboxes; no source-footage overlay selector | Static tests pass; visual test pending |
 | Removed features | Tape Behavior, transparent tape/tape sweep, source-footage overlay toggle, VHS Craft | Confirmed absent from current source/UI |

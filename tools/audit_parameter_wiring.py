@@ -39,6 +39,6 @@ require("Glitch Cam" not in source and "GLITCH_CAM" not in source, "ineffective 
 require("P_TAPE_TYPE" not in source and "P_CRAFT_ENABLE" not in source and "P_OVERLAY_ENABLE" not in source and "Tape Dropouts" not in source and 'PF_ADD_FLOAT_SLIDERX("Block Corruption"' not in source, "requested tape, dropouts, block corruption, VHS Craft and source-footage overlay features removed")
 require("P_GRAIN_LINES_ENABLE" in source and "P_GRAIN_LINES_SIZE" in source and "P_GRAIN_LINES_SPEED" in source and "grainAmount = clamp01(s.grain)" in source, "grain amount and colored signal-line controls directly drive separate high-visibility stages")
 require("PF_VERSION(1, 2, 0, PF_Stage_RELEASE, 1)" in source, "plugin version identity unchanged")
-require("trackingHalfWidth = 0.012f + clamp01(s.trackWidth) * 0.47f" in source and "const float chromaBreak = trackBand" in source, "rolling tracking damage has full-frame-capable width, tearing, chroma breakup and snow")
+require("trackingHalfWidth = 0.012f + clamp01(s.trackWidth) * 0.47f" in source and "const int trackShift = (int)std::round(lineJitter * (float)inW);" in source and "const float snowGate = trackBand" not in source, "tracking damage is width-controlled image displacement without unsolicited snow/white tears")
 require('Name { "VHS6RIFT" }' in (ROOT / "resources" / "VHS6RIFTPiPL.r").read_text(encoding="utf-8"), "PiPL name remains VHS6RIFT")
 print("PASS: static parameter wiring audit completed. No pixel-render, Windows build, or AE runtime claim is implied.")

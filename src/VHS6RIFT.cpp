@@ -98,9 +98,9 @@ static PF_Err ParamsSetup(PF_InData *in_data, PF_OutData *out_data) {
   AEFX_CLR_STRUCT(def);
   PF_ADD_FLOAT_SLIDERX("Grain Motion Speed", 0, 400, 0, 400, 100, PF_Precision_TENTHS, 0, 0, P_GRAIN_SPEED);
   AEFX_CLR_STRUCT(def);
-  PF_ADD_CHECKBOX("Enable Colored Signal Lines", "Enable", TRUE, 0, P_GRAIN_LINES_ENABLE);
+  PF_ADD_CHECKBOX("Enable Colored Signal Lines", "Enable", FALSE, 0, P_GRAIN_LINES_ENABLE);
   AEFX_CLR_STRUCT(def);
-  PF_ADD_FLOAT_SLIDERX("Colored Lines Amount", 0, 100, 0, 100, 65, PF_Precision_TENTHS, 0, 0, P_GRAIN_LINES_AMOUNT);
+  PF_ADD_FLOAT_SLIDERX("Colored Lines Amount", 0, 100, 0, 100, 0, PF_Precision_TENTHS, 0, 0, P_GRAIN_LINES_AMOUNT);
   AEFX_CLR_STRUCT(def);
   PF_ADD_FLOAT_SLIDERX("Colored Lines Size", 1, 100, 1, 100, 18, PF_Precision_TENTHS, 0, 0, P_GRAIN_LINES_SIZE);
   AEFX_CLR_STRUCT(def);
@@ -112,13 +112,13 @@ static PF_Err ParamsSetup(PF_InData *in_data, PF_OutData *out_data) {
 
   PF_ADD_TOPIC("SIGNAL - Tracking and Damage Events", P_TOPIC_DAMAGE);
   AEFX_CLR_STRUCT(def);
-  PF_ADD_CHECKBOX("Enable Tracking Damage", "Enable", TRUE, 0, P_TRACKING_ENABLE);
+  PF_ADD_CHECKBOX("Enable Tracking Damage", "Enable", FALSE, 0, P_TRACKING_ENABLE);
   AEFX_CLR_STRUCT(def);
-  PF_ADD_FLOAT_SLIDERX("Tracking Noise", 0, 100, 0, 100, 45, PF_Precision_TENTHS, 0, 0, P_TRACKING);
+  PF_ADD_FLOAT_SLIDERX("Tracking Noise", 0, 100, 0, 100, 0, PF_Precision_TENTHS, 0, 0, P_TRACKING);
   AEFX_CLR_STRUCT(def);
   PF_ADD_FLOAT_SLIDERX("Tracking Event Frequency", 0, 100, 0, 100, 25, PF_Precision_TENTHS, 0, 0, P_TRACK_FREQ);
   AEFX_CLR_STRUCT(def);
-  PF_ADD_FLOAT_SLIDERX("Tracking Band Width", 1, 100, 1, 100, 24, PF_Precision_TENTHS, 0, 0, P_TRACK_WIDTH);
+  PF_ADD_FLOAT_SLIDERX("Tracking Band Width", 1, 100, 1, 100, 18, PF_Precision_TENTHS, 0, 0, P_TRACK_WIDTH);
   AEFX_CLR_STRUCT(def);
   PF_ADD_FLOAT_SLIDERX("Events per Minute", 0, 60, 0, 60, 8, PF_Precision_TENTHS, 0, 0, P_EVENT_RATE);
   AEFX_CLR_STRUCT(def);
@@ -157,11 +157,11 @@ static PF_Err ParamsSetup(PF_InData *in_data, PF_OutData *out_data) {
   AEFX_CLR_STRUCT(def);
   PF_ADD_FLOAT_SLIDERX("NTSC Chroma Delay", 0, 100, 0, 100, 18, PF_Precision_TENTHS, 0, 0, P_NTSC_CHROMA_DELAY);
   AEFX_CLR_STRUCT(def);
-  PF_ADD_FLOAT_SLIDERX("NTSC Head Switching", 0, 100, 0, 100, 14, PF_Precision_TENTHS, 0, 0, P_NTSC_HEAD_SWITCH);
+  PF_ADD_FLOAT_SLIDERX("NTSC Head Switching", 0, 100, 0, 100, 0, PF_Precision_TENTHS, 0, 0, P_NTSC_HEAD_SWITCH);
   AEFX_CLR_STRUCT(def);
-  PF_ADD_FLOAT_SLIDERX("NTSC Edge Wave", 0, 100, 0, 100, 12, PF_Precision_TENTHS, 0, 0, P_NTSC_EDGE_WAVE);
+  PF_ADD_FLOAT_SLIDERX("NTSC Edge Wave", 0, 100, 0, 100, 0, PF_Precision_TENTHS, 0, 0, P_NTSC_EDGE_WAVE);
   AEFX_CLR_STRUCT(def);
-  PF_ADD_FLOAT_SLIDERX("NTSC Composite Signal", 0, 100, 0, 100, 14, PF_Precision_TENTHS, 0, 0, P_NTSC_COMPOSITE);
+  PF_ADD_FLOAT_SLIDERX("NTSC Composite Signal", 0, 100, 0, 100, 0, PF_Precision_TENTHS, 0, 0, P_NTSC_COMPOSITE);
   AEFX_CLR_STRUCT(def);
   PF_END_TOPIC(P_NTSC_END);
   AEFX_CLR_STRUCT(def);
@@ -384,9 +384,9 @@ static PF_Err Render(PF_InData *in_data, PF_ParamDef *params[], PF_LayerDef *out
   baseNtscParams.head_switching = getSlider(params, P_NTSC_HEAD_SWITCH, 1.0f);
   baseNtscParams.edge_wave = getSlider(params, P_NTSC_EDGE_WAVE, 1.0f);
   baseNtscParams.composite_noise = getSlider(params, P_NTSC_COMPOSITE, 1.0f);
-  baseNtscParams.tracking_noise = getCheck(params, P_TRACKING_ENABLE) ? getSlider(params, P_TRACKING, 1.0f) * prof.trackingInstability : 0.0f;
+  baseNtscParams.tracking_noise = 0.0f; // Tracking is handled once by the adjustable Main VHS band below.
   const bool hasNtscControls = getCheck(params, P_NTSC_ENABLE) && (baseNtscParams.chroma_delay > 0.001f || baseNtscParams.head_switching > 0.001f ||
-    baseNtscParams.edge_wave > 0.001f || baseNtscParams.composite_noise > 0.001f || baseNtscParams.tracking_noise > 0.001f);
+    baseNtscParams.edge_wave > 0.001f || baseNtscParams.composite_noise > 0.001f);
   baseNtscParams.strength = (getCheck(params, P_CONTINUOUS) && hasNtscControls) ? std::min(10.0f, std::max(0.0f, strength / 3.5f)) : 0.0f;
   baseNtscParams.random_seed = getInt(params, P_SEED);
   baseNtscParams.frame_num = (uint32_t)((in_data->time_step != 0)
@@ -430,12 +430,12 @@ static PF_Err Render(PF_InData *in_data, PF_ParamDef *params[], PF_LayerDef *out
 
   // Color response & chroma behavior
   const float sat = s.saturation * prof.saturation * colorScale;
-  const float bleed = clamp01(s.bleed * (0.45f + prof.chromaBleed) * (0.3f + 0.7f * drive));
+  const float bleed = clamp01(s.bleed * (0.25f + prof.chromaBleed * 1.35f) * (0.3f + 0.7f * drive));
   const float totalChromaX = s.chromaX * drive + prof.chromaOffsetX;
   const float totalChromaY = s.chromaY * drive + prof.chromaOffsetY;
 
   // Luma Softness is strictly controlled by P_SOFTNESS slider (0..100).
-  const float soft = clamp01(s.softness * 0.01f + prof.lumaSoftness * 0.82f * drive);
+  const float soft = clamp01(s.softness * 0.01f + prof.lumaSoftness * 1.05f * drive);
   const int lowpassType = std::max(0, params[P_ADV_LOWPASS_TYPE]->u.pd.value - 1);
   const int blurRadius = clampi((int)std::ceil(soft * (lowpassType == 0 ? 5.0f : 2.0f)), 0, 5);
 
@@ -520,18 +520,21 @@ static PF_Err Render(PF_InData *in_data, PF_ParamDef *params[], PF_LayerDef *out
     for (int x = 0; x < w; ++x) {
       const int nominalSx = (int)((x + 0.5f) * inW / std::max(1, w));
       int sy = clampi((int)((y + 0.5f) * inH / std::max(1, h)), 0, inH - 1);
-      const float cameraLineWobble = std::sin((float)y * 0.17f + timeSec * (2.0f + prof.timebaseWobble * 4.0f))
-          * prof.timebaseWobble * (0.5f + 0.5f * drive) * 2.0f;
-      int sx = clampi(nominalSx + (int)std::round(cameraLineWobble), 0, inW - 1);
+      // Camera-specific timebase instability is random line jitter, not a visible sine-wave warp.
+      // Early VHS-C bodies wander more; later S-VHS-C bodies remain comparatively stable.
+      const uint32_t camRowHash = (uint32_t)s.seed ^ (uint32_t)(frame * 2246822519u)
+          ^ (uint32_t)(y * 3266489917u) ^ 0x9e3779b9u;
+      const float cameraLineJitter = (rand01(camRowHash) - 0.5f)
+          * prof.timebaseWobble * (0.5f + 0.5f * drive) * 2.2f;
+      int sx = clampi(nominalSx + (int)std::round(cameraLineJitter), 0, inW - 1);
       const float ynTracking = (float)y / (float)std::max(1, h - 1);
       const float rawTrackDist = std::fabs(ynTracking - trackingCenter);
       const float trackDist = std::min(rawTrackDist, 1.0f - rawTrackDist);
       const float trackBand = effTracking * (1.0f - smooth(trackingHalfWidth * 0.72f, trackingHalfWidth, trackDist));
       if (trackBand > 0.001f) {
         const uint32_t th = (uint32_t)s.seed ^ (uint32_t)(frame * 2246822519u) ^ (uint32_t)((y / 2) * 3266489917u);
-        const float lineJitter = (rand01(th) * 2.0f - 1.0f) * (0.015f + 0.34f * trackBand);
-        const float wave = std::sin((float)y * (0.09f + 0.21f * s.trackFreq) + timeSec * 8.0f + s.seed * 0.03f) * 0.035f * trackBand;
-        const int trackShift = (int)std::round((lineJitter + wave) * (float)inW);
+        const float lineJitter = (rand01(th) * 2.0f - 1.0f) * (0.008f + 0.16f * trackBand);
+        const int trackShift = (int)std::round(lineJitter * (float)inW);
         sx = clampi(sx + trackShift, 0, inW - 1);
         // A second line-dependent vertical phase slip makes large tracking values
         // distort the picture itself instead of merely drawing a bright stripe.
@@ -626,7 +629,7 @@ static PF_Err Render(PF_InData *in_data, PF_ParamDef *params[], PF_LayerDef *out
         const uint32_t cameraNoiseHash = (uint32_t)s.seed ^ (uint32_t)(frame * 2246822519u)
             ^ (uint32_t)(x * 3266489917u) ^ (uint32_t)(y * 668265263u);
         const float cameraChromaNoise = (rand01(cameraNoiseHash ^ 0x68bc21ebu) - 0.5f)
-            * prof.chromaNoise * drive;
+            * prof.chromaNoise * drive * 0.35f;
         r = clamp01(r + cameraChromaNoise);
         b = clamp01(b - cameraChromaNoise * 0.85f);
 
@@ -672,29 +675,9 @@ static PF_Err Render(PF_InData *in_data, PF_ParamDef *params[], PF_LayerDef *out
           r = g = b = mono;
         }
 
-        // Tracking damage belongs to the Main VHS engine. A broad moving band combines
-        // horizontal sync tears, color breakup and animated snow; width can approach full frame.
-        if (trackBand > 0.001f) {
-          const uint32_t trh = (uint32_t)s.seed ^ (uint32_t)(frame * 668265263u)
-              ^ (uint32_t)((x / 2) * 2246822519u) ^ (uint32_t)((y / 2) * 3266489917u);
-          const float snow = rand01(trh);
-          const float snowGate = trackBand * (0.12f + 0.42f * trackBand);
-          if (snow < snowGate) {
-            const float snowMix = clamp01(trackBand * (0.35f + 0.65f * rand01(trh + 13u)));
-            const float snowV = snow < snowGate * 0.45f ? 1.0f : 0.02f;
-            r = clamp01(r * (1.0f - snowMix) + snowV * snowMix);
-            g = clamp01(g * (1.0f - snowMix) + snowV * snowMix);
-            b = clamp01(b * (1.0f - snowMix) + snowV * snowMix);
-          }
-          const float chromaBreak = trackBand * (rand01(trh + 29u) * 2.0f - 1.0f) * 0.42f;
-          r = clamp01(r + chromaBreak);
-          b = clamp01(b - chromaBreak * 0.92f);
-          const float tearEdge = std::fabs(std::sin((float)x * 0.025f + timeSec * 11.0f + (float)(trh & 255u) * 0.02f));
-          const float tearMix = trackBand * (0.12f + 0.38f * tearEdge);
-          r = clamp01(r * (1.0f - tearMix) + 0.92f * tearMix);
-          g = clamp01(g * (1.0f - tearMix) + 0.96f * tearMix);
-          b = clamp01(b * (1.0f - tearMix) + 1.00f * tearMix);
-        }
+        // Tracking is deliberately expressed as horizontal image displacement above.
+        // Do not add snow, glass-like pixel noise, white flashes, or colored tears here;
+        // users control this damage with Enable Tracking Damage, Tracking Noise and Band Width.
 
         // Optional colored analog signal lines are composited after monochrome conversion,
         // so Saturation=0 desaturates the image but never desaturates these independent artifacts.

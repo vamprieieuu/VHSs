@@ -26,3 +26,8 @@ The included static tests validate source structure and parameter wiring. They d
 The camera selector now uses five real JVC analog models: GR-C7U (1986 VHS-C), GR-AX220U (Compact VHS), GR-AX920U (Compact VHS), GR-SXM37US (S-VHS-C), and GR-SXM740U (S-VHS-C). The per-camera response varies luma softness, line timing stability, chroma bleed/delay, edge response, noise floor, and tracking behavior—not only RGB color. See `docs/CAMERA_ENGINE_RESEARCH_2026-10-20.md` for documented distinctions and references. These are approximate emulations, not measured pixel-exact reproductions.
 
 `Enable Main VHS Engine` is on by default. `Enable Tracking Damage` is located in the Tracking and Damage section and is processed as part of the main VHS signal path. The standalone Tape Dropouts and Block Corruption controls, and the Signal Reference engine, have been removed. Grain amount directly controls grain (0 means off); colored signal lines have their own enable, amount, size, and speed controls.
+
+
+### Defaults after the signal-artifact rollback
+
+The Main VHS engine remains enabled, but optional damage is not forced onto a newly applied effect: Tracking Damage is off with Tracking Noise at 0; Colored Signal Lines are off with Amount at 0; NTSC Edge Wave, NTSC Head Switching, and NTSC Composite Signal default to 0. Increase the controls or enable their toggles when you want those effects. The tracking band width remains adjustable up to nearly the full frame. Tracking uses horizontal line displacement only; it does not add the removed glass-like snow, white flashes, or red/colored lines. Camera selection changes transfer softness/bandwidth, chroma displacement/bleed, edge response, and line stability—not just RGB tint.
