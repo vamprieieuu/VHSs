@@ -58,14 +58,14 @@ if ops != expected:
 
 # 2. Required UI Controls Check
 required_controls = [
-    "VHS Strength", "Continuous VHS Signal Treatment", "Random Seed", "Colored Grain Amount",
-    "Tape Behavior Model", "Enable VHS Overlay on Source Footage", "VHS Craft - Signal Controls",
-    "Enable VHS Craft Engine", "VHS Legend - Signal Controls", "Enable VHS Legend Engine",
-    "NTSC-RS - Base Signal Controls", "Enable NTSC-RS Signal Engine", "Signal Reference - Controls",
-    "Enable Signal Reference Engine", "Audio Glitch Enable", "Audio Event Glitches", "Audio Wet / Dry Mix",
-    "Enable Grain / Noise", "Enable Tracking Damage", "Enable Tape Effects", "Enable Other Signal Engines",
-    "Procedural Transparent Tape", "Moving Tape Sweep", "Enable Glitch Cam Events",
-    "Built-in OSD / Text Overlay", "Built-in Overlay Style", "Grain Size", "Grain Softness",
+    "VHS Camera Profile", "VHS Strength", "Continuous VHS Signal Treatment", "Random Seed",
+    "Grain Amount", "Grain Size", "Grain Motion Speed", "Enable Colored Signal Lines",
+    "Colored Lines Amount", "Colored Lines Size", "Colored Lines Speed", "VHS Legend - Signal Controls",
+    "Enable VHS Legend Engine", "NTSC-RS - Base Signal Controls", "Enable NTSC-RS Signal Engine",
+    "Signal Reference - Controls", "Enable Signal Reference Engine", "Audio Glitch Enable",
+    "Audio Event Glitches", "Audio Wet / Dry Mix", "Enable Grain / Noise", "Enable Tracking Damage",
+    "Enable Other Signal Engines", "Enable Glitch Cam Events", "Built-in OSD / Text Overlay",
+    "Enable Built-in Signal Overlay", "Built-in Overlay Style", "Grain Size Preset", "Grain Softness",
     "Lowpass Filter Type", "Composite Signal Sharpen", "Chroma Demodulation Filter"
 ]
 for item in required_controls:
@@ -102,13 +102,14 @@ if 'SUFFIX ".aex"' not in cmake or 'OUTPUT_NAME "VHS6RIFT"' not in cmake:
     fail("CMake target is not configured to emit VHS6RIFT.aex")
 
 print(f"PASS: {len(expected)} registered parameters are ordered consistently.")
-print("PASS: VHS signal, independent signal engines, tape, source-footage overlay and audio controls are present.")
-if "CAMERA ENGINE" in source or "kCameraProfiles" in source or "P_CAMERA" in source:
-    fail("obsolete selectable camera/color engine must be removed")
+print("PASS: camera profiles, NTSC-RS signal, independent signal engines, grain/color-line controls and audio controls are present.")
+for removed in ["Tape Behavior Model", "Enable Tape Effects", "Enable VHS Overlay on Source Footage", "VHS Craft - Signal Controls"]:
+    if removed in source:
+        fail(f"removed UI feature remains in source: {removed}")
 for control in ["Grain Size", "Grain Softness", "Grain Structure", "Grain Color Mode", "Lowpass Filter Type", "Composite Signal Sharpen", "Chroma Demodulation Filter", "Vertical Composite Noise", "Small Circular Dot Noise", "Head-Switch Position", "Head-Switch Height", "Head-Switch Motion", "Built-in OSD / Text Overlay", "Enable Glitch Cam Events", "Built-in Overlay Library", "Built-in Overlay Style", "OSD Position X (%)", "OSD Position Y (%)", "OSD Text Scale (%)", "Glitch Cam Color Palette", "Glitch Cam Blend-in"]:
     if control not in source:
         fail(f"advanced signal/grain/OSD control missing: {control}")
-print("PASS: selectable camera/color engine removed; fixed VHS signal response remains.")
+print("PASS: reference-derived VHS camera profiles remain selectable and drive distinct transfer responses.")
 print("PASS: PiPL identity, version (591361) and outflags (0x48000006) match the source.")
 
 # Regression guard: Glitch Cam's effective rate must drive both slot timing and gating.
@@ -117,8 +118,8 @@ if "const bool chosenEvent = effectiveEventRate > 0.0f" not in source:
 print("PASS: Glitch Cam event gating uses the effective event rate override.")
 
 # Regression guards for the 2026-10-19 repair pass.
-if "const float charScale = 1.0f;" not in source or "const float colorScale = 1.0f;" not in source:
-    fail("fixed VHS signal response must not depend on a removed camera/color selector")
+if "const float charScale = drive;" not in source or "const float colorScale = 1.0f;" not in source:
+    fail("camera profiles must use the master drive while keeping color controls independently wired")
 if 'PF_ADD_FLOAT_SLIDERX("Block Corruption", 0, 100, 0, 100, 0' not in source:
     fail("Block corruption must default to zero to avoid unwanted square artifacts on load.")
 if 'PF_ADD_FLOAT_SLIDERX("VHS Strength", 0, 2000, 0, 2000, 350' not in source:

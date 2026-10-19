@@ -1,27 +1,17 @@
-# VHS6RIFT Repair Report — 2026-10-20
+# Work completion report — requested UI and engine revision
 
-## Source changes made
+Implemented in source:
+- Removed the separate Moving Grain UI and replaced it with unified Grain and Colored Signal Lines controls. Grain is off and amount is zero by default; amount, size, speed, softness, and 4mm/8mm/16mm/32mm/64mm presets are available.
+- Added independent colored line controls for amount, size, and speed, composited after monochrome conversion.
+- Removed Tape Behavior, transparent tape/tape sweep, source-footage overlay toggle, and VHS Craft from the parameter UI and render path.
+- Added an independent checkbox for the advanced built-in overlay library.
+- Restored seven reference-derived camera profiles using the existing camera profile matrix and supplied before/after reference contact sheets.
+- Strengthened the Signal Reference error events and Glitch Cam event windows; preserved the NTSC-RS tracking-noise path.
 
-- Removed the Camera Engine selector and its camera-specific profile banks / color response transforms.
-- Re-established a fixed VHS transfer response and enabled the real `ntsc-rs` base signal path by default, with an independent NTSC-RS checkbox and controls.
-- Replaced the mutually exclusive alternate-engine dropdown with independent VHS Craft, VHS Legend-style, and Signal Reference enable switches; their settings remain in their respective groups.
-- Increased moving grain visibility and replaced square-cell sampling with interpolated temporal noise.
-- Reworked tape behavior with irregular animated band edges, luma loss, chroma separation, vertical roll displacement, and side-tear motion; Tape Behavior remains Off by default.
-- Replaced the external layer input with a yes/no source-footage overlay switch; the switch drives the built-in procedural overlay library.
-- Removed the CRT TV system and all CRT controls from the source/UI.
-- Adjusted the native C++ render test source to target the revised parameter inventory.
-- Updated source validation, wiring audit, regression tests, README, and limitation notes.
+Checks actually run:
+- `tools/validate_project.py`: PASS, 112 registered parameter slots in matching order.
+- `tools/audit_parameter_wiring.py`: PASS.
+- `python -m pytest -q`: PASS, 14 tests.
+- C++ delimiter scan: PASS.
 
-## Checks run
-
-- `python tools/validate_project.py` — PASS.
-- `python tools/audit_parameter_wiring.py` — PASS.
-- `python -m pytest -q` — PASS (13 tests).
-- C++ delimiter-balance scan — PASS.
-
-## Not verified
-
-- No Windows/MSVC build was run.
-- The Rust `ntscrs_c` static library and native C++ render harness were not executed because Cargo/Rust and the complete licensed Adobe SDK/PiPLtool were not available in this environment.
-- No After Effects 23.2.1 visual/runtime test was performed. Do not treat static checks as proof that every effect is visually correct or that the plugin loads successfully.
-- No `.aex` file was produced or included.
+Not run: Windows/MSVC/CMake build, Rust/Cargo build, native pixel harness, or visual render inside After Effects. The source ZIP must be built and visually checked before these changes can be called runtime-verified.

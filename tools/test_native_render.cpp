@@ -56,6 +56,7 @@ int main() {
     params[P_CHROMA_BLEED]->u.fs_d.value = 40.0;
     params[P_GRAIN_ENABLE]->u.bd.value = TRUE;
     params[P_GRAIN_AMOUNT]->u.fs_d.value = 65.0;
+    params[P_GRAIN_LINES_ENABLE]->u.bd.value = FALSE;
     params[P_GRAIN_SCALE]->u.fs_d.value = 28.0;
     params[P_GRAIN_SPEED]->u.fs_d.value = 100.0;
     params[P_NTSC_ENABLE]->u.bd.value = TRUE;
@@ -63,22 +64,20 @@ int main() {
     params[P_NTSC_HEAD_SWITCH]->u.fs_d.value = 14.0;
     params[P_NTSC_EDGE_WAVE]->u.fs_d.value = 12.0;
     params[P_NTSC_COMPOSITE]->u.fs_d.value = 14.0;
-    params[P_ADV_GRAIN_SIZE]->u.pd.value = 3;
+    params[P_GRAIN_PRESET]->u.pd.value = 2;
     params[P_ADV_GRAIN_SOFTNESS]->u.fs_d.value = 35.0;
     params[P_ADV_GRAIN_MODE]->u.pd.value = 1;
     params[P_ADV_GRAIN_COLOR]->u.pd.value = 1;
-    params[P_TAPE_TYPE]->u.pd.value = 1;
-    params[P_TAPE_DIRECTION]->u.pd.value = 1;
     params[P_OTHER_STRENGTH]->u.fs_d.value = 65.0;
     params[P_OTHER_ENABLE]->u.bd.value = TRUE;
     params[P_ADV_GLITCH_ENABLE]->u.bd.value = FALSE;
+    params[P_CAMERA]->u.pd.value = 1;
     params[P_GLITCH_CAM_AMOUNT]->u.fs_d.value = 70.0;
     params[P_GLITCH_CAM_RATE]->u.fs_d.value = 30.0;
     params[P_GLITCH_CAM_MODE]->u.pd.value = 1;
     params[P_GLITCH_CAM_CHROMA]->u.fs_d.value = 3.0;
     params[P_GLITCH_CAM_BLOCKS]->u.fs_d.value = 16.0;
     params[P_ADV_GLITCH_BLENDIN]->u.fs_d.value = 15.0;
-    params[P_OVERLAY_LAYER]->u.bd.value = FALSE;
   };
   auto render = [&]() { std::fill(dst.begin(), dst.end(), PF_Pixel{}); output.data = dst.data(); return Render(&in, params.data(), &output); };
 

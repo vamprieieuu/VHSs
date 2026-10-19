@@ -1,22 +1,11 @@
-# VHS6RIFT Native and After Effects Test Plan
+# Test plan — current source revision
 
-## Before building
-1. Add the licensed After Effects SDK headers and `PiPLtool.exe` under `extern/AfterEffectsSDK/`.
-2. Install Rust/Cargo for the `ntscrs_c` static library.
-3. Run `python tools/validate_project.py`, `python tools/audit_parameter_wiring.py`, and `python -m pytest -q`.
-
-## Native build / render checks
-1. Run the Windows/MSVC CMake build and confirm exactly one `VHS6RIFT.aex` artifact is produced.
-2. Run the native render harness; confirm Master Strength 0 is an identity copy, the NTSC-RS base changes the source, Glitch Cam alters the whole image during an event, and moving grain changes across frames.
-3. Record any compile or test failure; do not infer native success from static Python tests.
-
-## AE 23.2.1 visual checks
-1. Apply VHS6RIFT to a color-bar chart, portrait, and detailed street footage. Confirm the default is a recognizable VHS signal, not only a color tint.
-2. Toggle NTSC-RS and adjust chroma delay/head switching/edge wave/composite noise individually.
-3. Enable each alternate signal engine separately and verify that its controls produce visible, distinct effects.
-4. Test all Tape Behavior models one at a time; confirm Off is neutral and each enabled model is moving/temporal.
-5. Enable the source-footage overlay checkbox and cycle through the 21 procedural overlay styles; confirm no external layer selection is required.
-6. Enable Glitch Cam and scrub through at least 10 seconds; check event visibility, full-frame coverage, rate, amount, palette and blend-in.
-7. Compare grain at multiple sizes and softness values; confirm there are no square pixel-cell artifacts and motion follows timeline time.
-8. Verify alpha edges, full-resolution performance, preview/render consistency, and saved-project parameter behavior.
-9. Confirm the removed Camera Engine selector and CRT TV system no longer appear in the UI.
+1. Run `python tools/validate_project.py`, `python tools/audit_parameter_wiring.py`, and `python -m pytest -q`.
+2. Run the GitHub Actions Windows x64 / MSVC Release build with Rust/Cargo available and confirm that `VHS6RIFT.aex` is emitted.
+3. In After Effects 2023, confirm Master Strength 0 is an identity copy and that NTSC-RS changes the source at normal strength.
+4. Confirm grain amount defaults to 0 and grain is disabled on load. Enable it, compare 8mm and 16mm presets, and move amount, size, and speed independently at preview and full resolution.
+5. Set Saturation to 0. Confirm the image is monochrome. Enable Colored Signal Lines and verify only the independent line artifacts retain color; adjust their amount, size, and speed separately.
+6. Test all seven camera profiles against the supplied reference-analysis contact sheets and clips, especially the Gen 7 breakdown, Fall-78 warm/low-detail look, and JVC GR-C7U chroma/softness behavior.
+7. Enable Signal Reference and Glitch Cam separately. Preview across several seconds to see the time-based event windows; test each Glitch Cam style and vary amount/rate.
+8. Confirm the removed Tape Behavior, tape sweep, source-footage overlay toggle, and VHS Craft controls do not appear. Verify the advanced built-in overlay and OSD each remain off until explicitly enabled.
+9. Check transparency, multiple frame sizes, and playback scrubbing. Do not mark visual checks as passed until performed in AE.
