@@ -23,10 +23,11 @@ def test_real_ntsc_rs_is_active_and_independently_switchable():
 
 
 def test_grain_is_temporal_smooth_and_visible():
-    assert 'const float grainAmount = grainEnabled ? clamp01(std::max(s.grain, 0.35f)) : 0.0f;' in SRC
-    assert 'const float rawN = top + (bottom - top) * fy;' in SRC
+    assert 'const float grainAmount = grainEnabled ? clamp01(s.grain) : 0.0f;' in SRC
+    assert 'const float rawN = (rand01(pixelHash) - 0.5f);' in SRC
+    assert 'PF_ADD_CHECKBOX("Enable Grain / Noise", "Enable", FALSE' in SRC
     assert 'motionFrame * 2246822519u' in SRC
-    assert 'PF_ADD_FLOAT_SLIDERX("Colored Grain Amount", 0, 100, 0, 100, 65' in SRC
+    assert 'PF_ADD_FLOAT_SLIDERX("Colored Grain Amount", 0, 100, 0, 100, 0' in SRC
     assert 'Grain Size' in SRC and '64mm (Very Fine)' in SRC
 
 
@@ -51,7 +52,7 @@ def test_overlay_is_checkbox_not_external_layer_selector():
 def test_tape_behavior_is_editable_and_not_forced_on_at_load():
     assert 'PF_ADD_POPUP("Tape Behavior Model", 6, 1' in SRC
     assert 'const float effTapeStrength = tapeEnabled ? tapeStrengthRaw : 0.0f;' in SRC
-    assert 'if (tapeType > 0 && effTapeStrength > 0.001f)' in SRC
+    assert 'if (tapeType > 0 && tapeType != 2 && effTapeStrength > 0.001f)' in SRC
 
 
 def test_glitch_cam_has_own_toggle_and_visible_event_strength():
@@ -77,3 +78,20 @@ def test_advanced_filters_osd_and_procedural_overlays_remain_wired():
         assert control in SRC
     assert 'if (osdEnabled && osdOpacity > 0.001f' in SRC
     assert 'if (builtinOverlayEnabled && builtinOverlayOpacity > 0.001f)' in SRC
+
+
+def test_native_ntsc_tracking_and_grayscale_controls_are_wired():
+    assert 'baseNtscParams.tracking_noise = getCheck(params, P_TRACKING_ENABLE)' in SRC
+    assert 'effect.tracking_noise.enabled = true;' in (ROOT / 'extern/ntscrs_c/src/lib.rs').read_text(encoding='utf-8')
+    assert 'if (sat <= 0.0001f)' in SRC
+    assert 'const float blackOffset = s.black * 0.0035f * drive;' in SRC
+    assert 'const float totalChromaX = s.chromaX * drive;' in SRC
+    assert 'const float totalChromaY = s.chromaY * drive;' in SRC
+
+
+def test_glitch_cam_enable_is_inside_its_section_and_native_head_switch_is_used():
+    glitch_topic = SRC.index('PF_ADD_TOPIC("GLITCH CAM - Event Style and Timing"')
+    advanced_topic = SRC.index('PF_ADD_TOPIC("ADVANCED - Grain, Signal Filters and OSD"')
+    assert glitch_topic < SRC.index('PF_ADD_CHECKBOX("Enable Glitch Cam Events"') < advanced_topic
+    assert 'requestedTapeModel == 2' in SRC
+    assert 'baseNtscParams.head_switching = std::max' in SRC

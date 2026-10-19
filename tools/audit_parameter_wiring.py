@@ -32,7 +32,7 @@ require("const bool craftEngineEnabled = getCheck(params, P_CRAFT_ENABLE) && oth
 require("const bool legendEngineEnabled = getCheck(params, P_LEGEND_ENABLE) && otherEnabled;" in source, "VHS Legend has its own enable gate")
 require("const bool signalReferenceEnabled = getCheck(params, P_SIGNAL_ENABLE) && otherEnabled;" in source, "Signal Reference has its own enable gate")
 require("const int tapeType = selTapeType;" in source, "Tape Type Off is a true neutral selection")
-require("const float otherStrength = otherStrengthRaw * drive;" in source, "independent signal engines share a master strength level")
+require("const float otherStrength = clamp01(otherStrengthRaw) * drive;" in source, "independent signal engines share a master strength level")
 require("const float effTapeStrength = tapeEnabled ? tapeStrengthRaw : 0.0f;" in source, "Tape module has explicit enable/strength gate")
 require("PF_ADD_CHECKBOX(\"Enable VHS Overlay on Source Footage\"" in source and "PF_ADD_LAYER" not in source, "overlay is a yes/no source-footage toggle, not a layer selector")
 require("CAMERA ENGINE" not in source and "kCameraProfiles" not in source, "selectable camera/color engine removed")

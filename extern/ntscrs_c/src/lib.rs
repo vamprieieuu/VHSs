@@ -11,6 +11,7 @@ pub struct NtscrsCParams {
     pub head_switching: f32,
     pub edge_wave: f32,
     pub composite_noise: f32,
+    pub tracking_noise: f32,
     pub strength: f32,
     pub random_seed: i32,
     pub frame_num: u32,
@@ -67,6 +68,19 @@ pub unsafe extern "C" fn ntscrs_process_argb8(
         effect.composite_noise.settings.intensity = p.composite_noise * strength * 0.005;
     } else {
         effect.composite_noise.enabled = false;
+    }
+
+    // Use the actual ntsc-rs tracking-noise engine. Its output is an animated
+    // bottom-anchored waveform/snow disturbance, not a synthetic solid stripe.
+    if p.tracking_noise > 0.001 {
+        effect.tracking_noise.enabled = true;
+        effect.tracking_noise.settings.height = (6.0 + p.tracking_noise * 0.42 * strength) as i32;
+        effect.tracking_noise.settings.wave_intensity = p.tracking_noise * strength * 0.45;
+        effect.tracking_noise.settings.snow_intensity = p.tracking_noise * strength * 0.0012;
+        effect.tracking_noise.settings.snow_anisotropy = 0.85;
+        effect.tracking_noise.settings.noise_intensity = p.tracking_noise * strength * 0.006;
+    } else {
+        effect.tracking_noise.enabled = false;
     }
 
     let ctx = Context::new();

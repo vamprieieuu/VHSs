@@ -13,6 +13,7 @@ typedef struct NtscrsCParams {
     float head_switching;    // Head switching height / enable (0..100)
     float edge_wave;         // Luma smear / edge wave (0..100)
     float composite_noise;   // Composite noise intensity (0..100)
+    float tracking_noise;    // Native ntsc-rs VHS tracking noise (0..100)
     float strength;          // Overall engine strength multiplier (0..1)
     int32_t random_seed;     // Random seed
     uint32_t frame_num;      // Frame index

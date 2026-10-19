@@ -49,3 +49,12 @@ The GitHub Actions workflow is configured for Windows/MSVC and expects the Rust 
 - A delimiter-balance scan of the changed C++ source.
 
 These checks do not replace the Windows native build or AE 23.2.1 visual/runtime validation.
+
+
+## October 20 signal/grain correction
+- Grain now defaults to disabled and amount zero; grain uses fine per-pixel animated noise instead of interpolated large lattice cells.
+- Saturation at zero forces the processed picture itself to monochrome while subsequent signal/tape artifacts can retain color.
+- Black Level is a direct luma offset; Chroma Offset X/Y no longer include a hidden non-zero profile offset; Chroma Bleed uses the visible slider directly.
+- Tracking Noise now calls the bundled ntsc-rs native tracking-noise implementation through the C FFI, replacing the homemade solid color stripe. Bottom Head-Switch tape mode routes to ntsc-rs head switching.
+- Glitch Cam's enable checkbox is located in the Glitch Cam section, and VHS Legend / Signal Reference have been toned away from arbitrary neon lines.
+- Static checks pass; this source revision has not been built with Windows/MSVC or visually tested inside After Effects in this environment.

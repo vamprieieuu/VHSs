@@ -59,9 +59,9 @@ if ops != expected:
 # 2. Required UI Controls Check
 required_controls = [
     "VHS Strength", "Continuous VHS Signal Treatment", "Random Seed", "Colored Grain Amount",
-    "Tape Behavior Model", "Enable VHS Overlay on Source Footage", "VHS Craft — Signal Controls",
-    "Enable VHS Craft Engine", "VHS Legend — Signal Controls", "Enable VHS Legend Engine",
-    "NTSC-RS — Base Signal Controls", "Enable NTSC-RS Signal Engine", "Signal Reference — Controls",
+    "Tape Behavior Model", "Enable VHS Overlay on Source Footage", "VHS Craft - Signal Controls",
+    "Enable VHS Craft Engine", "VHS Legend - Signal Controls", "Enable VHS Legend Engine",
+    "NTSC-RS - Base Signal Controls", "Enable NTSC-RS Signal Engine", "Signal Reference - Controls",
     "Enable Signal Reference Engine", "Audio Glitch Enable", "Audio Event Glitches", "Audio Wet / Dry Mix",
     "Enable Grain / Noise", "Enable Tracking Damage", "Enable Tape Effects", "Enable Other Signal Engines",
     "Procedural Transparent Tape", "Moving Tape Sweep", "Enable Glitch Cam Events",
