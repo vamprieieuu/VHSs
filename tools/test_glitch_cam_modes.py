@@ -13,7 +13,7 @@ assert count == 15, f"expected 15 styles, got {count}"
 assert len(styles) == count, f"popup count={count}, labels={len(styles)}"
 assert len(set(styles)) == count, "duplicate style names"
 for style in [
-    "Sync Tear", "Chroma Breakup", "Block Corruption", "Luma Dropout",
+    "Sync Tear", "Chroma Breakup", "Horizontal Slip", "Luma Dropout",
     "Mixed Signal Burst", "RGB Convergence Burst", "Vertical Hold Roll",
     "Color Smear", "Head-Switch Noise", "Horizontal Fold", "Solarized Flash",
     "Tape Stretch", "Ghost Echo", "Signal Crush", "Chroma Bar Interference",

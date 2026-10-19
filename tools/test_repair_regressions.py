@@ -6,11 +6,14 @@ ROOT = Path(__file__).resolve().parents[1]
 SRC = (ROOT / "src" / "VHS6RIFT.cpp").read_text(encoding="utf-8")
 
 
-def test_camera_profiles_are_restored_from_reference_analysis():
-    assert 'PF_ADD_POPUP("VHS Camera Profile", 7, 1' in SRC
-    assert "kVhsSignalProfiles[7]" in SRC
+def test_main_vhs_defaults_on_and_five_real_jvc_camera_engines_are_selected():
+    assert 'PF_ADD_POPUP("VHS Camera Engine", 5, 1' in SRC
+    assert "kVhsSignalProfiles[5]" in SRC
     assert "const VhsSignalProfile &prof = kVhsSignalProfiles[cameraProfileIndex];" in SRC
-    assert "Fxc6 Reference|Gen 7 Reference|JVC GR-C7U (1986)|VHS-R20 Reference|Fall-78 Reference|ERC-V2S Reference|JVC GR-SXM740U" in SRC
+    for model in ["JVC GR-C7U (1986 VHS-C)", "JVC GR-AX220U (1997 VHS-C)", "JVC GR-AX920U (1997 VHS-C)", "JVC GR-SXM37US (S-VHS-C)", "JVC GR-SXM740U (S-VHS-C)"]:
+        assert model in SRC
+    assert 'PF_ADD_CHECKBOX("Enable Main VHS Engine", "Enable", TRUE' in SRC
+    assert "mainVhsEnabled ? std::min" in SRC
     assert "ntscrs_process_argb8" in SRC
     assert 'PF_ADD_FLOAT_SLIDERX("VHS Strength", 0, 2000, 0, 2000, 350' in SRC
 
@@ -27,8 +30,8 @@ def test_grain_is_zero_by_default_and_has_size_speed_amount_controls():
     assert 'PF_ADD_FLOAT_SLIDERX("Grain Amount", 0, 100, 0, 100, 0' in SRC
     assert 'PF_ADD_FLOAT_SLIDERX("Grain Size", 1, 100, 1, 100, 1' in SRC
     assert 'PF_ADD_FLOAT_SLIDERX("Grain Motion Speed", 0, 400, 0, 400, 100' in SRC
-    assert 'PF_ADD_CHECKBOX("Enable Grain / Noise", "Enable", FALSE' in SRC
-    assert 'const float grainAmount = grainEnabled ? clamp01(s.grain * (0.75f + prof.noiseFloor * 2.0f)) : 0.0f;' in SRC
+    assert 'const float grainAmount = clamp01(s.grain) * (0.75f + prof.noiseFloor * 2.0f);' in SRC
+    assert 'P_GRAIN_ENABLE' not in SRC
     assert "const float rawN = (n00 * (1.0f-fx) + n10 * fx) * (1.0f-fy) + (n01 * (1.0f-fx) + n11 * fx) * fy;" in SRC
     assert 'PF_ADD_POPUP("Grain Size Preset", 5, 2' in SRC
     assert SRC.index('PF_ADD_TOPIC("IMAGE - Grain and Colored Signal Lines"') < SRC.index('PF_ADD_POPUP("Grain Size Preset"') < SRC.index('PF_END_TOPIC(P_TOPIC_GRAIN_END)')
@@ -49,7 +52,7 @@ def test_removed_features_are_absent():
     for removed in [
         'Tape Behavior Model', 'Enable Tape Effects', 'Procedural Transparent Tape',
         'Moving Tape Sweep', 'Enable VHS Overlay on Source Footage',
-        'VHS Craft - Signal Controls', 'Enable VHS Craft Engine',
+        'VHS Craft - Signal Controls', 'Enable VHS Craft Engine', 'Tape Dropouts', 'PF_ADD_FLOAT_SLIDERX("Block Corruption"', 'Legend Block Corruption', 'Sync Tear|Chroma Breakup|Block Corruption|Luma Dropout|' 'Signal Reference - Controls', 'Enable Signal Reference Engine',
     ]:
         assert removed not in SRC
     for removed_id in ['P_TAPE_TYPE', 'P_TAPE_ENABLE', 'P_TAPE_SWEEP_ENABLE', 'P_OVERLAY_ENABLE', 'P_CRAFT_ENABLE']:
@@ -57,14 +60,12 @@ def test_removed_features_are_absent():
     assert 'PF_ADD_LAYER' not in SRC
 
 
-def test_signal_reference_and_legend_have_distinct_active_processing():
+def test_signal_reference_is_removed_and_legend_remains_independent():
     assert 'PF_ADD_CHECKBOX("Enable VHS Legend Engine", "Enable", FALSE' in SRC
-    assert 'PF_ADD_CHECKBOX("Enable Signal Reference Engine", "Enable", FALSE' in SRC
     assert 'if (legendEngineEnabled)' in SRC
-    assert 'if (signalReferenceEnabled)' in SRC
-    assert 'const bool signalReferenceEnabled = getCheck(params, P_SIGNAL_ENABLE) && otherEnabled;' in SRC
+    assert 'P_SIGNAL_ENABLE' not in SRC
+    assert 'Signal Reference - Controls' not in SRC
     assert 'const bool otherEnabled = getCheck(params, P_OTHER_ENABLE);' in SRC
-    assert 'const bool error = rand01(errorHash) < errorDrive * 0.12f;' in SRC
 
 
 def test_glitch_cam_has_own_toggle_and_visible_event_strength():

@@ -58,12 +58,11 @@ if ops != expected:
 
 # 2. Required UI Controls Check
 required_controls = [
-    "VHS Camera Profile", "VHS Strength", "Continuous VHS Signal Treatment", "Random Seed",
+    "VHS Camera Engine", "Enable Main VHS Engine", "VHS Strength", "Continuous VHS Signal Treatment", "Random Seed",
     "Grain Amount", "Grain Size", "Grain Motion Speed", "Enable Colored Signal Lines",
     "Colored Lines Amount", "Colored Lines Size", "Colored Lines Speed", "VHS Legend - Signal Controls",
     "Enable VHS Legend Engine", "NTSC-RS - Base Signal Controls", "Enable NTSC-RS Signal Engine",
-    "Signal Reference - Controls", "Enable Signal Reference Engine", "Audio Glitch Enable",
-    "Audio Event Glitches", "Audio Wet / Dry Mix", "Enable Grain / Noise", "Enable Tracking Damage",
+    "Audio Glitch Enable", "Audio Event Glitches", "Audio Wet / Dry Mix", "Enable Tracking Damage",
     "Enable Other Signal Engines", "Enable Glitch Cam Events", "Built-in OSD / Text Overlay",
     "Enable Built-in Signal Overlay", "Built-in Overlay Style", "Grain Size Preset", "Grain Softness",
     "Lowpass Filter Type", "Composite Signal Sharpen", "Chroma Demodulation Filter"
@@ -102,14 +101,14 @@ if 'SUFFIX ".aex"' not in cmake or 'OUTPUT_NAME "VHS6RIFT"' not in cmake:
     fail("CMake target is not configured to emit VHS6RIFT.aex")
 
 print(f"PASS: {len(expected)} registered parameters are ordered consistently.")
-print("PASS: camera profiles, NTSC-RS signal, independent signal engines, grain/color-line controls and audio controls are present.")
+print("PASS: Main VHS toggle, five real JVC camera engines, NTSC-RS, grain/color-line controls and audio controls are present.")
 for removed in ["Tape Behavior Model", "Enable Tape Effects", "Enable VHS Overlay on Source Footage", "VHS Craft - Signal Controls"]:
     if removed in source:
         fail(f"removed UI feature remains in source: {removed}")
 for control in ["Grain Size", "Grain Softness", "Grain Structure", "Grain Color Mode", "Lowpass Filter Type", "Composite Signal Sharpen", "Chroma Demodulation Filter", "Vertical Composite Noise", "Small Circular Dot Noise", "Head-Switch Position", "Head-Switch Height", "Head-Switch Motion", "Built-in OSD / Text Overlay", "Enable Glitch Cam Events", "Built-in Overlay Library", "Built-in Overlay Style", "OSD Position X (%)", "OSD Position Y (%)", "OSD Text Scale (%)", "Glitch Cam Color Palette", "Glitch Cam Blend-in"]:
     if control not in source:
         fail(f"advanced signal/grain/OSD control missing: {control}")
-print("PASS: reference-derived VHS camera profiles remain selectable and drive distinct transfer responses.")
+print("PASS: five real JVC VHS-C/S-VHS-C camera engines drive distinct transfer, bandwidth, line-stability and noise responses.")
 print("PASS: PiPL identity, version (591361) and outflags (0x48000006) match the source.")
 
 # Regression guard: Glitch Cam's effective rate must drive both slot timing and gating.
@@ -120,13 +119,15 @@ print("PASS: Glitch Cam event gating uses the effective event rate override.")
 # Regression guards for the 2026-10-19 repair pass.
 if "const float charScale = drive;" not in source or "const float colorScale = 1.0f;" not in source:
     fail("camera profiles must use the master drive while keeping color controls independently wired")
-if 'PF_ADD_FLOAT_SLIDERX("Block Corruption", 0, 100, 0, 100, 0' not in source:
-    fail("Block corruption must default to zero to avoid unwanted square artifacts on load.")
+if "Tape Dropouts" in source or "Signal Reference - Controls" in source or "Enable Signal Reference Engine" in source:
+    fail("removed Tape Dropouts or Signal Reference UI remains in source")
+if 'PF_ADD_CHECKBOX("Enable Main VHS Engine", "Enable", TRUE' not in source:
+    fail("Main VHS must be enabled by default")
 if 'PF_ADD_FLOAT_SLIDERX("VHS Strength", 0, 2000, 0, 2000, 350' not in source:
     fail("VHS Strength control label/range/default mismatch.")
 if "const bool chosenEvent = effectiveEventRate > 0.0f" not in source:
     fail("Glitch Cam must not depend on the removed legacy event toggle.")
-print("PASS: fixed VHS signal response, default block corruption, and dedicated Glitch Cam regressions are guarded.")
+print("PASS: default Main VHS, removed Tape Dropouts/Block Corruption/Signal Reference, and dedicated Glitch Cam regressions are guarded.")
 
 # 4. Native C++ Image Processing Test Suite Execution
 # This harness is a GCC/Linux-oriented test and includes the Adobe SDK headers.
@@ -165,9 +166,9 @@ elif test_src.exists():
 
         res_run = subprocess.run([str(test_bin)], stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True)
         print(res_run.stdout)
-        if res_run.returncode != 0 or "11 / 11 native C++ tests PASSED" not in res_run.stdout:
+        if res_run.returncode != 0 or "7 / 7 native C++ tests PASSED" not in res_run.stdout:
             fail(f"Native C++ pixel processing test suite failed:\n{res_run.stderr}")
-        print("PASS: Native C++ pixel processing test suite passed 11/11 test cases.")
+        print("PASS: Native C++ pixel processing test suite passed 7/7 test cases.")
 
 # 5. Compiled Binary Artifact PiPL Verification (.aex)
 aex_files = list(ROOT.glob("**/*.aex"))

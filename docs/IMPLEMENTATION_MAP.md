@@ -2,7 +2,7 @@
 
 | Area | Current implementation | Verification status |
 |---|---|---|
-| VHS camera profiles | Seven distinct qualitative transfer profiles derived from the supplied Fxc6, Gen 7, JVC GR-C7U, VHS-R20, Fall-78, ERC-V2S, and JVC GR-SXM740U references | Source wired; visual match requires AE test |
+| VHS camera engines | Five JVC VHS-C/S-VHS-C models with per-model luma bandwidth, chroma bleed/delay, line timing wobble, edge response, noise floor and tracking response | Approximate engineering models; validate visually against captured footage |
 | Base signal | Included `ntscrs_c` Rust C-FFI wrapper calling the actual `ntsc-rs` signal engine | Source wired; native build/runtime not run here |
 | Image color/chroma | Saturation, black level, luma softness, chroma bleed and X/Y offsets | Static wiring tests pass |
 | Grain | Amount, continuous size, speed, softness, and 4mm/8mm/16mm/32mm/64mm preset; disabled and zero amount by default; interpolated lattice texture rather than per-pixel square cells | Static tests pass; visual test pending |

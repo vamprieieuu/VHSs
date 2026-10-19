@@ -48,13 +48,13 @@ int main() {
   auto defaults = [&]() {
     for (int i = 0; i < P_COUNT; ++i) std::memset(&defs[i], 0, sizeof(PF_ParamDef));
     params[P_INPUT]->u.ld = input;
+    params[P_MAIN_ENABLE]->u.bd.value = TRUE;
     params[P_MASTER]->u.fs_d.value = 350.0;
     params[P_CONTINUOUS]->u.bd.value = TRUE;
     params[P_SEED]->u.sd.value = 17;
     params[P_SATURATION]->u.fs_d.value = 100.0;
     params[P_SOFTNESS]->u.fs_d.value = 12.0;
     params[P_CHROMA_BLEED]->u.fs_d.value = 40.0;
-    params[P_GRAIN_ENABLE]->u.bd.value = TRUE;
     params[P_GRAIN_AMOUNT]->u.fs_d.value = 65.0;
     params[P_GRAIN_LINES_ENABLE]->u.bd.value = FALSE;
     params[P_GRAIN_SCALE]->u.fs_d.value = 28.0;
@@ -85,18 +85,33 @@ int main() {
   if (changed(src, dst) != 0) { std::cerr << "FAIL: Master=0 must be identity.\n"; return 1; }
   std::cout << "PASS: Master=0 identity bypass.\n";
 
+  defaults(); params[P_MAIN_ENABLE]->u.bd.value = FALSE; render();
+  if (changed(src, dst) != 0) { std::cerr << "FAIL: Main VHS disabled must be identity.\n"; return 2; }
+  std::cout << "PASS: Main VHS disabled identity bypass.\n";
+
   defaults(); in.current_time = 1000; render();
   const size_t baseChanged = changed(src, dst); baseline = dst;
-  if (baseChanged < N / 3) { std::cerr << "FAIL: default VHS/NTSC signal treatment is too weak. changed=" << baseChanged << "\n"; return 2; }
+  if (baseChanged < N / 3) { std::cerr << "FAIL: default VHS/NTSC signal treatment is too weak. changed=" << baseChanged << "\n"; return 3; }
   std::cout << "PASS: default VHS/NTSC signal path changes " << baseChanged << " pixels.\n";
 
   defaults(); in.current_time = 1000; params[P_ADV_GLITCH_ENABLE]->u.bd.value = TRUE; params[P_GLITCH_CAM_AMOUNT]->u.fs_d.value = 150.0; render();
-  if (changed(baseline, dst) < N / 50) { std::cerr << "FAIL: Glitch Cam did not materially affect the full frame.\n"; return 3; }
+  if (changed(baseline, dst) < N / 50) { std::cerr << "FAIL: Glitch Cam did not materially affect the full frame.\n"; return 4; }
   std::cout << "PASS: Glitch Cam event stage changes the rendered frame.\n";
 
   defaults(); params[P_MASTER]->u.fs_d.value = 350.0; in.current_time = 1000; render(); const auto frame1 = dst;
   in.current_time = 2000; render();
-  if (changed(frame1, dst) < N / 20) { std::cerr << "FAIL: moving grain / signal did not vary across frames.\n"; return 4; }
+  if (changed(frame1, dst) < N / 20) { std::cerr << "FAIL: moving grain / signal did not vary across frames.\n"; return 5; }
   std::cout << "PASS: temporal grain/signal varies between frames.\n";
+
+  defaults(); in.current_time = 1000; params[P_GRAIN_LINES_ENABLE]->u.bd.value = TRUE;
+  params[P_GRAIN_LINES_AMOUNT]->u.fs_d.value = 100.0; render();
+  if (changed(baseline, dst) < N / 100) { std::cerr << "FAIL: colored signal lines are not visible.\n"; return 6; }
+  std::cout << "PASS: independent colored signal lines change the image.\n";
+
+  defaults(); in.current_time = 1000; params[P_CAMERA]->u.pd.value = 1; render(); const auto camera1 = dst;
+  params[P_CAMERA]->u.pd.value = 5; render();
+  if (changed(camera1, dst) < N / 200) { std::cerr << "FAIL: camera engines are not visibly distinct.\n"; return 7; }
+  std::cout << "PASS: selected camera engines have distinct signal responses.\n";
+  std::cout << "7 / 7 native C++ tests PASSED.\n";
   return 0;
 }
