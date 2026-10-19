@@ -784,9 +784,10 @@ static PF_Err Render(PF_InData *in_data, PF_ParamDef *params[], PF_LayerDef *out
             const uint32_t hs = (uint32_t)s.seed ^ (motionFrame * 2246822519u) ^ (uint32_t)(xx * 73856093u) ^ (uint32_t)(yy * 19349663u) ^ salt;
             return rand01(hs) - 0.5f;
           };
-          const float a = grainCell(gx, gy, 0u), b = grainCell(gx + 1, gy, 0u);
-          const float c = grainCell(gx, gy + 1, 0u), d = grainCell(gx + 1, gy + 1, 0u);
-          const float top = a + (b - a) * fx, bottom = c + (d - c) * fx;
+          const float grainTL = grainCell(gx, gy, 0u), grainTR = grainCell(gx + 1, gy, 0u);
+          const float grainBL = grainCell(gx, gy + 1, 0u), grainBR = grainCell(gx + 1, gy + 1, 0u);
+          const float top = grainTL + (grainTR - grainTL) * fx;
+          const float bottom = grainBL + (grainBR - grainBL) * fx;
           const float rawN = top + (bottom - top) * fy;
           const float n = rawN * grainAmount * 1.05f * (1.0f - 0.65f * advGrainSoftness);
           const float chromaN = grainCell(gx, gy, 0xA511E9B3u) * grainAmount * 0.85f;
