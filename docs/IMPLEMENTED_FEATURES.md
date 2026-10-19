@@ -4,7 +4,7 @@
 - Seven selectable reference-derived camera transfer profiles.
 - Saturation, black level, luma softness, chroma bleed, and X/Y chroma offset controls.
 - Grain with amount, continuous size, speed, softness, and 4mm/8mm/16mm/32mm/64mm presets; default amount is zero and the module is disabled on load.
-- Separate optional colored signal lines with amount, size, and speed controls; colored lines are processed after the monochrome image conversion.
+- Native NTSC-RS composite signal noise with intensity, frequency, and detail controls; noise is injected into the composite signal and decoded by the NTSC-RS engine, not drawn as red lines.
 - Tracking and dropout controls, VHS Legend, NTSC-RS, and Signal Reference engines.
 - Optional advanced built-in overlays and OSD, each separately gated.
 - Audio degradation controls.

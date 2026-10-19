@@ -11,7 +11,10 @@ pub struct NtscrsCParams {
     pub head_switching: f32,
     pub edge_wave: f32,
     pub composite_noise: f32,
+    pub composite_noise_frequency: f32,
+    pub composite_noise_detail: i32,
     pub tracking_noise: f32,
+    pub tracking_height: f32,
     pub strength: f32,
     pub random_seed: i32,
     pub frame_num: u32,
@@ -63,22 +66,27 @@ pub unsafe extern "C" fn ntscrs_process_argb8(
 
     effect.luma_smear = p.edge_wave * strength * 0.01;
 
+    // Use NTSC-RS's original FBM composite-signal noise implementation and
+    // expose the same three controls as its native settings: intensity/frequency/detail.
     if p.composite_noise > 0.001 {
         effect.composite_noise.enabled = true;
-        effect.composite_noise.settings.intensity = p.composite_noise * strength * 0.005;
+        effect.composite_noise.settings.intensity = p.composite_noise * strength * 0.01;
+        effect.composite_noise.settings.frequency = p.composite_noise_frequency.clamp(0.0, 1.0);
+        effect.composite_noise.settings.detail = p.composite_noise_detail.clamp(1, 5);
     } else {
         effect.composite_noise.enabled = false;
     }
 
-    // Use the actual ntsc-rs tracking-noise engine. Its output is an animated
-    // bottom-anchored waveform/snow disturbance, not a synthetic solid stripe.
+    // Restore the original NTSC-RS tracking waveform/noise path. Keep the
+    // glassy/snow component at zero; the user's requested look is glitch-like
+    // horizontal tracking disturbance, not a full-frame grain layer.
     if p.tracking_noise > 0.001 {
         effect.tracking_noise.enabled = true;
-        effect.tracking_noise.settings.height = (6.0 + p.tracking_noise * 0.42 * strength) as i32;
-        effect.tracking_noise.settings.wave_intensity = p.tracking_noise * strength * 0.45;
-        effect.tracking_noise.settings.snow_intensity = p.tracking_noise * strength * 0.0012;
-        effect.tracking_noise.settings.snow_anisotropy = 0.85;
-        effect.tracking_noise.settings.noise_intensity = p.tracking_noise * strength * 0.006;
+        effect.tracking_noise.settings.height = ((h as f32 * p.tracking_height.clamp(0.0, 100.0) / 100.0).round() as i32).clamp(1, h as i32);
+        effect.tracking_noise.settings.wave_intensity = p.tracking_noise.clamp(0.0, 100.0) * strength * 0.35;
+        effect.tracking_noise.settings.snow_intensity = 0.0;
+        effect.tracking_noise.settings.snow_anisotropy = 0.25;
+        effect.tracking_noise.settings.noise_intensity = p.tracking_noise.clamp(0.0, 100.0) * strength * 0.003;
     } else {
         effect.tracking_noise.enabled = false;
     }

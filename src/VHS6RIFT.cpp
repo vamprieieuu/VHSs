@@ -29,10 +29,10 @@ enum {
   P_INPUT = 0, P_CAMERA, P_MAIN_ENABLE, P_MASTER, P_CONTINUOUS, P_SEED,
   P_TOPIC_COLOR, P_SATURATION, P_BLACK, P_SOFTNESS, P_CHROMA_BLEED, P_CHROMA_X, P_CHROMA_Y, P_TOPIC_COLOR_END,
   P_TOPIC_GRAIN, P_GRAIN_AMOUNT, P_GRAIN_SCALE, P_GRAIN_PRESET, P_GRAIN_SPEED, P_GRAIN_LINES_ENABLE, P_GRAIN_LINES_AMOUNT, P_GRAIN_LINES_SIZE, P_GRAIN_LINES_SPEED, P_TOPIC_GRAIN_END,
-  P_TOPIC_DAMAGE, P_TRACKING_ENABLE, P_TRACKING, P_TRACK_FREQ, P_TRACK_WIDTH, P_EVENT_RATE, P_EVENT_DURATION, P_RECOVERY, P_TOPIC_DAMAGE_END,
+  P_TOPIC_DAMAGE, P_TRACKING_ENABLE, P_TRACKING, P_TRACK_WIDTH, P_EVENT_RATE, P_EVENT_DURATION, P_RECOVERY, P_TOPIC_DAMAGE_END,
   P_TOPIC_OTHER, P_OTHER_STRENGTH,
   P_LEGEND_TOPIC, P_LEGEND_ENABLE, P_LEGEND_BREAKUP, P_LEGEND_TEAR, P_LEGEND_SIGNAL, P_LEGEND_END,
-  P_NTSC_TOPIC, P_NTSC_ENABLE, P_NTSC_CHROMA_DELAY, P_NTSC_HEAD_SWITCH, P_NTSC_EDGE_WAVE, P_NTSC_COMPOSITE, P_NTSC_END,
+  P_NTSC_TOPIC, P_NTSC_ENABLE, P_NTSC_CHROMA_DELAY, P_NTSC_HEAD_SWITCH, P_NTSC_EDGE_WAVE, P_NTSC_END,
   P_TOPIC_OTHER_END,
   P_TOPIC_AUDIO, P_AUDIO_ENABLE, P_AUDIO_EVENTS, P_AUDIO_MIX, P_AUDIO_EVENT_AMOUNT, P_AUDIO_CRACKLE, P_AUDIO_DROPOUT, P_AUDIO_SATURATION, P_AUDIO_LOFI, P_TOPIC_AUDIO_END,
   P_TOPIC_MODULES, P_OTHER_ENABLE, P_TOPIC_MODULES_END,
@@ -88,7 +88,7 @@ static PF_Err ParamsSetup(PF_InData *in_data, PF_OutData *out_data) {
 
   AEFX_CLR_STRUCT(def);
 
-  PF_ADD_TOPIC("IMAGE - Grain and Colored Signal Lines", P_TOPIC_GRAIN);
+  PF_ADD_TOPIC("IMAGE - Grain and Signal Noise", P_TOPIC_GRAIN);
   AEFX_CLR_STRUCT(def);
   PF_ADD_FLOAT_SLIDERX("Grain Amount", 0, 100, 0, 100, 0, PF_Precision_TENTHS, 0, 0, P_GRAIN_AMOUNT);
   AEFX_CLR_STRUCT(def);
@@ -98,13 +98,13 @@ static PF_Err ParamsSetup(PF_InData *in_data, PF_OutData *out_data) {
   AEFX_CLR_STRUCT(def);
   PF_ADD_FLOAT_SLIDERX("Grain Motion Speed", 0, 400, 0, 400, 100, PF_Precision_TENTHS, 0, 0, P_GRAIN_SPEED);
   AEFX_CLR_STRUCT(def);
-  PF_ADD_CHECKBOX("Enable Colored Signal Lines", "Enable", FALSE, 0, P_GRAIN_LINES_ENABLE);
+  PF_ADD_CHECKBOX("Composite signal noise (NTSC-RS)", "Enable", FALSE, 0, P_GRAIN_LINES_ENABLE);
   AEFX_CLR_STRUCT(def);
-  PF_ADD_FLOAT_SLIDERX("Colored Lines Amount", 0, 100, 0, 100, 0, PF_Precision_TENTHS, 0, 0, P_GRAIN_LINES_AMOUNT);
+  PF_ADD_FLOAT_SLIDERX("Signal Noise Intensity", 0, 100, 0, 100, 0, PF_Precision_TENTHS, 0, 0, P_GRAIN_LINES_AMOUNT);
   AEFX_CLR_STRUCT(def);
-  PF_ADD_FLOAT_SLIDERX("Colored Lines Size", 1, 100, 1, 100, 18, PF_Precision_TENTHS, 0, 0, P_GRAIN_LINES_SIZE);
+  PF_ADD_FLOAT_SLIDERX("Signal Noise Frequency", 0, 100, 0, 100, 50, PF_Precision_TENTHS, 0, 0, P_GRAIN_LINES_SIZE);
   AEFX_CLR_STRUCT(def);
-  PF_ADD_FLOAT_SLIDERX("Colored Lines Speed", 0, 400, 0, 400, 100, PF_Precision_TENTHS, 0, 0, P_GRAIN_LINES_SPEED);
+  PF_ADD_FLOAT_SLIDERX("Signal Noise Detail", 1, 5, 1, 5, 1, PF_Precision_TENTHS, 0, 0, P_GRAIN_LINES_SPEED);
   AEFX_CLR_STRUCT(def);
   PF_END_TOPIC(P_TOPIC_GRAIN_END);
 
@@ -116,9 +116,7 @@ static PF_Err ParamsSetup(PF_InData *in_data, PF_OutData *out_data) {
   AEFX_CLR_STRUCT(def);
   PF_ADD_FLOAT_SLIDERX("Tracking Noise", 0, 100, 0, 100, 0, PF_Precision_TENTHS, 0, 0, P_TRACKING);
   AEFX_CLR_STRUCT(def);
-  PF_ADD_FLOAT_SLIDERX("Tracking Event Frequency", 0, 100, 0, 100, 25, PF_Precision_TENTHS, 0, 0, P_TRACK_FREQ);
-  AEFX_CLR_STRUCT(def);
-  PF_ADD_FLOAT_SLIDERX("Tracking Band Width", 1, 100, 1, 100, 18, PF_Precision_TENTHS, 0, 0, P_TRACK_WIDTH);
+  PF_ADD_FLOAT_SLIDERX("Tracking Damage Size (% Frame)", 1, 100, 1, 100, 18, PF_Precision_TENTHS, 0, 0, P_TRACK_WIDTH);
   AEFX_CLR_STRUCT(def);
   PF_ADD_FLOAT_SLIDERX("Events per Minute", 0, 60, 0, 60, 8, PF_Precision_TENTHS, 0, 0, P_EVENT_RATE);
   AEFX_CLR_STRUCT(def);
@@ -160,8 +158,6 @@ static PF_Err ParamsSetup(PF_InData *in_data, PF_OutData *out_data) {
   PF_ADD_FLOAT_SLIDERX("NTSC Head Switching", 0, 100, 0, 100, 0, PF_Precision_TENTHS, 0, 0, P_NTSC_HEAD_SWITCH);
   AEFX_CLR_STRUCT(def);
   PF_ADD_FLOAT_SLIDERX("NTSC Edge Wave", 0, 100, 0, 100, 0, PF_Precision_TENTHS, 0, 0, P_NTSC_EDGE_WAVE);
-  AEFX_CLR_STRUCT(def);
-  PF_ADD_FLOAT_SLIDERX("NTSC Composite Signal", 0, 100, 0, 100, 0, PF_Precision_TENTHS, 0, 0, P_NTSC_COMPOSITE);
   AEFX_CLR_STRUCT(def);
   PF_END_TOPIC(P_NTSC_END);
   AEFX_CLR_STRUCT(def);
@@ -273,7 +269,7 @@ static inline int clampi(int v, int a, int b) { return std::max(a, std::min(b, v
 struct Settings {
   int seed=17;
   float master=.35f, continuous=1, saturation=1, black=0, softness=.12f, bleed=.20f;
-  float chromaX=2, chromaY=0, grain=.08f, grainScale=28, grainSpeed=1, tracking=.18f, trackFreq=.25f, trackWidth=.18f;
+  float chromaX=2, chromaY=0, grain=.08f, grainScale=28, grainSpeed=1, tracking=.18f, trackWidth=.18f;
   float eventRate=8, eventDuration=.18f, recovery=.12f;
 };
 
@@ -295,7 +291,6 @@ static Settings ReadSettings(PF_ParamDef *p[]) {
   s.grainScale = getSlider(p,P_GRAIN_SCALE,1.0f);
   s.grainSpeed = getSlider(p,P_GRAIN_SPEED,100.0f);
   s.tracking = getSlider(p,P_TRACKING,100.0f);
-  s.trackFreq = getSlider(p,P_TRACK_FREQ,100.0f);
   s.trackWidth = getSlider(p,P_TRACK_WIDTH,100.0f);
   s.eventRate = getSlider(p,P_EVENT_RATE,1.0f);
   s.eventDuration = getSlider(p,P_EVENT_DURATION,1.0f);
@@ -383,10 +378,15 @@ static PF_Err Render(PF_InData *in_data, PF_ParamDef *params[], PF_LayerDef *out
   baseNtscParams.chroma_delay = getSlider(params, P_NTSC_CHROMA_DELAY, 1.0f);
   baseNtscParams.head_switching = getSlider(params, P_NTSC_HEAD_SWITCH, 1.0f);
   baseNtscParams.edge_wave = getSlider(params, P_NTSC_EDGE_WAVE, 1.0f);
-  baseNtscParams.composite_noise = getSlider(params, P_NTSC_COMPOSITE, 1.0f);
-  baseNtscParams.tracking_noise = 0.0f; // Tracking is handled once by the adjustable Main VHS band below.
+  const bool signalNoiseEnabled = getCheck(params, P_GRAIN_LINES_ENABLE);
+  baseNtscParams.composite_noise = signalNoiseEnabled ? getSlider(params, P_GRAIN_LINES_AMOUNT, 100.0f) * 100.0f : 0.0f;
+  baseNtscParams.composite_noise_frequency = getSlider(params, P_GRAIN_LINES_SIZE, 100.0f);
+  baseNtscParams.composite_noise_detail = (int32_t)std::round(getSlider(params, P_GRAIN_LINES_SPEED, 1.0f));
+  const bool trackingEnabledForNtsc = getCheck(params, P_TRACKING_ENABLE) && getSlider(params, P_TRACKING, 100.0f) > 0.001f;
+  baseNtscParams.tracking_noise = trackingEnabledForNtsc ? getSlider(params, P_TRACKING, 100.0f) * 100.0f : 0.0f;
+  baseNtscParams.tracking_height = getSlider(params, P_TRACK_WIDTH, 100.0f) * 100.0f;
   const bool hasNtscControls = getCheck(params, P_NTSC_ENABLE) && (baseNtscParams.chroma_delay > 0.001f || baseNtscParams.head_switching > 0.001f ||
-    baseNtscParams.edge_wave > 0.001f || baseNtscParams.composite_noise > 0.001f);
+    baseNtscParams.edge_wave > 0.001f || baseNtscParams.composite_noise > 0.001f || baseNtscParams.tracking_noise > 0.001f);
   baseNtscParams.strength = (getCheck(params, P_CONTINUOUS) && hasNtscControls) ? std::min(10.0f, std::max(0.0f, strength / 3.5f)) : 0.0f;
   baseNtscParams.random_seed = getInt(params, P_SEED);
   baseNtscParams.frame_num = (uint32_t)((in_data->time_step != 0)
@@ -440,16 +440,11 @@ static PF_Err Render(PF_InData *in_data, PF_ParamDef *params[], PF_LayerDef *out
   const int blurRadius = clampi((int)std::ceil(soft * (lowpassType == 0 ? 5.0f : 2.0f)), 0, 5);
 
   // Module checkboxes and enablers - strictly obeys checkbox state
-  const bool trackingEnabled = getCheck(params, P_TRACKING_ENABLE);
   const bool otherEnabled = getCheck(params, P_OTHER_ENABLE);
 
 
   // Grain is opt-in and has no forced minimum; amount zero is a true bypass.
   const float grainAmount = clamp01(s.grain) * (0.75f + prof.noiseFloor * 2.0f);
-  const bool coloredLinesEnabled = getCheck(params, P_GRAIN_LINES_ENABLE);
-  const float coloredLinesAmount = getSlider(params, P_GRAIN_LINES_AMOUNT, 100.0f);
-  const float coloredLinesSize = getSlider(params, P_GRAIN_LINES_SIZE, 100.0f);
-  const float coloredLinesSpeed = getSlider(params, P_GRAIN_LINES_SPEED, 100.0f);
   const int advGrainSize = clampi(params[P_GRAIN_PRESET]->u.pd.value - 1, 0, 4);
   const float advGrainSoftness = getSlider(params, P_ADV_GRAIN_SOFTNESS, 100.0f);
   const int advGrainMode = clampi(params[P_ADV_GRAIN_MODE]->u.pd.value - 1, 0, 2);
@@ -504,16 +499,8 @@ static PF_Err Render(PF_InData *in_data, PF_ParamDef *params[], PF_LayerDef *out
   const float ntscChroma    = getSlider(params, P_NTSC_CHROMA_DELAY, 100.0f);
   const float ntscHead      = getSlider(params, P_NTSC_HEAD_SWITCH, 100.0f);
   const float ntscWave      = getSlider(params, P_NTSC_EDGE_WAVE, 100.0f);
-  const float ntscComposite = getSlider(params, P_NTSC_COMPOSITE, 100.0f);
 
 
-
-  // Tracking amount is controlled by its slider; zero must disable the band.
-  // sigScale already includes normalized master drive, so do not multiply by
-  // raw master strength again (which over-amplified tracking at the default 3.5).
-  const float effTracking = trackingEnabled ? clamp01(s.tracking * sigScale) : 0.0f;
-  const float trackingHalfWidth = 0.012f + clamp01(s.trackWidth) * 0.47f;
-  const float trackingCenter = std::fmod(timeSec * (0.045f + s.trackFreq * 1.15f) + 0.13f, 1.0f);
 
   for (int y = 0; y < h; ++y) {
     PF_Pixel *dst = outBase + y * outStride;
@@ -527,23 +514,6 @@ static PF_Err Render(PF_InData *in_data, PF_ParamDef *params[], PF_LayerDef *out
       const float cameraLineJitter = (rand01(camRowHash) - 0.5f)
           * prof.timebaseWobble * (0.5f + 0.5f * drive) * 2.2f;
       int sx = clampi(nominalSx + (int)std::round(cameraLineJitter), 0, inW - 1);
-      const float ynTracking = (float)y / (float)std::max(1, h - 1);
-      const float rawTrackDist = std::fabs(ynTracking - trackingCenter);
-      const float trackDist = std::min(rawTrackDist, 1.0f - rawTrackDist);
-      const float trackBand = effTracking * (1.0f - smooth(trackingHalfWidth * 0.72f, trackingHalfWidth, trackDist));
-      if (trackBand > 0.001f) {
-        const uint32_t th = (uint32_t)s.seed ^ (uint32_t)(frame * 2246822519u) ^ (uint32_t)((y / 2) * 3266489917u);
-        const float lineJitter = (rand01(th) * 2.0f - 1.0f) * (0.008f + 0.16f * trackBand);
-        const int trackShift = (int)std::round(lineJitter * (float)inW);
-        sx = clampi(sx + trackShift, 0, inW - 1);
-        // A second line-dependent vertical phase slip makes large tracking values
-        // distort the picture itself instead of merely drawing a bright stripe.
-        if (trackBand > 0.45f) {
-          const int verticalSlip = (int)std::round((rand01(th + 7u) - 0.5f) * trackBand * 0.10f * (float)inH);
-          sy = clampi(sy + verticalSlip, 0, inH - 1);
-        }
-      }
-
       PF_Pixel p = inBase[sy * inStride + sx];
       float r = p.red / 255.0f, g = p.green / 255.0f, b = p.blue / 255.0f;
 
@@ -679,22 +649,8 @@ static PF_Err Render(PF_InData *in_data, PF_ParamDef *params[], PF_LayerDef *out
         // Do not add snow, glass-like pixel noise, white flashes, or colored tears here;
         // users control this damage with Enable Tracking Damage, Tracking Noise and Band Width.
 
-        // Optional colored analog signal lines are composited after monochrome conversion,
-        // so Saturation=0 desaturates the image but never desaturates these independent artifacts.
-        if (coloredLinesEnabled && coloredLinesAmount > 0.001f) {
-          const float linePeriod = std::max(3.0f, 36.0f - coloredLinesSize * 0.30f);
-          const float phase = timeSec * (0.5f + coloredLinesSpeed * 0.12f);
-          const float rowPhase = std::fmod((float)y + phase * linePeriod, linePeriod);
-          const float lineCore = 1.0f - smooth(0.35f, 1.1f + coloredLinesSize * 0.015f, std::min(rowPhase, linePeriod - rowPhase));
-          const float wobble = 0.5f + 0.5f * std::sin((float)x * 0.021f + phase * 2.7f + (float)(s.seed % 31));
-          const float a = clamp01(lineCore * coloredLinesAmount * 0.78f * (0.40f + 0.60f * wobble));
-          if (a > 0.001f) {
-            const float stripe = (std::sin((float)x * 0.009f + phase * 1.3f) + 1.0f) * 0.5f;
-            r = clamp01(r * (1.0f-a) + (0.85f + 0.15f * stripe) * a);
-            g = clamp01(g * (1.0f-a) + (0.12f + 0.18f * stripe) * a);
-            b = clamp01(b * (1.0f-a) + (0.45f + 0.45f * (1.0f-stripe)) * a);
-          }
-        }
+        // Signal noise is not drawn as synthetic red stripes. It is processed by
+        // the vendored NTSC-RS composite-noise engine before this C++ image stage.
 
         // Signal Grain
         if (grainAmount > 0.001f) {

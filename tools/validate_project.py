@@ -59,8 +59,8 @@ if ops != expected:
 # 2. Required UI Controls Check
 required_controls = [
     "VHS Camera Engine", "Enable Main VHS Engine", "VHS Strength", "Continuous VHS Signal Treatment", "Random Seed",
-    "Grain Amount", "Grain Size", "Grain Motion Speed", "Enable Colored Signal Lines",
-    "Colored Lines Amount", "Colored Lines Size", "Colored Lines Speed", "VHS Legend - Signal Controls",
+    "Grain Amount", "Grain Size", "Grain Motion Speed", "Composite signal noise (NTSC-RS)", "Signal Noise Intensity", "Signal Noise Frequency", "Signal Noise Detail",
+    "VHS Legend - Signal Controls",
     "Enable VHS Legend Engine", "NTSC-RS - Base Signal Controls", "Enable NTSC-RS Signal Engine",
     "Audio Glitch Enable", "Audio Event Glitches", "Audio Wet / Dry Mix", "Enable Tracking Damage",
     "Enable Other Signal Engines", "Built-in OSD / Text Overlay",
@@ -102,12 +102,16 @@ if 'SUFFIX ".aex"' not in cmake or 'OUTPUT_NAME "VHS6RIFT"' not in cmake:
 
 if "Glitch Cam" in source or "GLITCH_CAM" in source:
     fail("ineffective Glitch Cam module must be removed completely")
-if "trackingHalfWidth = 0.012f + clamp01(s.trackWidth) * 0.47f" not in source:
-    fail("tracking band must be able to expand across most of the frame")
+if "baseNtscParams.tracking_height = getSlider(params, P_TRACK_WIDTH, 100.0f) * 100.0f;" not in source:
+    fail("native NTSC-RS tracking height must be able to expand across most of the frame")
 if "const float grainAmplitude = grainAmount * 0.72f" not in source:
     fail("grain strength multiplier was not raised")
-if 'PF_ADD_CHECKBOX("Enable Colored Signal Lines", "Enable", FALSE' not in source:
-    fail("colored signal lines must be opt-in by default")
+if 'PF_ADD_CHECKBOX("Composite signal noise (NTSC-RS)", "Enable", FALSE' not in source:
+    fail("NTSC-RS composite signal noise must be opt-in by default")
+if 'r = clamp01(r * (1.0f-a) + (0.85f + 0.15f * stripe) * a);' in source:
+    fail("synthetic red signal-line overlay must not be present")
+if 'effect.composite_noise.settings.frequency = p.composite_noise_frequency.clamp(0.0, 1.0);' not in (ROOT / 'extern/ntscrs_c/src/lib.rs').read_text(encoding='utf-8'):
+    fail("signal noise must use native NTSC-RS frequency settings")
 if 'PF_ADD_CHECKBOX("Enable Tracking Damage", "Enable", FALSE' not in source:
     fail("tracking damage must be opt-in by default")
 if 'PF_ADD_FLOAT_SLIDERX("NTSC Edge Wave", 0, 100, 0, 100, 0' not in source:
@@ -116,7 +120,7 @@ if "snowGate = trackBand" in source or "tearMix = trackBand" in source:
     fail("unrequested tracking snow/white tears remain in the Main VHS path")
 
 print(f"PASS: {len(expected)} registered parameters are ordered consistently.")
-print("PASS: Main VHS toggle, five real JVC camera engines, NTSC-RS, grain/color-line controls and audio controls are present.")
+print("PASS: Main VHS toggle, five real JVC camera engines, NTSC-RS composite noise, grain and audio controls are present.")
 for removed in ["Tape Behavior Model", "Enable Tape Effects", "Enable VHS Overlay on Source Footage", "VHS Craft - Signal Controls"]:
     if removed in source:
         fail(f"removed UI feature remains in source: {removed}")

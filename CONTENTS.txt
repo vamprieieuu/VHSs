@@ -2,7 +2,7 @@ VHS6RIFT — Native After Effects VHS/Analog Video Suite
 Source-only repository revision: 2026-10-20
 
 Core implementation:
-- src/VHS6RIFT.cpp — native effect UI, camera profiles, VHS rendering, tracking damage, grain, colored signal lines, overlays/OSD, audio processing
+- src/VHS6RIFT.cpp — native effect UI, camera profiles, VHS rendering, native NTSC-RS tracking damage, grain, composite signal noise, overlays/OSD, audio processing
 - include/VHS6RIFT.h — parameter/header definitions
 - resources/VHS6RIFTPiPL.r — effect identity and PiPL metadata
 - CMakeLists.txt / build.ps1 / .github/workflows/build.yml — native Windows build configuration
@@ -12,9 +12,9 @@ Core implementation:
 Current design decisions:
 - Main VHS defaults enabled; VHS Strength 0 is an identity bypass.
 - Five distinct JVC VHS-C/S-VHS-C camera-engine approximations.
-- Tracking damage is integrated into Main VHS, animated, and can expand across most of the frame.
+- Tracking damage uses the native NTSC-RS glitch waveform, is off by default, and its affected height can expand to the full frame; tracking snow is disabled to avoid the glassy look.
 - Grain Amount remains 0 by default; raising it now produces clearly visible moving grain.
-- Colored Signal Lines are enabled by default with independent amount/size/speed controls.
+- Signal Noise uses the original NTSC-RS composite-noise engine with intensity/frequency/detail controls and is off by default; the synthetic red-line overlay is removed.
 - Removed the ineffective Glitch Cam module, Signal Reference, standalone Tape Dropouts and Block Corruption, VHS Craft, source-footage overlay selector, and CRT TV system.
 - Built-in procedural overlay library and OSD remain optional.
 

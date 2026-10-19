@@ -55,15 +55,14 @@ int main() {
     params[P_SATURATION]->u.fs_d.value = 100.0;
     params[P_SOFTNESS]->u.fs_d.value = 12.0;
     params[P_CHROMA_BLEED]->u.fs_d.value = 40.0;
-    params[P_GRAIN_AMOUNT]->u.fs_d.value = 100.0;
-    params[P_GRAIN_LINES_ENABLE]->u.bd.value = TRUE;
+    params[P_GRAIN_AMOUNT]->u.fs_d.value = 0.0;
+    params[P_GRAIN_LINES_ENABLE]->u.bd.value = FALSE;
     params[P_GRAIN_SCALE]->u.fs_d.value = 28.0;
     params[P_GRAIN_SPEED]->u.fs_d.value = 100.0;
     params[P_NTSC_ENABLE]->u.bd.value = TRUE;
     params[P_NTSC_CHROMA_DELAY]->u.fs_d.value = 18.0;
-    params[P_NTSC_HEAD_SWITCH]->u.fs_d.value = 14.0;
-    params[P_NTSC_EDGE_WAVE]->u.fs_d.value = 12.0;
-    params[P_NTSC_COMPOSITE]->u.fs_d.value = 14.0;
+    params[P_NTSC_HEAD_SWITCH]->u.fs_d.value = 0.0;
+    params[P_NTSC_EDGE_WAVE]->u.fs_d.value = 0.0;
     params[P_GRAIN_PRESET]->u.pd.value = 2;
     params[P_ADV_GRAIN_SOFTNESS]->u.fs_d.value = 35.0;
     params[P_ADV_GRAIN_MODE]->u.pd.value = 1;
@@ -87,19 +86,19 @@ int main() {
   if (baseChanged < N / 3) { std::cerr << "FAIL: default VHS/NTSC signal treatment is too weak. changed=" << baseChanged << "\n"; return 3; }
   std::cout << "PASS: default VHS/NTSC signal path changes " << baseChanged << " pixels.\n";
 
-  defaults(); in.current_time = 1000; params[P_TRACKING]->u.fs_d.value = 100.0; params[P_TRACK_WIDTH]->u.fs_d.value = 100.0; render();
+  defaults(); in.current_time = 1000; params[P_TRACKING_ENABLE]->u.bd.value = TRUE; params[P_TRACKING]->u.fs_d.value = 100.0; params[P_TRACK_WIDTH]->u.fs_d.value = 100.0; render();
   if (changed(baseline, dst) < N / 20) { std::cerr << "FAIL: tracking damage did not materially affect the frame.\n"; return 4; }
   std::cout << "PASS: wide tracking damage materially affects the frame.\n";
 
-  defaults(); params[P_MASTER]->u.fs_d.value = 350.0; in.current_time = 1000; render(); const auto frame1 = dst;
+  defaults(); params[P_MASTER]->u.fs_d.value = 350.0; params[P_GRAIN_AMOUNT]->u.fs_d.value = 100.0; in.current_time = 1000; render(); const auto frame1 = dst;
   in.current_time = 2000; render();
-  if (changed(frame1, dst) < N / 20) { std::cerr << "FAIL: moving grain / signal did not vary across frames.\n"; return 5; }
-  std::cout << "PASS: temporal grain/signal varies between frames.\n";
+  if (changed(frame1, dst) < N / 20) { std::cerr << "FAIL: moving grain did not vary across frames.\n"; return 5; }
+  std::cout << "PASS: temporal grain varies between frames.\n";
 
   defaults(); in.current_time = 1000; params[P_GRAIN_LINES_ENABLE]->u.bd.value = TRUE;
-  params[P_GRAIN_LINES_AMOUNT]->u.fs_d.value = 100.0; render();
-  if (changed(baseline, dst) < N / 100) { std::cerr << "FAIL: colored signal lines are not visible.\n"; return 6; }
-  std::cout << "PASS: independent colored signal lines change the image.\n";
+  params[P_GRAIN_LINES_AMOUNT]->u.fs_d.value = 100.0; params[P_GRAIN_LINES_SIZE]->u.fs_d.value = 50.0; params[P_GRAIN_LINES_SPEED]->u.fs_d.value = 3.0; render();
+  if (changed(baseline, dst) < N / 100) { std::cerr << "FAIL: native NTSC-RS composite signal noise is not visible.\n"; return 6; }
+  std::cout << "PASS: native NTSC-RS composite signal noise changes the image.\n";
 
   defaults(); in.current_time = 1000; params[P_CAMERA]->u.pd.value = 1; render(); const auto camera1 = dst;
   params[P_CAMERA]->u.pd.value = 5; render();

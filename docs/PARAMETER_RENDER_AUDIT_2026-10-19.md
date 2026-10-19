@@ -8,7 +8,7 @@
 
 ## Static source audit findings
 
-- `P_NTSC_CHROMA_DELAY`, `P_NTSC_HEAD_SWITCH`, `P_NTSC_EDGE_WAVE`, and `P_NTSC_COMPOSITE` are passed into the `ntscrs_process_argb8` argument structure in the NTSC post-pass.
+- `P_NTSC_CHROMA_DELAY`, `P_NTSC_HEAD_SWITCH`, and `P_NTSC_EDGE_WAVE` plus the signal-noise group are passed into `ntscrs_process_argb8`; signal noise uses native NTSC-RS intensity/frequency/detail settings.
 - Audio controls are read by `AudioRender` and affect sample-domain processing (wet/dry, event envelope, crackle, dropout, saturation, quantization). This is source inspection only; audio rendering has not been tested in AE.
 - The audit found `P_BLOCK_GLITCH` as a registered/read parameter that previously lacked a downstream use; it now has one.
 

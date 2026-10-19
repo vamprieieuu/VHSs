@@ -34,7 +34,7 @@ def test_real_ntsc_rs_is_active_and_independently_switchable():
     assert 'PF_ADD_CHECKBOX("Enable NTSC-RS Signal Engine", "Enable", TRUE' in SRC
     assert 'PF_ADD_FLOAT_SLIDERX("NTSC Chroma Delay", 0, 100, 0, 100, 18' in SRC
     assert 'baseNtscParams.chroma_delay = getSlider(params, P_NTSC_CHROMA_DELAY, 1.0f)' in SRC
-    assert 'baseNtscParams.tracking_noise = 0.0f; // Tracking is handled once by the adjustable Main VHS band below.' in SRC
+    assert 'baseNtscParams.tracking_noise = trackingEnabledForNtsc ? getSlider(params, P_TRACKING, 100.0f) * 100.0f : 0.0f;' in SRC
     assert 'effect.tracking_noise.enabled = true;' in (ROOT / "extern/ntscrs_c/src/lib.rs").read_text(encoding="utf-8")
 
 
@@ -46,18 +46,19 @@ def test_grain_is_zero_by_default_and_has_size_speed_amount_controls():
     assert 'P_GRAIN_ENABLE' not in SRC
     assert "const float rawN = (n00 * (1.0f-fx) + n10 * fx) * (1.0f-fy) + (n01 * (1.0f-fx) + n11 * fx) * fy;" in SRC
     assert 'PF_ADD_POPUP("Grain Size Preset", 5, 2' in SRC
-    assert SRC.index('PF_ADD_TOPIC("IMAGE - Grain and Colored Signal Lines"') < SRC.index('PF_ADD_POPUP("Grain Size Preset"') < SRC.index('PF_END_TOPIC(P_TOPIC_GRAIN_END)')
+    assert SRC.index('PF_ADD_TOPIC("IMAGE - Grain and Signal Noise"') < SRC.index('PF_ADD_POPUP("Grain Size Preset"') < SRC.index('PF_END_TOPIC(P_TOPIC_GRAIN_END)')
     assert '64mm (Very Fine)' in SRC
     assert 'const float grainAmplitude = grainAmount * 0.72f' in SRC
 
 
-def test_colored_lines_are_separate_and_survive_monochrome():
-    assert 'PF_ADD_CHECKBOX("Enable Colored Signal Lines", "Enable", FALSE' in SRC
-    assert 'PF_ADD_FLOAT_SLIDERX("Colored Lines Amount"' in SRC
-    assert 'PF_ADD_FLOAT_SLIDERX("Colored Lines Size"' in SRC
-    assert 'PF_ADD_FLOAT_SLIDERX("Colored Lines Speed"' in SRC
-    assert 'Optional colored analog signal lines are composited after monochrome conversion' in SRC
-    assert 'if (coloredLinesEnabled && coloredLinesAmount > 0.001f)' in SRC
+def test_signal_noise_uses_native_ntsc_rs_controls_not_synthetic_lines():
+    assert 'PF_ADD_CHECKBOX("Composite signal noise (NTSC-RS)", "Enable", FALSE' in SRC
+    assert 'PF_ADD_FLOAT_SLIDERX("Signal Noise Intensity"' in SRC
+    assert 'PF_ADD_FLOAT_SLIDERX("Signal Noise Frequency"' in SRC
+    assert 'PF_ADD_FLOAT_SLIDERX("Signal Noise Detail"' in SRC
+    assert 'effect.composite_noise.settings.frequency = p.composite_noise_frequency.clamp(0.0, 1.0);' in (ROOT / 'extern/ntscrs_c/src/lib.rs').read_text(encoding='utf-8')
+    assert 'if (coloredLinesEnabled && coloredLinesAmount > 0.001f)' not in SRC
+    assert 'r = clamp01(r * (1.0f-a) + (0.85f + 0.15f * stripe) * a);' not in SRC
 
 
 def test_removed_features_are_absent():
@@ -85,13 +86,9 @@ def test_glitch_cam_is_removed_and_tracking_is_a_real_main_vhs_stage():
     assert "Glitch Cam" not in SRC
     assert 'PF_ADD_CHECKBOX("Enable Tracking Damage", "Enable", FALSE' in SRC
     assert 'PF_ADD_FLOAT_SLIDERX("Tracking Noise", 0, 100, 0, 100, 0' in SRC
-    assert 'PF_ADD_FLOAT_SLIDERX("Tracking Band Width", 1, 100, 1, 100, 18' in SRC
-    assert "const float trackingHalfWidth = 0.012f + clamp01(s.trackWidth) * 0.47f;" in SRC
-    assert "const float trackBand = effTracking * (1.0f - smooth(trackingHalfWidth * 0.72f, trackingHalfWidth, trackDist));" in SRC
-    assert "const int trackShift = (int)std::round(lineJitter * (float)inW);" in SRC
-    assert "const float snowGate = trackBand" not in SRC
-    assert "const float chromaBreak = trackBand" not in SRC
-    assert "const float tearMix = trackBand" not in SRC
+    assert 'PF_ADD_FLOAT_SLIDERX("Tracking Damage Size (% Frame)", 1, 100, 1, 100, 18' in SRC and 'baseNtscParams.tracking_height = getSlider(params, P_TRACK_WIDTH, 100.0f) * 100.0f;' in SRC
+    assert "baseNtscParams.tracking_height = getSlider(params, P_TRACK_WIDTH, 100.0f) * 100.0f;" in SRC
+    assert "effect.tracking_noise.settings.snow_intensity = 0.0;" in (ROOT / "extern/ntscrs_c/src/lib.rs").read_text(encoding="utf-8")
     assert 'PF_ADD_CHECKBOX("Enable Tracking Damage", "Enable", FALSE' in SRC
 
 
