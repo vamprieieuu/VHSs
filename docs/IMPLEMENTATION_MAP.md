@@ -3,7 +3,7 @@
 | Requirement | Current source path | Current status before first Windows build |
 |---|---|---|
 | Native AEX, not JSX / stacked built-in effects | `src/VHS6RIFT.cpp`, `resources/VHS6RIFTPiPL.r` | Implemented in source; not compiled yet |
-| Nineteen camera look profiles | Camera selector + nineteen profile groups and four controls per profile | Implemented as distinct parameterized processing profiles; hardware calibration not verified |
+| Seven camera reference profiles | Camera selector + seven profile groups and four controls per profile | Implemented as distinct parameterized processing profiles; hardware calibration not verified |
 | Per-camera Character / Color / Signal / Grain controls | `cameraParamIds` and profile-specific arrays in `Render` | Implemented in source; visual isolation tests pending |
 | Continuous treatment separate from event glitches | `P_CONTINUOUS`, `P_EVENTS` and separate render branches | Implemented in source; tests pending |
 | Deterministic events | `hash32`, `rand01`, timeline-based event slots | Implemented in source; frame-rate and scrubbing tests pending |
@@ -11,11 +11,10 @@
 | Colored grain | spatial/time-seeded hash noise with scale/speed controls and opt-in toggle | Implemented in source; noise distribution and temporal quality pending |
 | Tape band families | Tape Type / Strength / Size / Speed / Direction | Source-sample displacement and distinct band behaviors implemented; visual comparison pending |
 | Video overlay layer | layer parameter checkout at mapped time + Normal/Add/Screen/Multiply/Luma Key | Implemented in source; SDK checkout behavior and source-end/loop semantics require AE verification |
-| Built-in overlay library | 21 native overlay branches in `Render`, independent from the source-layer overlay | Implemented in source with strength, speed, event frequency, color-channel and blend-in controls; native harness covers each preset against an Off baseline |
 | Overlay speed/offset/loop | time remap via custom-time checkout and explicit loop-period control | Implemented in source; loop duration is user-specified because an arbitrary layer's source duration is not inferred here; test required |
 | Other VHS reference-inspired engines | VHS Craft, VHS Legend-named binary, NTSC-RS, Signal branches | Independent processing paths and controls implemented in source; not the original algorithms; opt-in toggle and visual tests pending |
 | CRT TV | Scanline, curvature, glow, RGB convergence, flicker, vignette | New optional CRT stage implemented in source; reference comparison and AE render tests pending |
-| Procedural Transparent Tape | Time-driven translucent oxide wrinkle, local source displacement, and luma/chroma integration | New optional generated effect; avoids painting a bright white stripe; visual calibration pending |
+| Procedural Transparent Tape | Time-driven irregular band with luma/chroma integration | New optional generated effect; not a substitute for the supplied overlay assets; visual calibration pending |
 | Moving Tape Sweep | Time-driven moving band with source displacement and chroma/luma disturbance | New optional effect; sweep behavior and interval require AE visual validation |
 | Real audio processing | `PF_Cmd_AUDIO_RENDER`, `PF_SoundWorld` sample path, independent audio toggles and controls | Implemented in source; audio callback/sample-format/sync tests pending |
 | SDK/PiPL build | CMake PiPL tool pipeline + GitHub Actions | Code/PiPL version and outflags declarations aligned in source; Windows Actions build still required |
@@ -29,7 +28,3 @@
 - The long overlay reference clip includes a visible stock watermark; it remains reference-only.
 - The supplied VHS Legend-named binary contains internal Crates VHS Master identifiers and GPU/runtime strings; its filename alone does not establish product identity.
 - The first implementation uses CPU processing. It does not promise GPU acceleration or a physical electrical circuit simulation.
-
-
-| Glitch Cam 01–15 | Native procedural tear/channel-split/dropout/block families with strength, speed, event rate and color toggle | Implemented in source; compare to the supplied GIF references in AE |
-| Capture OSD | PLAY/REC, editable date stamp, running timecode, opacity, scale, position and safe margin | Implemented with an embedded bitmap font; custom arbitrary text remains a source-layer overlay |

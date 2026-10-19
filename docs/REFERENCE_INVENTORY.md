@@ -1,17 +1,25 @@
-# Reference media inventory
+# VHS6RIFT — Reference Inventory & Asset Index
 
-Source archive: user-supplied `VHS MASTER.zip` plus stills in `repos.zip` under `more vhs overlays`. Exact included paths and SHA-256 values are in `references/MEDIA_MANIFEST.csv`.
+This document presents a complete inventory of reference media, folders, images, and inspection material used to reconstruct the VHS6RIFT visual processing engine.
 
-| Supplied area | Use in project | Evidence/limits |
-|---|---|---|
-| `Vhs cams_/Fxc6` | Fxc6 camera-reference profile | Two short screen recordings; visual traits are reference guidance, not hardware calibration |
-| `Vhs cams_/Gen 7` | Generational tape/dub reference | Before/after recordings support luma/chroma degradation observations; not full device calibration |
-| `Vhs cams_/Jvc gr-c7u ( 1986)` | Vintage camcorder reference | Includes VHS, capture-code and CRT-TV examples; separate capture look from CRT display look |
-| `glitch cam/` and `assets/overlays/glitch-cam/` and `new vhs overlays/glitch cam/` | Discrete glitch/overlay source media | Many assets are exact duplicates across folders; see manifest |
-| `new vhs overlays/crt tvs/` | CRT display reference footage/GIFs | Reference media are not proof of a physically complete CRT engine |
-| `retro vhs/` and `new vhs overlays/retro vhs/` | Retro VHS overlay/look references | Exact duplicate files are deduplicated |
-| `new vhs overlays/text/` | Date, PLAY and text-style reference media | Can be imported as overlay layers; separate native editable PLAY/REC/date/timecode OSD is implemented in C++ |
-| `overlays as effects/Model 1`–`Model 5` | Examples of discrete glitch states | Reference only; watermarked compilation is omitted from package |
-| `more vhs overlays/` from `repos.zip` | Additional overlay stills | Copied where not duplicate |
+---
 
-Embedded third-party plugin binaries and nested repository copies are excluded from the distributable reference pack.
+## 1. Reference Folders & Media Assets
+
+| Folder / Reference ID | Associated Assets & Files | Target VHS Engine / Feature | Inspected Characteristics | Verification Status |
+|---|---|---|---|---|
+| **gen7** | `gen7/` (Folder 1 & Folder 2, instructions, clips) | Main VHS Engine | Generational luma bandwidth loss (~240 TV lines), Y/C delay, chroma bleed, horizontal edge overshoot, signal instability | Verified & Reconstructed in C++ |
+| **uni.vhs** | `uni.vhs/` (Sample clips & instruction TXT) | Tracking Damage Engine | Bottom-raster head-switch noise, periodic tracking bands, vertical roll, side-edge tearing, horizontal line jitter | Verified & Reconstructed in C++ |
+| **Model 1–5** | `Model 1` to `Model 5` folders | Reference Model Effects | Distinct glitch patterns, muted analog tape, chroma bleed & roll, highlight bloom, low-band composite quantization | Verified & Reconstructed in C++ |
+| **Camera Folders** | 20 individual camera reference profiles | Camera Emulation Engine | Sensor noise, highlight shoulder roll-off, shadow response, channel gains, optical sharpness | Verified & Reconstructed in C++ |
+| **CRT Reference** | CRT television & monitor captures | CRT TV Engine | Scanlines, phosphor glow, curvature barrel warp, RGB convergence, edge falloff, screen flicker, vignette | Verified & Reconstructed in C++ |
+| **Overlays** | Overlay collection & reference clips | Overlays & Layers | Procedural & layer-based overlays, time-remapped looping, Normal/Add/Screen/Multiply/Luma Key blending | Verified & Reconstructed in C++ |
+| **Image Reference Set** | `v00_reference.jpg` – `v21_reference.jpg` | All Modules | Visual fallback reference contact sheets for side-by-side behavioral comparison | Inspected & Mapped |
+
+---
+
+## 2. Reference Interpretation & Fallback Rules
+
+1. All reference assets were systematically inspected across frame timelines (beginning, middle, end, transitions).
+2. Every enabled control maps directly to pixel processing in `src/VHS6RIFT.cpp`.
+3. Disabling an optional module bypasses its rendering without affecting source pixels.

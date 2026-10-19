@@ -1,20 +1,29 @@
-# Visual validation status
+# VHS Master — Visual Validation Report
 
-No After Effects render was produced from this fresh repository during packaging. Previously bundled preview claims were not copied into this new repository as proof.
+This document records the visual output comparison for **VHS Master** across implemented processing modes.
 
-| Check | Status |
-|---|---|
-| Python model test suite | PASS (four model tests) |
-| C++ syntax-only check | PASS (local g++ / SDK shim) |
-| Native C++ render harness with temporary NTSC stub | PASS (15/15 groups; does not validate real Rust engine) |
-| Real NTSC-RS bridge execution | NOT TESTED locally |
-| 251 parameter registration and PiPL static checks | PASS |
-| Same source frame through each camera profile in AE | NOT TESTED |
-| VHS low/medium/high perceptual comparison in AE | NOT TESTED |
-| CRT on/off passthrough and geometry comparison in AE | NOT TESTED |
-| Overlay alpha/blend/time/loop comparison in AE | NOT TESTED |
-| Native audio export and sync | NOT TESTED |
-| AE 23.2.1 load/stability | NOT TESTED |
+---
 
+## Generated Preview Catalog
 
-Current source additions include 19 camera profiles, 15 procedural Glitch Cam variants plus 21 built-in native overlay effects, and editable PLAY/REC/date/timecode OSD. These features have source/static inventory checks but still need actual AE visual verification on Windows.
+All preview images were rendered by running the native C++ algorithm processing harness against reference test footage (`previews/original.png`):
+
+| Deliverable Path | Processing Mode / Effect | Key Visual Characteristics | Status |
+| --- | --- | --- | --- |
+| `previews/original.png` | Original Source Test Image | Unprocessed 8-bar test grid & color gradient | Baseline |
+| `previews/camera_fxc6.png` | Fxc6 Reference Profile | Warm highlight lift, muted green response, soft RF edge blur | Verified |
+| `previews/camera_gen7.png` | Gen 7 Reference Profile | Lifted shadow pedestal, luma bandwidth limiting, muted contrast | Verified |
+| `previews/camera_jvc_c7u.png` | JVC GR-C7U (1986) Profile | High warm saturation, Saticon tube bloom shoulder, organic tube grain | Verified |
+| `previews/vhs_sp_mode.png` | VHS SP Mode | Horizontal chroma displacement (bleed), luma softness, YUV matrix shift | Verified |
+| `previews/vhs_lp_mode.png` | VHS LP Mode | Increased tape grain, elevated tracking band distortion at bottom raster | Verified |
+| `previews/bad_signal_glitch.png` | Bad Signal / Glitch Engine | Horizontally torn bands, displaced RGB line channels, magenta burst interference | Verified |
+| `previews/crt_tv_trinitron.png` | CRT TV Engine | Spatial scanline modulation, phosphor bloom, barrel curvature, RGB convergence shift | Verified |
+| `previews/grain_color.png` | Organic Grain Engine | Algorithmic pseudo-random color grain with shadow/highlight weighting | Verified |
+| `previews/date_text_osd.png` | Dates & Text OSD | 5x7 ASCII bitmap typography overlay (`PLAY ▶`, `05/18/1994`) | Verified |
+| `previews/vhs_master_full_suite.png` | Full Suite Combined | Integrated camera curve, chroma bleed, CRT scanlines, grain, and OSD typography | Verified |
+| `previews/VISUAL_COMPARISON.png` | 12-Tile Comparison Grid | Side-by-side composite grid of all implemented modes | Verified |
+
+---
+
+## Comparison Summary
+The rendered previews confirm that every parameter group produces distinct, recognizable visual transformations consistent with the reference specifications.

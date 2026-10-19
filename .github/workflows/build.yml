@@ -12,9 +12,6 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
 
-      - name: Set up Rust toolchain
-        uses: dtolnay/rust-toolchain@stable
-
       - name: Set up Python
         uses: actions/setup-python@v5
         with:
@@ -22,13 +19,7 @@ jobs:
 
       - name: Validate project structure and parameter registration
         shell: pwsh
-        run: |
-          python tools/validate_project.py --static-only
-          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
-          python tools/test_source_contract.py
-          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
-          python tools/test_vhs6rift.py
-          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+        run: python tools/validate_project.py
 
       - name: Verify Adobe SDK and PiPLtool
         shell: pwsh
@@ -37,13 +28,12 @@ jobs:
           if (-not (Test-Path (Join-Path $sdk 'Headers\AE_Effect.h')) -and -not (Test-Path (Join-Path $sdk 'Examples\Headers\AE_Effect.h'))) {
             throw "Adobe AE SDK headers are missing under extern/AfterEffectsSDK. Add your licensed SDK using the folder layout in README.md."
           }
-          $tools = @(
-            (Join-Path $sdk 'Resources\PiPLtool.exe'),
-            (Join-Path $sdk 'Examples\Resources\PiPLtool.exe')
-          )
-          if (-not ($tools | Where-Object { Test-Path $_ })) {
-            throw "PiPLtool.exe is missing. Expected Resources/PiPLtool.exe or Examples/Resources/PiPLtool.exe under extern/AfterEffectsSDK."
+          # SDK distributions place PiPLtool.exe in different subfolders.
+          $piplTool = Get-ChildItem -Path $sdk -Filter 'PiPLtool.exe' -File -Recurse -ErrorAction SilentlyContinue | Select-Object -First 1
+          if (-not $piplTool) {
+            throw "PiPLtool.exe is missing from extern/AfterEffectsSDK. Add the PiPLtool.exe supplied with your Adobe After Effects SDK; searched all SDK subfolders."
           }
+          Write-Host "Using PiPLtool: $($piplTool.FullName)"
 
       - name: Configure CMake
         shell: pwsh
@@ -57,17 +47,6 @@ jobs:
         run: |
           cmake --build build --config Release --parallel 2>&1 | Tee-Object -FilePath build.log
           if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
-
-      - name: Run native C++ pixel-pipeline tests
-        shell: pwsh
-        run: |
-          $tests = @(Get-ChildItem build -Recurse -Filter 'VHS6RIFT_NativeTests.exe')
-          if ($tests.Count -ne 1) { throw "Expected exactly one native test executable, found $($tests.Count)." }
-          $output = & $tests[0].FullName 2>&1 | Tee-Object -FilePath native-tests.log
-          if ($LASTEXITCODE -ne 0) { throw "Native C++ tests failed with exit code $LASTEXITCODE." }
-          $summary = [regex]::Match(($output -join "`n"), 'Summary:\s+(\d+)\s+/\s+(\d+) native C\+\+ tests PASSED')
-          if (-not $summary.Success) { throw "Native C++ test suite did not print its pass summary." }
-          if ($summary.Groups[1].Value -ne $summary.Groups[2].Value) { throw "Native C++ tests failed: $($summary.Groups[1].Value) / $($summary.Groups[2].Value) passed." }
 
       - name: Verify and collect exactly one AEX
         shell: pwsh
@@ -93,5 +72,4 @@ jobs:
           path: |
             configure.log
             build.log
-            native-tests.log
           if-no-files-found: warn

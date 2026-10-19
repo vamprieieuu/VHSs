@@ -1,0 +1,5 @@
+exclude = [
+    "extern",
+    "build-win",
+    "build"
+]

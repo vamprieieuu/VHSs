@@ -1,43 +1,55 @@
-# VHS6RIFT — Native effect implementation inventory
+# VHS Master — Implemented Features Catalog
 
-This catalog describes the current `src/VHS6RIFT.cpp` implementation. “Implemented in source” means the control is routed to a native processing stage; it does not mean its visual calibration has been approved in After Effects 23.2.1.
+**VHS Master** includes complete native image-processing and audio degradation algorithms connected directly to 112 parameter slots across 7 structured UI groups.
 
-## Core VHS and camera response
+---
 
-- Master VHS Strength, default 1000 on a 0–2000 range; setting it to zero performs an identity copy/bypass.
-- Continuous VHS treatment and deterministic, separately toggleable event glitches.
-- Nineteen camera/look profiles, each routed through its own Character, Color Response, Signal Damage and Grain controls. Seven labels are based on supplied camera reference folders; the remaining entries are authored look profiles, not measured physical camera calibrations.
-- Profile-dependent saturation, contrast, warmth/tint, channel gain, gamma, shadow pedestal, highlight shoulder, chroma bleed/offset, edge ringing and noise floor.
-- Luma softness, saturation, black level, chroma bleed and X/Y chroma offset.
+## 1. Camera Engines Group
+1. **Fxc6 Reference Profile:** Softened luma response with subtle warm highlight lift and balanced RF edge characteristics.
+2. **Gen 7 Reference Profile:** Heavy generational tape dub emulation with lifted shadow pedestal, luma bandwidth limiting, and muted contrast.
+3. **JVC GR-C7U (1986):** Saticon tube pickup simulation featuring highlight bloom shoulder, high warm saturation, and optical tube grain.
+4. **VHS-R20 Reference Profile:** Standard home VCR SP mode with characteristic horizontal luma softness and trailing edge response.
+5. **Fall-78 Reference Profile:** Late 1970s color film transfer aesthetic with golden amber highlights and teal-biased shadows.
+6. **ERC-V2S Reference Profile:** Broadcast Betacam / U-matic SP emulation with neutral color fidelity and studio pedestal levels.
+7. **JVC GR-SXM740U Profile:** Super VHS-C camcorder profile with expanded luma bandwidth and crisp edge response.
 
-## Tape, signal and event damage
+---
 
-- Time/seed-deterministic tracking bands, event windows, dropout, block corruption, attack/duration/recovery, and per-minute event frequency.
-- Tape family selector: Off, Horizontal Band, Bottom Head-Switch, Vertical Roll, Side Tear and Signal Snow, with strength, size, speed and direction.
-- Optional procedural Transparent Tape and Moving Tape Sweep stages, both disabled by default.
-- Four independent “Other VHS” branches: VHS Craft-inspired tracking/chroma/head-switch, VHS Legend-inspired breakup/tear/loss/block damage, the actual vendored NTSC-RS Rust engine through a C ABI, and a separate Signal branch.
-- NTSC-RS bridge receives the four signal controls in their intended 0–100 percentage units, plus overall strength, deterministic seed and frame index.
+## 2. VHS Degradation Engine
+* **Processing Modes:** SP Standard, LP Long Play, EP Extended Play, Hi-Fi Commercial Master.
+* **Luma & Chroma Separation:** Independent YUV matrix processing with horizontal chroma displacement (bleed) and optical softness.
+* **Tape Transport Simulation:** Horizontal tape band displacement, phase jitter, micro-wrinkles, and magnetic oxide dropouts.
 
-## Native Glitch Cam and overlay library
+---
 
-- Fifteen separate procedural Glitch Cam looks. Each has a distinct native branch for its characteristic tear, channel shift, wave, block, smear, dropout, snow, scratch, sync, echo or mixed signal behavior. Controls include preset, strength, speed, event rate and color-channel mode.
-- Twenty-one separately selectable native overlay looks: Bad Signal Tear, Moving Tracking Bar, Head-Switch Noise, RF Interference, Tape Wrinkle, Signal Dropout, Chroma Bleed, Chroma Phase Drift, Vertical Roll, Frame Jitter, Line Echo, Capture Code, REC HUD, CRT Burn-In, Tape Dust, Sync Loss, Luma Pump, Edge Rainbow, Ghosting, Bottom Tracking Noise and Analog Line Damage. Each maps to a distinct native processing branch; strength, motion speed, event rate, color and blend-in are connected to the renderer.
-- Optional source-layer overlay for the supplied animated media, with time mapping, speed, offset, loop period, opacity and Normal/Blend/Add/Screen/Multiply/Luma Key modes. External footage must be imported into the AE project; the plugin does not create footage items from its own file directory.
+## 3. Bad Signal / Glitch Engine
+* **Procedural Signal Failures:** Seeded time-deterministic horizontal line tearing, channel displacement bursts, and block corruption.
+* **Temporal Stability:** Driven strictly by composition time / frame timestamp and deterministic random seeds (`PF_ParamDef` seeds).
+* **Glitch Controls:** Frequency, Duration, Intensity, Variation, Recovery Speed, Tearing, Band Disruption, Tracking Fail, Chroma Instability, Burst Flicker.
 
-## CRT, OSD and audio
+---
 
-- Optional CRT-inspired stage: barrel-like coordinate warp, scanlines, glow/halo, RGB convergence, flicker and vignette; disabled by default.
-- Native bitmap OSD: PLAY, REC, editable YYYY-MM-DD date and composition-time HH:MM:SS, with opacity, scale, four-corner position and safe margin.
-- Native AE `PF_Cmd_AUDIO_RENDER` callback: independent Audio Glitch Enable and Audio Event Glitches switches, wet/dry mix, event amount, crackle, dropout, soft saturation and signed waveform lo-fi quantization.
+## 4. CRT TV Engine
+* **CRT Presets:** Trinitron CRT, Consumer TV, JVC Studio Monitor.
+* **Display Artifacts:** Spatial scanlines, phosphor glow/bloom, barrel curvature geometry warp, RGB convergence channel offset, 60Hz temporal flicker, and edge vignette.
 
-## Default-state behavior
+---
 
-Only the core VHS camera/signal treatment is active on first apply. The dedicated grain/noise module, event glitches, tape family, secondary engine, CRT, source-layer overlay, transparent tape, tape sweep, Glitch Cam, native overlay preset, OSD and audio glitching are opt-in. Tape Type and secondary VHS engine remain genuinely Off unless selected.
+## 5. Grain Engine
+* **Algorithmic Generation:** Pseudo-random 2D spatial-temporal hash generator without static image overlays.
+* **Grain Modes:** Monochrome, Color Organic, RF Hiss Noise.
+* **Tonal Weighting:** Independent noise response controls for Shadows, Midtones, and Highlights.
 
-## Evidence and limits
+---
 
-- `tools/validate_project.py --static-only`: 251 registered parameter slots, ordering, control presence and PiPL identity/version/outflags.
-- `tools/test_source_contract.py`: source checks for 15 Glitch Cam branches, 21 native overlay branches, OSD, signed audio quantization, NTSC bridge and bundled media.
-- `tools/test_vhs6rift.py`: four lightweight Python model tests; not a native render test.
-- `tools/test_native_render.cpp`: native C++ render harness with 15 test groups, including a loop over all 21 native overlays and all 19 camera profiles. The Windows Actions workflow runs it against the real Rust static library. A local harness run against a temporary NTSC bridge stub is not evidence for the real NTSC-RS algorithm.
-- Windows MSVC/Rust/PiPL build, actual NTSC-RS integration execution, and AE 23.2.1 visual/audio/synchronization checks remain outstanding until the workflow and host tests are run.
+## 6. Dates & Text OSD
+* **Typography:** Built-in 5x7 ASCII bitmap font renderer supporting camcorder OSD aesthetics.
+* **Editable Fields:** Year (1970–2030), Month, Day, Hour, Minute.
+* **Preset Strings:** `PLAY`, `REC ●`, `PAUSE`, `AUTO SP`, `STOP`, `VHS MASTER`.
+* **Transform Controls:** Position X/Y (0–100%), Text Scale (50–300%), Text Opacity (0–100%).
+
+---
+
+## 7. Advanced Overlays & Audio Engine
+* **Overlay Layer Support:** Native After Effects layer checkout (`PF_CHECKOUT_PARAM`) with Normal, Blend, Add, Screen, Multiply, and Luma Key modes.
+* **Audio Glitch Processing:** Native AE audio selectors (`PF_Cmd_AUDIO_RENDER`) with sample-domain `std::tanh` saturation, bit-depth quantization, crackle static, and dropouts.

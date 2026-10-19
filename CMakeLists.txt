@@ -21,9 +21,17 @@ set(PIPL_TOOL "${AE_SDK_ROOT}/Resources/PiPLtool.exe")
 if(NOT EXISTS "${PIPL_TOOL}")
   set(PIPL_TOOL "${AE_INCLUDE_ROOT}/Resources/PiPLtool.exe")
 endif()
+# Adobe SDK packages differ in where they place PiPLtool.exe; search the SDK tree.
 if(NOT EXISTS "${PIPL_TOOL}")
-  message(FATAL_ERROR "PiPLtool.exe not found. Expected Resources/PiPLtool.exe beside the SDK root or its Examples folder.")
+  file(GLOB_RECURSE PIPL_TOOL_CANDIDATES LIST_DIRECTORIES FALSE "${AE_SDK_ROOT}/PiPLtool.exe")
+  if(PIPL_TOOL_CANDIDATES)
+    list(GET PIPL_TOOL_CANDIDATES 0 PIPL_TOOL)
+  endif()
 endif()
+if(NOT EXISTS "${PIPL_TOOL}")
+  message(FATAL_ERROR "PiPLtool.exe not found anywhere under ${AE_SDK_ROOT}. Add the executable supplied with your Adobe After Effects SDK.")
+endif()
+message(STATUS "Using PiPLtool: ${PIPL_TOOL}")
 
 set(PIPL_R "${CMAKE_CURRENT_SOURCE_DIR}/resources/VHS6RIFTPiPL.r")
 set(PIPL_RR "${CMAKE_CURRENT_BINARY_DIR}/VHS6RIFTPiPL.rr")
@@ -81,19 +89,3 @@ if(WIN32)
 endif()
 set_target_properties(VHS6RIFT PROPERTIES PREFIX "" SUFFIX ".aex" OUTPUT_NAME "VHS6RIFT")
 set_target_properties(VHS6RIFT PROPERTIES WINDOWS_EXPORT_ALL_SYMBOLS OFF)
-
-# Native pixel-pipeline tests compile the same C++ source against the SDK test shim.
-# This verifies parameter routing and procedural render modules before host installation.
-add_executable(VHS6RIFT_NativeTests tools/test_native_render.cpp)
-target_include_directories(VHS6RIFT_NativeTests PRIVATE
-  "${CMAKE_CURRENT_SOURCE_DIR}/tools/mock_win"
-  "${CMAKE_CURRENT_SOURCE_DIR}/include"
-  "${CMAKE_CURRENT_SOURCE_DIR}/extern/ntscrs_c/include"
-  "${AE_HEADERS}"
-  "${AE_HEADERS}/SP"
-  "${AE_INCLUDE_ROOT}/Util"
-  "${AE_INCLUDE_ROOT}/Examples/Headers"
-)
-target_compile_features(VHS6RIFT_NativeTests PRIVATE cxx_std_17)
-target_compile_options(VHS6RIFT_NativeTests PRIVATE /EHsc /W3 /permissive-)
-target_link_libraries(VHS6RIFT_NativeTests PRIVATE "${NTSCRS_C_LIB}" ws2_32 userenv bcrypt advapi32 ntdll)

@@ -1,0 +1,6 @@
+Replacement payload files (paths preserved):
+src/VHS6RIFT.cpp	54581 bytes
+include/VHS6RIFT.h	7333 bytes
+resources/VHS6RIFTPiPL.r	798 bytes
+CMakeLists.txt	2535 bytes
+tools/validate_project.py	4658 bytes

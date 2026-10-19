@@ -1,37 +1,63 @@
-# VHS6RIFT — NTSC-RS Native AE Edition
+# VHS6RIFT
 
-A new repository combining the open-source **ntsc-rs** signal-processing engine with the native C++ **VHS6RIFT** Adobe After Effects effect. Target: After Effects 2023 (23.2.1), Windows x64, Visual Studio 2022/MSVC.
+**Native Adobe After Effects effect prototype — After Effects 23.2.1 / Windows 11 / x64 / Visual Studio 2022.**
 
-## What is here
+VHS6RIFT is designed as a native image-and-audio effect, not a JSX script that stacks built-in AE effects. The initial source contains CPU pixel processing for camera-character pipelines, color response, chroma displacement/bleed, colored grain, tracking bands, deterministic event glitches, tape-band families, optional layer-based damage overlays, four independent reference-inspired processing paths, and an audio render path using the After Effects audio selectors.
 
-- `src/VHS6RIFT.cpp`: native AE effect with 19 distinct camera profiles, VHS/tape/signal processing, 15 procedural Glitch Cam looks, 21 selectable native overlay looks, CRT barrel-warped aperture, scanlines, phosphor bloom/RGB triad, flicker and vignette, editable PLAY/REC/date/timecode OSD, source-layer overlays, and sample-domain audio effects.
-- `extern/ntsc-rs/`: full upstream ntsc-rs source tree and its original licenses.
-- `extern/ntscrs_c/`: C ABI bridge used by the AE effect to invoke ntsc-rs.
-- `extern/AfterEffectsSDK/`: the SDK snapshot supplied with the user's existing project.
-- `assets/overlays/`: organized import-ready reference media for Glitch Cam, Retro VHS, CRT TV, a date-stamp reference and the five supplied tape-signal clips.
-- `references/VHS_MASTER_MEDIA/`: deduplicated source-reference media extracted from the user's VHS MASTER archive.
-- `references/MORE_VHS_OVERLAYS/`: additional overlay stills from `repos.zip`.
-- `docs/FEATURE_MATRIX.md`, `docs/`, and `reference-analysis/`: implementation inventory, build notes, and reference documentation.
-- `.github/workflows/build.yml`: Windows 2022 build pipeline; intended to produce exactly one `VHS6RIFT.aex`.
+> **Honest status:** this repository is a first implementation baseline, not a release-certified plugin. The uploaded reference archive contains no usable Adobe SDK and the original repo's `src/` contained only a placeholder. This source has not yet been compiled against your exact SDK or loaded into AE 23.2.1. The first GitHub Actions build is the next verification gate. Audio/video synchronization, overlay checkout/loop timing, rendering at different bit depths, and visual fidelity must be verified inside After Effects before being called complete.
 
-## Build
+## Included camera reference profiles
 
-On Windows with Visual Studio 2022 Build Tools, CMake, Rust stable (MSVC target), and the supplied compatible Adobe AE SDK:
+- Fxc6 Reference
+- Gen 7 Reference
+- JVC GR-C7U (1986)
+- VHS-R20 Reference
+- Fall-78 Reference
+- ERC-V2S Reference
+- JVC GR-SXM740U
 
-```powershell
-python tools/validate_project.py --static-only
-python tools/test_source_contract.py
-python tools/test_vhs6rift.py
-cmake -S . -B build -G "Visual Studio 17 2022" -A x64 -DAE_SDK_ROOT="$PWD/extern/AfterEffectsSDK"
-cmake --build build --config Release --parallel
-.\build\Release\VHS6RIFT_NativeTests.exe
-```
+Each profile has its own Character, Color Response, Signal Damage, and Grain controls. These are **reference-derived processing profiles**, not claims that the supplied screen recordings are pristine captures from the camera's original sensor or that every profile is already hardware-calibrated. The profile controls feed different processing stages; they are not just LUT names.
 
-The expected output name is `VHS6RIFT.aex`. This source package has not been represented as AE-runtime-tested unless an actual Windows build and After Effects render test is recorded in `docs/BUILD_REPORT.md`.
+## Main groups
 
-## Important scope notes
+- Camera profile selector and camera-specific parameter banks
+- Color Controls
+- Grain and Signal Noise
+- Tracking and Damage Events (deterministic from timeline time and seed; no playback-state dependency)
+- Tape Band / Tape Noise (horizontal band, bottom head-switch, vertical roll, side tear, signal snow; direction, size, speed, strength)
+- Damage Overlay Layer (select a footage layer; Normal, integrated Blend, Add, Screen, Multiply, optional luma key; opacity, time offset, speed and user-defined loop period)
+- Other VHS Engines (independent implementations inspired by observed reference behavior from VHS Craft, the supplied VHS Legend-named binary, ntsc-rs, and Signal)
+- Audio Glitches (audio enable, audio-event enable, wet/dry, event amount, crackle, dropout, saturation and lo-fi quantization)
 
-- This is a fresh repository layout, not a patch archive for the old repo. The upstream ntsc-rs source is vendored intact under `extern/ntsc-rs`; its license notices are retained.
-- The supplied reference assets are for visual guidance and user-authorized local use. Watermarked compilation footage and embedded third-party binaries/repositories are not redistributed.
-- The source-layer overlay input expects you to import desired reference media into After Effects and select it as the overlay layer. Separately, 15 procedural Glitch Cam variants, 21 selectable native overlay effects, and PLAY/REC/date/timecode OSD are native code paths and do not require extra footage layers. Grain/noise, tape, CRT, external overlays, and secondary signal engines default Off unless selected; the main VHS camera/signal treatment starts at Master Strength 1000. The 19 camera profiles are independently parameterized and use different tonal, chroma, gain, softness, edge, and noise-floor response data.
-- Adobe SDK redistribution/use remains subject to Adobe's SDK terms.
+The Other VHS section does **not** load, wrap, or call any reference AEX. It contains separate processing paths built from observed categories. The supplied `VHS LEGEND.aex` has internal strings identifying `Crates VHS Master`/`CratesVHSMaster`; the external filename is not proof that it is a genuine VHS Legend build.
+
+## SDK setup
+
+Add your licensed Adobe After Effects SDK to `extern/AfterEffectsSDK/`. The build supports either of these layouts:
+
+- `extern/AfterEffectsSDK/Headers/AE_Effect.h` plus `extern/AfterEffectsSDK/Resources/PiPLtool.exe`
+- `extern/AfterEffectsSDK/Examples/Headers/AE_Effect.h` plus `extern/AfterEffectsSDK/Examples/Resources/PiPLtool.exe`
+
+Do not replace the SDK with a different SDK template. Do not commit a prebuilt AEX from another plugin. The GitHub workflow intentionally fails early with a useful message if the SDK or PiPLtool is missing.
+
+## Build on GitHub Actions
+
+1. Create a repository named `VHS6RIFT` and upload these files/folders.
+2. Add the Adobe SDK under `extern/AfterEffectsSDK/`.
+3. Push to `main` or run **Actions → VHS6RIFT Windows Build → Run workflow**.
+4. Download the `VHS6RIFT-aex` artifact only after the job succeeds.
+5. Install the `.aex` into a test copy of AE 23.2.1 and run the tests in `docs/TEST_PLAN.md`.
+
+The intended plugin output is exactly one file: `VHS6RIFT.aex`.
+
+## Reference audit
+
+The archive audit and frame contact sheets are in [`reference-analysis/`](reference-analysis/). The source video clips and reference AEX binaries are intentionally not bundled into the repository: the clips include screen recordings/watermarks and the AEX files are third-party binaries. Their measured metadata, SHA-256 hashes, visible behavior notes, and static-inspection findings are documented separately.
+
+## Audio note
+
+The After Effects effect SDK does provide audio selectors (`PF_Cmd_AUDIO_SETUP`, `PF_Cmd_AUDIO_RENDER`, and `PF_Cmd_AUDIO_SETDOWN`). This prototype implements a sample-domain audio render path instead of presenting audio-only sliders as if they were working. The callback path has not yet been tested in AE 23.2.1, and timing alignment with the visual event schedule must be measured in a real render.
+
+## License and reference use
+
+The VHS6RIFT implementation in this repository is original project code. It does not contain copied source code or embedded third-party plugin binaries. `ntsc-rs` is an open-source reference project; if future changes copy/adapt code rather than merely use it as a behavioral reference, preserve the upstream license/notice obligations and review the specific files' licenses first. Proprietary AEX files are for behavioral/static reference only.

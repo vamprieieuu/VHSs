@@ -4,7 +4,7 @@ Record AE version, OS, project dimensions, frame rate, bit depth, source clip, s
 
 1. **Load / PiPL:** install only the built `VHS6RIFT.aex`; verify AE 23.2.1 lists VHS6RIFT and applies it without version, flags, or reinstall errors.
 2. **Neutral bypass:** set Master Strength to 0, disable Continuous Treatment and Event Glitches, set Tape Type Off, Overlay Opacity 0, Other VHS Engine Off, Audio Glitch Enable off. Compare output to source.
-3. **Camera profiles:** render the same frame for all nineteen profiles. Record differences in color response, softness, grain and signal behavior; confirm profile sliders affect only their selected profile.
+3. **Camera profiles:** render the same frame for all seven profiles. Record differences in color response, softness, grain and signal behavior; confirm profile sliders affect only their selected profile.
 4. **Continuous-only:** enable Continuous Treatment and disable Event Glitches. Verify color/chroma/grain/tracking treatment without sudden event bursts.
 5. **Events-only:** disable Continuous Treatment and enable Event Glitches. Verify short, irregular events separated by quiet frames. Change rate, duration, recovery and seed one at a time.
 6. **Repeatability:** render frame N, scrub away and back, render again. Repeat with same settings and seed. Compare images. Then change only Seed and confirm the event pattern changes.
@@ -26,14 +26,3 @@ Record AE version, OS, project dimensions, frame rate, bit depth, source clip, s
 | Neutral bypass | | Matches source | | Not run | |
 | Camera profiles | | Each has distinct signal/color behavior | | Not run | |
 | Audio sync | | Measured offset documented | | Not run | |
-
-6. **Glitch Cam presets:** render a moving clip for all 15 procedural presets; verify event-rate, speed, strength and color toggle alter output and frame-to-frame behavior.
-7. **OSD:** toggle PLAY, REC, date, and timecode; verify date fields, opacity, scale, all four corners and safe margin.
-8. **Default clean signal:** verify Off for Tape Type and Other VHS Engine produces no forced tape band or Craft/Legend layer when effect is first applied.
-
-
-## Built-in overlay library coverage
-
-The native C++ harness iterates all 21 selectable built-in overlay presets (Off is the first popup item), enables each preset at a controlled timeline time, and compares its render against the same core VHS treatment with the built-in overlay set to Off. This checks that each option has a measurable code path without confusing the normal VHS base treatment with the overlay effect. Run the harness with the real `ntscrs_c` Rust library for full integration coverage; an identity stub can validate the C++ modules but cannot validate NTSC-RS output.
-
-7. **Native overlay library:** render all 21 native overlay presets against a matched baseline; verify strength, motion speed, event rate, color toggle, and blend-in. The C++ harness contains this loop, and the Windows workflow requires it to pass.

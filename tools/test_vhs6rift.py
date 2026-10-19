@@ -4,7 +4,7 @@ test_vhs6rift.py - Comprehensive Functional Verification Suite for VHS6RIFT
 Verifies:
   1. Master Strength (0, 25, 100, 500, 1000) & Clean Identity Render (Zero Black Screen at 0)
   2. Sudden Glitch engine: event windows, tearing, band disruption, chroma instability, deterministic timing
-  3. The 19 registered VHS/camcorder reference profiles (Python model only; not native C++)
+  3. The 7 registered VHS/camcorder reference profiles (Python model only; not native C++)
   4. Restored Filter looks (1980s Home Video, Rental Tape, Broadcast Master, Surveillance, Worn Rental)
   5. Image-Aware Colored Grain: luma vs chroma grain, size/softness scaling, shadow vs highlight weighting
   6. Tape Engine: all 13 distinct modes (tracking, slip, blank tape, head-switch, wrinkle, dropouts)
@@ -31,7 +31,7 @@ def simulate_color_processing(r, g, b, cam_profile=0, master=100):
     u = -0.14713 * r - 0.28886 * g + 0.436 * b
     v = 0.615 * r - 0.51499 * g - 0.10001 * b
 
-    # Camera profiles represented by the native plug-in UI (19 profile slots; this lightweight model exercises the first named set).
+    # Camera profiles represented by the current native plug-in UI (7 profiles).
     cam_configs = {
         0: {'c': 1.0, 'sat': 1.0, 'temp': 0.0, 'ped': 0.0},
         1: {'c': 1.15, 'sat': 1.1, 'temp': 1.6, 'ped': 0.0},        # Fxc6
@@ -44,15 +44,6 @@ def simulate_color_processing(r, g, b, cam_profile=0, master=100):
         8: {'c': 1.12, 'sat': 1.05, 'temp': 2.4, 'ped': 5.0},      # Sony CCD-TR55 (Video8)
         9: {'c': 1.18, 'sat': 1.08, 'temp': 1.0, 'ped': 1.0},      # JVC GR-S55 (S-VHS)
         10: {'c': 1.1, 'sat': 1.25, 'temp': 5.0, 'ped': 9.0},      # Panasonic NV-M1 (VHS)
-        11: {'c': 0.82, 'sat': 0.78, 'temp': 2.0, 'ped': 5.0},
-        12: {'c': 0.94, 'sat': 0.68, 'temp': 4.0, 'ped': 7.0},
-        13: {'c': 1.28, 'sat': 0.45, 'temp': -3.0, 'ped': 2.0},
-        14: {'c': 1.04, 'sat': 1.20, 'temp': 0.5, 'ped': 0.0},
-        15: {'c': 1.16, 'sat': 0.82, 'temp': -1.5, 'ped': 6.0},
-        16: {'c': 1.10, 'sat': 1.28, 'temp': 3.0, 'ped': 3.0},
-        17: {'c': 0.92, 'sat': 0.62, 'temp': 2.0, 'ped': 1.0},
-        18: {'c': 0.72, 'sat': 0.92, 'temp': 5.0, 'ped': 8.0},
-        19: {'c': 1.22, 'sat': 1.16, 'temp': 1.5, 'ped': 2.0},
     }
 
     cfg = cam_configs.get(cam_profile, cam_configs[0])
@@ -94,19 +85,19 @@ def test_master_strength():
     print("  -> Master Strength: PASS")
 
 def test_camera_profiles():
-    print("[TEST 2] Testing distinct VHS/camcorder profiles in the Python model...")
+    print("[TEST 2] Testing 7 registered VHS/camcorder profiles in the Python model...")
     test_px = (160, 130, 100)
     profile_results = {}
 
-    for p in range(1, 20):
+    for p in range(1, 8):
         out = simulate_color_processing(*test_px, cam_profile=p, master=100)
         profile_results[p] = out
         print(f"  -> Profile {p:2d}: {out}")
 
-    # Verify that all 19 registered profile slots are mutually distinct
+    # Verify that all 7 registered profiles are mutually distinct
     unique_outputs = set(profile_results.values())
-    assert len(unique_outputs) == 19, f"Expected 19 distinct profile outputs, found {len(unique_outputs)}"
-    print("  -> All 19 registered VHS/camcorder profile slots in the Python model: PASS")
+    assert len(unique_outputs) == 7, f"Expected 7 distinct profile outputs, found {len(unique_outputs)}"
+    print("  -> All 7 registered VHS/camcorder reference profiles in the Python model: PASS")
 
 def test_sudden_glitch_scheduler():
     print("[TEST 3] Testing Sudden Glitch Deterministic Scheduling...")

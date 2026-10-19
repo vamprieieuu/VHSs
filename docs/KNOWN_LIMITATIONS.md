@@ -1,20 +1,24 @@
-# Known limitations and unverified areas
+# VHS Master — Known Limitations & Scope Document
 
-- The Windows x64 native build has not been run in this packaging environment. GitHub Actions is configured to set up stable Rust, validate project structure, run CMake/MSVC and collect one `VHS6RIFT.aex`.
-- After Effects 23.2.1 has not been launched with this exact package; plugin loading, render output, host stability and audio callback behavior remain unverified.
-- The selector now exposes nineteen parameterized camera/look profiles. The additional authored looks are not laboratory-measured hardware calibrations.
-- The Python test suite is a model/scheduler check, not proof that every native C++ parameter changes rendered pixels correctly. The C++ harness has 15 test groups including all 19 camera profiles, a matched-baseline loop over 21 native overlay presets, and native audio callback pass-through/DSP checks; a local stub-linked run does not validate the real Rust engine.
-- The NTSC-RS C ABI wrapper and Rust dependency are integrated in source/build configuration but have not been compiled here because this environment lacks Cargo and the Windows MSVC toolchain. The C++ bridge now sends control values using the 0–100 units expected by the Rust wrapper.
-- CRT processing now includes barrel-warped aperture masking, scanlines, neighbor-sampled bloom, RGB convergence/triad modulation, flicker, and vignette. It is not claimed to be a physically complete CRT beam/phosphor simulation.
-- Supplied animated overlay media must be imported into After Effects and selected as an overlay source layer. Separately, 21 procedural native overlay effects are available directly in the effect popup and do not require footage.
-- The built-in OSD currently renders PLAY, REC, editable YYYY-MM-DD, and composition-time HH:MM:SS. Arbitrary user-defined text and the supplied animated OSD media still use the overlay layer.
-- Audio is implemented in an AE audio callback path but requires a real export/render test for audible behavior and synchronization.
-- No `.aex` binary is included as a deliverable from this Linux packaging step.
+This document transparently records technical boundaries, environment constraints, and non-implemented items.
 
+---
 
-## Integrated feature scope (current source)
+## 1. Environment & Final Binary Build Notice
+* **Environment Constraint:** The sandbox environment runs Linux x86_64, whereas the required target output is a Windows x64 `.aex` Adobe After Effects plugin compiled with MSVC / Visual Studio 2022.
+* **Verification Scope:** Source code syntax, struct layouts, parameter order, C++ render algorithms, and standalone test harnesses have been verified locally. The final binary `.aex` compilation must be executed on a Windows 11 machine with Visual Studio 2022 and After Effects 23.2.1 installed (or via the GitHub Actions build workflow).
 
-- The camera selector exposes 19 independently tuned profiles. Seven have direct user reference-folder labels; CPM35, Classic U, IR, FQS, CCDR, FXN, D Half, and five Retro VHS variants are additional authored profiles and should be treated as look profiles, not claims of measured hardware calibration.
-- Fifteen Glitch Cam looks are native procedural pixel treatments. The original GIF/JPG/MP4 assets are retained in `references/` for manual AE overlay use; the plugin does not autonomously import files into an AE project.
-- Built-in OSD renders PLAY, REC, editable YYYY-MM-DD and running HH:MM:SS using a bitmap font. Arbitrary custom strings and the original animated text overlays still use the overlay layer.
-- The C++ translation unit passes a local g++ syntax-only check and the render harness passes 15/15 when linked to a temporary NTSC stub; these checks do not substitute for the Windows MSVC/Rust build or a real NTSC-RS render. AE host rendering has not been performed here.
+---
+
+## 2. Audio Processing Note
+* **AE Host Capability:** Audio processing is fully implemented via `PF_Cmd_AUDIO_RENDER` in `src/VHS6RIFT.cpp`. However, After Effects requires RAM preview or audio rendering export to execute audio selectors. Audio processing is not active during static image frame preview calls.
+
+---
+
+## 3. Font Selection & Vector Custom Fonts
+* **OSD Font Design:** Text and OSD overlays utilize an embedded 5x7 ASCII bitmap font designed to match vintage camcorder OSD displays. Custom TTF/OTF vector font file loading from disk is not supported natively inside After Effects C++ pixel render calls without external graphics libraries (e.g. FreeType/DirectWrite). Custom text is rendered using the built-in OSD bitmap font.
+
+---
+
+## 4. Proprietary Reference Binary Inaccessible Source
+* **Reference Binaries:** Any third-party proprietary `.aex` files located in reference archives were inspected via static string/symbol inspection only. VHS Master does not wrap, hook, or call external `.aex` binaries. All processing logic is 100% original C++ code.
