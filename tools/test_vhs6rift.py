@@ -4,7 +4,7 @@ test_vhs6rift.py - Comprehensive Functional Verification Suite for VHS6RIFT
 Verifies:
   1. Master Strength (0, 25, 100, 500, 1000) & Clean Identity Render (Zero Black Screen at 0)
   2. Sudden Glitch engine: event windows, tearing, band disruption, chroma instability, deterministic timing
-  3. The 7 registered VHS/camcorder reference profiles (Python model only; not native C++)
+  3. The legacy reference-profile color model (Python-only smoke test; not native C++)
   4. Restored Filter looks (1980s Home Video, Rental Tape, Broadcast Master, Surveillance, Worn Rental)
   5. Image-Aware Colored Grain: luma vs chroma grain, size/softness scaling, shadow vs highlight weighting
   6. Tape Engine: all 13 distinct modes (tracking, slip, blank tape, head-switch, wrinkle, dropouts)
@@ -31,7 +31,7 @@ def simulate_color_processing(r, g, b, cam_profile=0, master=100):
     u = -0.14713 * r - 0.28886 * g + 0.436 * b
     v = 0.615 * r - 0.51499 * g - 0.10001 * b
 
-    # Camera profiles represented by the current native plug-in UI (7 profiles).
+    # Legacy reference-profile examples for this simplified Python-only model; not a mirror of the native 20-profile table.
     cam_configs = {
         0: {'c': 1.0, 'sat': 1.0, 'temp': 0.0, 'ped': 0.0},
         1: {'c': 1.15, 'sat': 1.1, 'temp': 1.6, 'ped': 0.0},        # Fxc6
@@ -85,7 +85,7 @@ def test_master_strength():
     print("  -> Master Strength: PASS")
 
 def test_camera_profiles():
-    print("[TEST 2] Testing 7 registered VHS/camcorder profiles in the Python model...")
+    print("[TEST 2] Testing legacy VHS/camcorder reference looks in the Python model...")
     test_px = (160, 130, 100)
     profile_results = {}
 
@@ -97,7 +97,7 @@ def test_camera_profiles():
     # Verify that all 7 registered profiles are mutually distinct
     unique_outputs = set(profile_results.values())
     assert len(unique_outputs) == 7, f"Expected 7 distinct profile outputs, found {len(unique_outputs)}"
-    print("  -> All 7 registered VHS/camcorder reference profiles in the Python model: PASS")
+    print("  -> All legacy reference-profile examples in the Python model: PASS")
 
 def test_sudden_glitch_scheduler():
     print("[TEST 3] Testing Sudden Glitch Deterministic Scheduling...")

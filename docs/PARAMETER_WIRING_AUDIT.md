@@ -15,7 +15,7 @@ This is a source-level static audit of `src/VHS6RIFT.cpp`, not a rendered-frame 
 ## Suggested controlled test order
 
 - Use a still image with fine text and saturated red/blue edges; keep resolution and frame time fixed.
-- Set Master Strength to 350, Continuous VHS Treatment on, Event Glitches off; compare the seven camera profiles one at a time.
+- Set Master Strength to 350, Continuous VHS Treatment on, Event Glitches off; compare all 20 native camera profiles one at a time. The lightweight Python model only covers legacy reference examples and is not the native renderer.
 - Enable CRT only, then sweep one CRT control at a time.
 - Enable Tape only, select a non-Off tape type, then sweep strength/size/speed/direction.
 - Enable Other VHS, select **Signal Reference**, then sweep Signal Strength, Luma Noise, Chroma Noise and Tape Errors individually.

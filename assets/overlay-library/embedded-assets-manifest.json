@@ -1,0 +1,139 @@
+{
+  "embedded_overlay_count": 21,
+  "frame_samples_per_asset": 10,
+  "embedded_preview_size": [
+    160,
+    90
+  ],
+  "pixel_format": "RGB565",
+  "assets": [
+    {
+      "selector_index": 2,
+      "selector_label": "Glitch 01",
+      "group": "glitch-cam",
+      "filename": "glitch cam 1.gif"
+    },
+    {
+      "selector_index": 3,
+      "selector_label": "Glitch 02",
+      "group": "glitch-cam",
+      "filename": "glitch cam 10.jpg"
+    },
+    {
+      "selector_index": 4,
+      "selector_label": "Glitch 03",
+      "group": "glitch-cam",
+      "filename": "glitch cam 11.gif"
+    },
+    {
+      "selector_index": 5,
+      "selector_label": "Glitch 04",
+      "group": "glitch-cam",
+      "filename": "glitch cam 12.gif"
+    },
+    {
+      "selector_index": 6,
+      "selector_label": "Glitch 05",
+      "group": "glitch-cam",
+      "filename": "glitch cam 13.gif"
+    },
+    {
+      "selector_index": 7,
+      "selector_label": "Glitch 06",
+      "group": "glitch-cam",
+      "filename": "glitch cam 14.gif"
+    },
+    {
+      "selector_index": 8,
+      "selector_label": "Glitch 07",
+      "group": "glitch-cam",
+      "filename": "glitch cam 15.gif"
+    },
+    {
+      "selector_index": 9,
+      "selector_label": "Glitch 08",
+      "group": "glitch-cam",
+      "filename": "glitch cam 2.gif"
+    },
+    {
+      "selector_index": 10,
+      "selector_label": "Glitch 09",
+      "group": "glitch-cam",
+      "filename": "glitch cam 3.gif"
+    },
+    {
+      "selector_index": 11,
+      "selector_label": "Glitch 10",
+      "group": "glitch-cam",
+      "filename": "glitch cam 4.gif"
+    },
+    {
+      "selector_index": 12,
+      "selector_label": "Glitch 11",
+      "group": "glitch-cam",
+      "filename": "glitch cam 5.gif"
+    },
+    {
+      "selector_index": 13,
+      "selector_label": "Glitch 12",
+      "group": "glitch-cam",
+      "filename": "glitch cam 6.gif"
+    },
+    {
+      "selector_index": 14,
+      "selector_label": "Glitch 13",
+      "group": "glitch-cam",
+      "filename": "glitch cam 7.gif"
+    },
+    {
+      "selector_index": 15,
+      "selector_label": "Glitch 14",
+      "group": "glitch-cam",
+      "filename": "glitch cam 8.jpg"
+    },
+    {
+      "selector_index": 16,
+      "selector_label": "Glitch 15",
+      "group": "glitch-cam",
+      "filename": "glitch cam 9.gif"
+    },
+    {
+      "selector_index": 17,
+      "selector_label": "Retro 01",
+      "group": "retro-vhs",
+      "filename": "1a98f360833a9eab4e6707e17dc5375d.gif"
+    },
+    {
+      "selector_index": 18,
+      "selector_label": "Retro 02",
+      "group": "retro-vhs",
+      "filename": "4de272dd99c292c84c8c352bf34cbb5d.gif"
+    },
+    {
+      "selector_index": 19,
+      "selector_label": "Retro 03",
+      "group": "retro-vhs",
+      "filename": "eb346f52c352720b5b5a058ce7f93803.jpg"
+    },
+    {
+      "selector_index": 20,
+      "selector_label": "Retro 04",
+      "group": "retro-vhs",
+      "filename": "fcb1a372c2f473c3fd4712053dd24975.gif"
+    },
+    {
+      "selector_index": 21,
+      "selector_label": "CRT TV 01",
+      "group": "crt-tv",
+      "filename": "crt 1.gif"
+    },
+    {
+      "selector_index": 22,
+      "selector_label": "CRT TV 02",
+      "group": "crt-tv",
+      "filename": "crt2.gif"
+    }
+  ],
+  "note": "Embedded in src/BundledOverlayFrames.h as 96x72 RGB565 samples evenly distributed across each GIF animation (or repeated static-image frame). Full-resolution originals remain under assets/overlay-library. This is a compact built-in preview rendition, not the full-resolution original.",
+  "generator": "tools/generate_bundled_overlay_frames.py"
+}

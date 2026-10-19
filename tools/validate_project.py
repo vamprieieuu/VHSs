@@ -58,15 +58,15 @@ if ops != expected:
 
 # 2. Required UI Controls Check
 required_controls = [
-    "VHS Camcorder / Reference Profile", "Fxc6 Character", "Gen 7 Character", "JVC GR-C7U Character",
+    "CAMERA ENGINE | Profile", "Fxc6 Character", "Gen 7 Character", "JVC GR-C7U Character",
     "VHS-R20 Character", "Fall-78 Character", "ERC-V2S Character", "JVC GR-SXM740U Character",
-    "Continuous VHS Treatment", "Event Glitches", "Random Seed", "Colored Grain Amount",
-    "Tape Type", "Overlay Layer (optional)", "Other VHS Engine", "VHS Craft Reference Controls",
-    "NTSC-RS Reference Controls", "Signal Reference Controls", "Audio Glitch Enable",
+    "MASTER | Continuous Signal Treatment", "MASTER | Event Glitches", "MASTER | Random Seed", "Colored Grain Amount",
+    "Tape Type", "Overlay Layer (optional)", "Other VHS Engine", "VHS Craft — Signal Controls",
+    "NTSC-RS — Base Signal Controls", "Signal Reference — Controls", "Audio Glitch Enable",
     "Audio Event Glitches", "Audio Wet / Dry Mix", "PF_Cmd_AUDIO_RENDER",
     "Enable Grain / Noise", "Enable Tracking Damage", "Enable Tape Effects",
     "Enable Overlay Layer", "Enable Other Signal Engines", "Enable CRT TV Engine",
-    "Procedural Transparent Tape", "Moving Tape Sweep", "CRT Scanline Strength"
+    "Procedural Transparent Tape", "Moving Tape Sweep", "CRT Scanline Strength", "Built-in OSD Style", "OSD Opacity", "OSD Scale"
 ]
 for item in required_controls:
     if item not in source:
@@ -94,7 +94,7 @@ if "AE_Effect_Version { 591361 }" not in pipl:
     fail("PiPL version is not the agreed 1.2 version")
 if '#include "entry.h"' in source:
     fail("missing entry.h dependency remains; this SDK snapshot does not contain entry.h")
-if 'PF_ADD_FLOAT_SLIDERX("Master VHS Strength", 0, 2000, 0, 2000, 350' not in source:
+if 'PF_ADD_FLOAT_SLIDERX("MASTER | VHS Strength", 0, 2000, 0, 2000, 350' not in source:
     fail("Master VHS Strength range/default is not configured as expected")
 if 'PF_ADD_CHECKBOX("Enable CRT TV Engine", "Enable", FALSE' not in source:
     fail("CRT engine must be optional and disabled by default")
@@ -103,12 +103,21 @@ if 'SUFFIX ".aex"' not in cmake or 'OUTPUT_NAME "VHS6RIFT"' not in cmake:
 
 print(f"PASS: {len(expected)} registered parameters are ordered consistently.")
 print("PASS: camera, signal, tape, overlay, Other VHS and audio controls are present.")
+if "kCameraProfiles[20]" not in source or "PF_ADD_POPUP(\"CAMERA ENGINE | Profile\", 20, 1" not in source:
+    fail("the 20-profile camera engine selector/table is missing")
+print("PASS: all 20 camera profiles are registered in the selector and render table.")
 print("PASS: PiPL identity, version (591361) and outflags (0x48000006) match the source.")
 
 # Regression guard: Glitch Cam's effective rate must drive both slot timing and gating.
 if "const bool chosenEvent = s.events && effectiveEventRate > 0.0f" not in source:
     fail("Glitch Cam event gate is not using effectiveEventRate; its rate override can be ignored.")
 print("PASS: Glitch Cam event gating uses the effective event rate override.")
+if "assets/overlay-library/manifest.json" not in str([p.relative_to(ROOT).as_posix() for p in (ROOT / "assets" / "overlay-library").rglob("manifest.json")]):
+    fail("bundled overlay library manifest is missing")
+print("PASS: bundled overlay reference library manifest is present.")
+if "if (osdStyle > 0 && osdOpacity > 0.0f)" not in source or "osdGlyphRow(osdText[ci], row)" not in source:
+    fail("built-in OSD render path is missing")
+print("PASS: built-in OSD has a registered, wired render path.")
 
 # 4. Native C++ Image Processing Test Suite Execution
 # This harness is a GCC/Linux-oriented test and includes the Adobe SDK headers.

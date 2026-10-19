@@ -8,13 +8,7 @@ VHS6RIFT is designed as a native image-and-audio effect, not a JSX script that s
 
 ## Included camera reference profiles
 
-- Fxc6 Reference
-- Gen 7 Reference
-- JVC GR-C7U (1986)
-- VHS-R20 Reference
-- Fall-78 Reference
-- ERC-V2S Reference
-- JVC GR-SXM740U
+- Panasonic Lumix TZ7 / ZS3; Sony Cyber-shot DSC-W180; Sony H7 / H9; Sony Handycam Video8 / Hi8; Canon PowerShot A-series; Canon AE-1 Film Transfer; Sony NEX-5; Canon EOS 400D / XTi; Sony a6000; Sony Cyber-shot DSC-T70; Kodak FZ55; Olympus mju 5000; Excel 2 (Balanced); JVC GR-C7U (1986); JVC GR-SXM740U; Fxc6 Reference; Gen 7 Reference; VHS-R20 Reference; Fall-78 Reference; ERC-V2S Reference
 
 Each profile has its own Character, Color Response, Signal Damage, and Grain controls. These are **reference-derived processing profiles**, not claims that the supplied screen recordings are pristine captures from the camera's original sensor or that every profile is already hardware-calibrated. The profile controls feed different processing stages; they are not just LUT names.
 
@@ -61,3 +55,9 @@ The After Effects effect SDK does provide audio selectors (`PF_Cmd_AUDIO_SETUP`,
 ## License and reference use
 
 The VHS6RIFT implementation in this repository is original project code. It does not contain copied source code or embedded third-party plugin binaries. `ntsc-rs` is an open-source reference project; if future changes copy/adapt code rather than merely use it as a behavioral reference, preserve the upstream license/notice obligations and review the specific files' licenses first. Proprietary AEX files are for behavioral/static reference only.
+## New built-in OSD and bundled overlays
+The `13 | BUILT-IN OSD — Camcorder Display` section adds selectable REC, PLAY timecode, camcorder, and security-camera display styles with opacity and scale controls. See `docs/BUILTIN_OSD_AND_OVERLAY_LIBRARY.md`. The Glitch Cam, Retro VHS, and CRT TV reference media is bundled in `assets/overlay-library/`. The `14 | BUILT-IN OVERLAY LIBRARY — Animated Reference Assets` section exposes 21 selectable embedded looks with independent opacity and playback speed; six RGB565 frame samples per asset are compiled into `src/BundledOverlayFrames.h`, so selection does not depend on external file paths. The embedded rendition is a compact 96×72 preview (six sampled frames), while the full-resolution original assets remain in the repository. Run `python tools/test_bundled_overlay_library.py` to check selector and asset wiring.
+
+
+## Repository-only delivery note
+This source archive contains the native C++ project, SDK integration scaffolding, reference assets, docs, and static tests. It intentionally does not include a compiled `.aex`; build and runtime validation remain separate steps.

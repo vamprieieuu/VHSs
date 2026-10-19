@@ -15,7 +15,11 @@
 #include "ntscrs_c.h"
 #include <cmath>
 #include <cstdint>
+#include <cstdio>
+#include <cstring>
 #include <algorithm>
+#include <vector>
+#include "BundledOverlayFrames.h"
 
 #define PLUGIN_NAME "VHS6RIFT"
 #define PLUGIN_MATCH_NAME "com.vhs6rift.effect"
@@ -50,6 +54,8 @@ enum {
   P_TOPIC_ADV_TAPE, P_TRANSPARENT_TAPE_ENABLE, P_TRANSPARENT_TAPE_STRENGTH, P_TRANSPARENT_TAPE_WIDTH, P_TRANSPARENT_TAPE_SPEED,
   P_TAPE_SWEEP_ENABLE, P_TAPE_SWEEP_STRENGTH, P_TAPE_SWEEP_WIDTH, P_TAPE_SWEEP_SPEED, P_TAPE_SWEEP_INTERVAL, P_TOPIC_ADV_TAPE_END,
   P_TOPIC_GLITCH_CAM, P_GLITCH_CAM_MODE, P_GLITCH_CAM_AMOUNT, P_GLITCH_CAM_CHROMA, P_GLITCH_CAM_BLOCKS, P_GLITCH_CAM_RATE, P_TOPIC_GLITCH_CAM_END,
+  P_TOPIC_OSD, P_OSD_STYLE, P_OSD_OPACITY, P_OSD_SCALE, P_TOPIC_OSD_END,
+  P_TOPIC_BUNDLED_OVERLAYS, P_BUNDLED_OVERLAY_STYLE, P_BUNDLED_OVERLAY_OPACITY, P_BUNDLED_OVERLAY_SPEED, P_TOPIC_BUNDLED_OVERLAYS_END,
   P_COUNT
 };
 static PF_Err About(PF_InData *in_data, PF_OutData *out_data, PF_ParamDef *params[], PF_LayerDef *output) {
@@ -70,22 +76,22 @@ static PF_Err ParamsSetup(PF_InData *in_data, PF_OutData *out_data) {
 
   AEFX_CLR_STRUCT(def);
 
-  PF_ADD_POPUP("VHS Camcorder / Reference Profile", 7, 1,
-    "Fxc6 Reference|Gen 7 Reference|JVC GR-C7U (1986)|VHS-R20 Reference|Fall-78 Reference|ERC-V2S Reference|JVC GR-SXM740U", P_CAMERA);
+  PF_ADD_POPUP("CAMERA ENGINE | Profile", 20, 1,
+    "Panasonic Lumix TZ7 / ZS3|Sony Cyber-shot DSC-W180|Sony H7 / H9|Sony Handycam Video8 / Hi8|Canon PowerShot A-series|Canon AE-1 Film Transfer|Sony NEX-5|Canon EOS 400D / XTi|Sony a6000|Sony Cyber-shot DSC-T70|Kodak FZ55|Olympus mju 5000|Excel 2 (Balanced)|Fxc6 Reference|Gen 7 Reference|JVC GR-C7U (1986)|VHS-R20 Reference|Fall-78 Reference|ERC-V2S Reference|JVC GR-SXM740U", P_CAMERA);
   AEFX_CLR_STRUCT(def);
-  PF_ADD_FLOAT_SLIDERX("Master VHS Strength", 0, 2000, 0, 2000, 350, PF_Precision_TENTHS, 0, 0, P_MASTER);
+  PF_ADD_FLOAT_SLIDERX("MASTER | VHS Strength", 0, 2000, 0, 2000, 350, PF_Precision_TENTHS, 0, 0, P_MASTER);
   AEFX_CLR_STRUCT(def);
-  PF_ADD_CHECKBOX("Continuous VHS Treatment", "Enable", TRUE, 0, P_CONTINUOUS);
+  PF_ADD_CHECKBOX("MASTER | Continuous Signal Treatment", "Enable", TRUE, 0, P_CONTINUOUS);
   AEFX_CLR_STRUCT(def);
-  PF_ADD_CHECKBOX("Event Glitches", "Enable", FALSE, 0, P_EVENTS);
+  PF_ADD_CHECKBOX("MASTER | Event Glitches", "Enable", FALSE, 0, P_EVENTS);
   AEFX_CLR_STRUCT(def);
-  PF_ADD_SLIDER("Random Seed", 0, 9999, 0, 9999, 17, P_SEED);
+  PF_ADD_SLIDER("MASTER | Random Seed", 0, 9999, 0, 9999, 17, P_SEED);
 
   AEFX_CLR_STRUCT(def);
 
-  PF_ADD_TOPIC("Camera-Specific Controls", P_TOPIC_CAMERA);
+  PF_ADD_TOPIC("02 | CAMERA ENGINE — Reference Fine Tuning", P_TOPIC_CAMERA);
   AEFX_CLR_STRUCT(def);
-  PF_ADD_TOPIC("Fxc6 Reference Profile", P_FXC6_TOPIC);
+  PF_ADD_TOPIC("Fxc6 Reference — Fine Tuning", P_FXC6_TOPIC);
   AEFX_CLR_STRUCT(def);
   PF_ADD_FLOAT_SLIDERX("Fxc6 Character", 0, 100, 0, 100, 65, PF_Precision_TENTHS, 0, 0, P_FXC6_CHARACTER);
   AEFX_CLR_STRUCT(def);
@@ -97,7 +103,7 @@ static PF_Err ParamsSetup(PF_InData *in_data, PF_OutData *out_data) {
   AEFX_CLR_STRUCT(def);
   PF_END_TOPIC(P_FXC6_END);
   AEFX_CLR_STRUCT(def);
-  PF_ADD_TOPIC("Gen 7 Reference Profile", P_GEN7_TOPIC);
+  PF_ADD_TOPIC("Gen 7 Reference — Fine Tuning", P_GEN7_TOPIC);
   AEFX_CLR_STRUCT(def);
   PF_ADD_FLOAT_SLIDERX("Gen 7 Character", 0, 100, 0, 100, 75, PF_Precision_TENTHS, 0, 0, P_GEN7_CHARACTER);
   AEFX_CLR_STRUCT(def);
@@ -109,7 +115,7 @@ static PF_Err ParamsSetup(PF_InData *in_data, PF_OutData *out_data) {
   AEFX_CLR_STRUCT(def);
   PF_END_TOPIC(P_GEN7_END);
   AEFX_CLR_STRUCT(def);
-  PF_ADD_TOPIC("JVC GR-C7U (1986) Profile", P_JVC_C7_TOPIC);
+  PF_ADD_TOPIC("JVC GR-C7U — Fine Tuning", P_JVC_C7_TOPIC);
   AEFX_CLR_STRUCT(def);
   PF_ADD_FLOAT_SLIDERX("JVC GR-C7U Character", 0, 100, 0, 100, 82, PF_Precision_TENTHS, 0, 0, P_JVC_C7_CHARACTER);
   AEFX_CLR_STRUCT(def);
@@ -121,7 +127,7 @@ static PF_Err ParamsSetup(PF_InData *in_data, PF_OutData *out_data) {
   AEFX_CLR_STRUCT(def);
   PF_END_TOPIC(P_JVC_C7_END);
   AEFX_CLR_STRUCT(def);
-  PF_ADD_TOPIC("VHS-R20 Reference Profile", P_R20_TOPIC);
+  PF_ADD_TOPIC("VHS-R20 Reference — Fine Tuning", P_R20_TOPIC);
   AEFX_CLR_STRUCT(def);
   PF_ADD_FLOAT_SLIDERX("VHS-R20 Character", 0, 100, 0, 100, 55, PF_Precision_TENTHS, 0, 0, P_R20_CHARACTER);
   AEFX_CLR_STRUCT(def);
@@ -133,7 +139,7 @@ static PF_Err ParamsSetup(PF_InData *in_data, PF_OutData *out_data) {
   AEFX_CLR_STRUCT(def);
   PF_END_TOPIC(P_R20_END);
   AEFX_CLR_STRUCT(def);
-  PF_ADD_TOPIC("Fall-78 Reference Profile", P_FALL78_TOPIC);
+  PF_ADD_TOPIC("Fall-78 Reference — Fine Tuning", P_FALL78_TOPIC);
   AEFX_CLR_STRUCT(def);
   PF_ADD_FLOAT_SLIDERX("Fall-78 Character", 0, 100, 0, 100, 30, PF_Precision_TENTHS, 0, 0, P_FALL78_CHARACTER);
   AEFX_CLR_STRUCT(def);
@@ -145,7 +151,7 @@ static PF_Err ParamsSetup(PF_InData *in_data, PF_OutData *out_data) {
   AEFX_CLR_STRUCT(def);
   PF_END_TOPIC(P_FALL78_END);
   AEFX_CLR_STRUCT(def);
-  PF_ADD_TOPIC("ERC-V2S Reference Profile", P_ERC_TOPIC);
+  PF_ADD_TOPIC("ERC-V2S Reference — Fine Tuning", P_ERC_TOPIC);
   AEFX_CLR_STRUCT(def);
   PF_ADD_FLOAT_SLIDERX("ERC-V2S Character", 0, 100, 0, 100, 60, PF_Precision_TENTHS, 0, 0, P_ERC_CHARACTER);
   AEFX_CLR_STRUCT(def);
@@ -157,7 +163,7 @@ static PF_Err ParamsSetup(PF_InData *in_data, PF_OutData *out_data) {
   AEFX_CLR_STRUCT(def);
   PF_END_TOPIC(P_ERC_END);
   AEFX_CLR_STRUCT(def);
-  PF_ADD_TOPIC("JVC GR-SXM740U Profile", P_JVC_SXM_TOPIC);
+  PF_ADD_TOPIC("JVC GR-SXM740U — Fine Tuning", P_JVC_SXM_TOPIC);
   AEFX_CLR_STRUCT(def);
   PF_ADD_FLOAT_SLIDERX("JVC GR-SXM740U Character", 0, 100, 0, 100, 50, PF_Precision_TENTHS, 0, 0, P_JVC_SXM_CHARACTER);
   AEFX_CLR_STRUCT(def);
@@ -173,7 +179,7 @@ static PF_Err ParamsSetup(PF_InData *in_data, PF_OutData *out_data) {
 
   AEFX_CLR_STRUCT(def);
 
-  PF_ADD_TOPIC("Color Controls", P_TOPIC_COLOR);
+  PF_ADD_TOPIC("03 | IMAGE — Color and Chroma", P_TOPIC_COLOR);
   AEFX_CLR_STRUCT(def);
   PF_ADD_FLOAT_SLIDERX("Saturation", 0, 200, 0, 200, 100, PF_Precision_TENTHS, 0, 0, P_SATURATION);
   AEFX_CLR_STRUCT(def);
@@ -191,7 +197,7 @@ static PF_Err ParamsSetup(PF_InData *in_data, PF_OutData *out_data) {
 
   AEFX_CLR_STRUCT(def);
 
-  PF_ADD_TOPIC("Grain and Signal Noise", P_TOPIC_GRAIN);
+  PF_ADD_TOPIC("04 | IMAGE — Moving Grain", P_TOPIC_GRAIN);
   AEFX_CLR_STRUCT(def);
   PF_ADD_FLOAT_SLIDERX("Colored Grain Amount", 0, 100, 0, 100, 0, PF_Precision_TENTHS, 0, 0, P_GRAIN_AMOUNT);
   AEFX_CLR_STRUCT(def);
@@ -203,7 +209,7 @@ static PF_Err ParamsSetup(PF_InData *in_data, PF_OutData *out_data) {
 
   AEFX_CLR_STRUCT(def);
 
-  PF_ADD_TOPIC("Tracking and Damage Events", P_TOPIC_DAMAGE);
+  PF_ADD_TOPIC("05 | SIGNAL — Tracking and Damage Events", P_TOPIC_DAMAGE);
   AEFX_CLR_STRUCT(def);
   PF_ADD_FLOAT_SLIDERX("Tracking Noise", 0, 100, 0, 100, 0, PF_Precision_TENTHS, 0, 0, P_TRACKING);
   AEFX_CLR_STRUCT(def);
@@ -225,7 +231,7 @@ static PF_Err ParamsSetup(PF_InData *in_data, PF_OutData *out_data) {
 
   AEFX_CLR_STRUCT(def);
 
-  PF_ADD_TOPIC("Tape Band / Tape Noise", P_TOPIC_TAPE);
+  PF_ADD_TOPIC("06 | TAPE — Tape Behavior", P_TOPIC_TAPE);
   AEFX_CLR_STRUCT(def);
   PF_ADD_POPUP("Tape Type", 6, 1, "Off|Horizontal Band|Bottom Head-Switch|Vertical Roll|Side Tear|Signal Snow", P_TAPE_TYPE);
   AEFX_CLR_STRUCT(def);
@@ -241,7 +247,7 @@ static PF_Err ParamsSetup(PF_InData *in_data, PF_OutData *out_data) {
 
   AEFX_CLR_STRUCT(def);
 
-  PF_ADD_TOPIC("Damage Overlay Layer", P_TOPIC_OVERLAY);
+  PF_ADD_TOPIC("07 | OVERLAYS — Footage / Layer Overlay", P_TOPIC_OVERLAY);
   AEFX_CLR_STRUCT(def);
   PF_ADD_LAYER("Overlay Layer (optional)", PF_LayerDefault_NONE, P_OVERLAY_LAYER);
   AEFX_CLR_STRUCT(def);
@@ -260,13 +266,13 @@ static PF_Err ParamsSetup(PF_InData *in_data, PF_OutData *out_data) {
   PF_END_TOPIC(P_TOPIC_OVERLAY_END);
 
   AEFX_CLR_STRUCT(def);
-  PF_ADD_TOPIC("Other VHS Engines (independent implementations)", P_TOPIC_OTHER);
+  PF_ADD_TOPIC("08 | SIGNAL ENGINES — Alternate Character", P_TOPIC_OTHER);
   AEFX_CLR_STRUCT(def);
-  PF_ADD_POPUP("Other VHS Engine", 5, 1, "Off|VHS Craft Reference|VHS Legend Reference File|NTSC-RS Signal Model|Signal Reference", P_OTHER_ENGINE);
+  PF_ADD_POPUP("Other VHS Engine", 5, 1, "Off|VHS Craft Reference|VHS Legend Reference File|NTSC-RS Base (always active)|Signal Reference", P_OTHER_ENGINE);
   AEFX_CLR_STRUCT(def);
   PF_ADD_FLOAT_SLIDERX("Other Engine Strength", 0, 100, 0, 100, 50, PF_Precision_TENTHS, 0, 0, P_OTHER_STRENGTH);
   AEFX_CLR_STRUCT(def);
-  PF_ADD_TOPIC("VHS Craft Reference Controls", P_CRAFT_TOPIC);
+  PF_ADD_TOPIC("VHS Craft — Signal Controls", P_CRAFT_TOPIC);
   AEFX_CLR_STRUCT(def);
   PF_ADD_FLOAT_SLIDERX("Craft Tracking Interference", 0, 100, 0, 100, 25, PF_Precision_TENTHS, 0, 0, P_CRAFT_TRACKING);
   AEFX_CLR_STRUCT(def);
@@ -278,7 +284,7 @@ static PF_Err ParamsSetup(PF_InData *in_data, PF_OutData *out_data) {
   AEFX_CLR_STRUCT(def);
   PF_END_TOPIC(P_CRAFT_END);
   AEFX_CLR_STRUCT(def);
-  PF_ADD_TOPIC("VHS Legend Reference Controls", P_LEGEND_TOPIC);
+  PF_ADD_TOPIC("VHS Legend — Signal Controls", P_LEGEND_TOPIC);
   AEFX_CLR_STRUCT(def);
   PF_ADD_FLOAT_SLIDERX("Legend Signal Breakdown", 0, 100, 0, 100, 25, PF_Precision_TENTHS, 0, 0, P_LEGEND_BREAKUP);
   AEFX_CLR_STRUCT(def);
@@ -290,7 +296,7 @@ static PF_Err ParamsSetup(PF_InData *in_data, PF_OutData *out_data) {
   AEFX_CLR_STRUCT(def);
   PF_END_TOPIC(P_LEGEND_END);
   AEFX_CLR_STRUCT(def);
-  PF_ADD_TOPIC("NTSC-RS Reference Controls", P_NTSC_TOPIC);
+  PF_ADD_TOPIC("NTSC-RS — Base Signal Controls", P_NTSC_TOPIC);
   AEFX_CLR_STRUCT(def);
   PF_ADD_FLOAT_SLIDERX("NTSC Chroma Delay", 0, 100, 0, 100, 25, PF_Precision_TENTHS, 0, 0, P_NTSC_CHROMA_DELAY);
   AEFX_CLR_STRUCT(def);
@@ -302,7 +308,7 @@ static PF_Err ParamsSetup(PF_InData *in_data, PF_OutData *out_data) {
   AEFX_CLR_STRUCT(def);
   PF_END_TOPIC(P_NTSC_END);
   AEFX_CLR_STRUCT(def);
-  PF_ADD_TOPIC("Signal Reference Controls", P_SIGNAL_TOPIC);
+  PF_ADD_TOPIC("Signal Reference — Controls", P_SIGNAL_TOPIC);
   AEFX_CLR_STRUCT(def);
   PF_ADD_FLOAT_SLIDERX("Signal Strength", 0, 100, 0, 100, 35, PF_Precision_TENTHS, 0, 0, P_SIGNAL_STRENGTH);
   AEFX_CLR_STRUCT(def);
@@ -317,7 +323,7 @@ static PF_Err ParamsSetup(PF_InData *in_data, PF_OutData *out_data) {
   PF_END_TOPIC(P_TOPIC_OTHER_END);
 
   AEFX_CLR_STRUCT(def);
-  PF_ADD_TOPIC("Audio Glitches (real audio processing)", P_TOPIC_AUDIO);
+  PF_ADD_TOPIC("09 | AUDIO — Tape Audio Degradation", P_TOPIC_AUDIO);
   AEFX_CLR_STRUCT(def);
   PF_ADD_CHECKBOX("Audio Glitch Enable", "Enable", FALSE, 0, P_AUDIO_ENABLE);
   AEFX_CLR_STRUCT(def);
@@ -338,7 +344,7 @@ static PF_Err ParamsSetup(PF_InData *in_data, PF_OutData *out_data) {
   PF_END_TOPIC(P_TOPIC_AUDIO_END);
 
   AEFX_CLR_STRUCT(def);
-  PF_ADD_TOPIC("Independent Effect Modules", P_TOPIC_MODULES);
+  PF_ADD_TOPIC("10 | SYSTEM — Modules and CRT TV", P_TOPIC_MODULES);
   AEFX_CLR_STRUCT(def);
   PF_ADD_CHECKBOX("Enable Grain / Noise", "Enable", TRUE, 0, P_GRAIN_ENABLE);
   AEFX_CLR_STRUCT(def);
@@ -367,7 +373,7 @@ static PF_Err ParamsSetup(PF_InData *in_data, PF_OutData *out_data) {
   PF_END_TOPIC(P_TOPIC_MODULES_END);
 
   AEFX_CLR_STRUCT(def);
-  PF_ADD_TOPIC("Transparent Tape and Tape Sweep", P_TOPIC_ADV_TAPE);
+  PF_ADD_TOPIC("11 | OVERLAYS — Procedural Tape Artifacts", P_TOPIC_ADV_TAPE);
   AEFX_CLR_STRUCT(def);
   PF_ADD_CHECKBOX("Procedural Transparent Tape", "Enable", FALSE, 0, P_TRANSPARENT_TAPE_ENABLE);
   AEFX_CLR_STRUCT(def);
@@ -390,9 +396,10 @@ static PF_Err ParamsSetup(PF_InData *in_data, PF_OutData *out_data) {
   PF_END_TOPIC(P_TOPIC_ADV_TAPE_END);
 
   AEFX_CLR_STRUCT(def);
-  PF_ADD_TOPIC("Glitch Cam Modes (independent event style)", P_TOPIC_GLITCH_CAM);
+  PF_ADD_TOPIC("12 | GLITCH CAM — Event Style and Timing", P_TOPIC_GLITCH_CAM);
   AEFX_CLR_STRUCT(def);
-  PF_ADD_POPUP("Glitch Cam Style", 5, 1, "Sync Tear|Chroma Breakup|Block Corruption|Luma Dropout|Mixed Signal Burst", P_GLITCH_CAM_MODE);
+  PF_ADD_POPUP("Glitch Cam Style", 15, 1,
+    "Sync Tear|Chroma Breakup|Block Corruption|Luma Dropout|Mixed Signal Burst|RGB Convergence Burst|Vertical Hold Roll|Color Smear|Head-Switch Noise|Horizontal Fold|Solarized Flash|Tape Stretch|Ghost Echo|Signal Crush|Chroma Bar Interference", P_GLITCH_CAM_MODE);
   AEFX_CLR_STRUCT(def);
   PF_ADD_FLOAT_SLIDERX("Glitch Cam Amount", 0, 200, 0, 200, 70, PF_Precision_TENTHS, 0, 0, P_GLITCH_CAM_AMOUNT);
   AEFX_CLR_STRUCT(def);
@@ -403,6 +410,28 @@ static PF_Err ParamsSetup(PF_InData *in_data, PF_OutData *out_data) {
   PF_ADD_FLOAT_SLIDERX("Glitch Cam Event Rate", 0, 60, 0, 60, 8, PF_Precision_TENTHS, 0, 0, P_GLITCH_CAM_RATE);
   AEFX_CLR_STRUCT(def);
   PF_END_TOPIC(P_TOPIC_GLITCH_CAM_END);
+
+  AEFX_CLR_STRUCT(def);
+  PF_ADD_TOPIC("13 | BUILT-IN OSD — Camcorder Display", P_TOPIC_OSD);
+  AEFX_CLR_STRUCT(def);
+  PF_ADD_POPUP("Built-in OSD Style", 5, 1, "Off|REC Indicator|PLAY Timecode|Camcorder OSD|Security Camera", P_OSD_STYLE);
+  AEFX_CLR_STRUCT(def);
+  PF_ADD_FLOAT_SLIDERX("OSD Opacity", 0, 100, 0, 100, 85, PF_Precision_TENTHS, 0, 0, P_OSD_OPACITY);
+  AEFX_CLR_STRUCT(def);
+  PF_ADD_FLOAT_SLIDERX("OSD Scale", 50, 300, 50, 300, 100, PF_Precision_TENTHS, 0, 0, P_OSD_SCALE);
+  AEFX_CLR_STRUCT(def);
+  PF_END_TOPIC(P_TOPIC_OSD_END);
+
+  AEFX_CLR_STRUCT(def);
+  PF_ADD_TOPIC("14 | BUILT-IN OVERLAY LIBRARY — Animated Reference Assets", P_TOPIC_BUNDLED_OVERLAYS);
+  AEFX_CLR_STRUCT(def);
+  PF_ADD_POPUP("Built-in Overlay Asset", 22, 1, "Off|Glitch 01|Glitch 02|Glitch 03|Glitch 04|Glitch 05|Glitch 06|Glitch 07|Glitch 08|Glitch 09|Glitch 10|Glitch 11|Glitch 12|Glitch 13|Glitch 14|Glitch 15|Retro 01|Retro 02|Retro 03|Retro 04|CRT TV 01|CRT TV 02", P_BUNDLED_OVERLAY_STYLE);
+  AEFX_CLR_STRUCT(def);
+  PF_ADD_FLOAT_SLIDERX("Built-in Overlay Opacity", 0, 100, 0, 100, 28, PF_Precision_TENTHS, 0, 0, P_BUNDLED_OVERLAY_OPACITY);
+  AEFX_CLR_STRUCT(def);
+  PF_ADD_FLOAT_SLIDERX("Built-in Overlay Speed", 0, 400, 0, 400, 100, PF_Precision_TENTHS, 0, 0, P_BUNDLED_OVERLAY_SPEED);
+  AEFX_CLR_STRUCT(def);
+  PF_END_TOPIC(P_TOPIC_BUNDLED_OVERLAYS_END);
 
   out_data->num_params = P_COUNT;
   return err;
@@ -415,6 +444,37 @@ static inline uint32_t hash32(uint32_t x) {
 static inline float rand01(uint32_t x) { return (hash32(x) & 0x00ffffffU) / 16777215.0f; }
 static inline float smooth(float a, float b, float x) { float t = clamp01((x-a)/(b-a)); return t*t*(3.0f-2.0f*t); }
 static inline int clampi(int v, int a, int b) { return std::max(a, std::min(b, v)); }
+
+// Compact 3x5 bitmap font for generated camcorder OSD; bit 2 is the left pixel.
+static inline uint8_t osdGlyphRow(char c, int row) {
+  static const uint8_t digits[10][5] = {
+    {7,5,5,5,7}, {2,6,2,2,7}, {7,1,7,4,7}, {7,1,7,1,7}, {5,5,7,1,1},
+    {7,4,7,1,7}, {7,4,7,5,7}, {7,1,1,1,1}, {7,5,7,5,7}, {7,5,7,1,7}
+  };
+  if (row < 0 || row > 4) return 0;
+  if (c >= '0' && c <= '9') return digits[c-'0'][row];
+  switch (c) {
+    case 'R': { const uint8_t v[5]={6,5,6,5,5}; return v[row]; }
+    case 'E': { const uint8_t v[5]={7,4,6,4,7}; return v[row]; }
+    case 'C': { const uint8_t v[5]={7,4,4,4,7}; return v[row]; }
+    case 'P': { const uint8_t v[5]={6,5,6,4,4}; return v[row]; }
+    case 'L': { const uint8_t v[5]={4,4,4,4,7}; return v[row]; }
+    case 'A': { const uint8_t v[5]={2,5,7,5,5}; return v[row]; }
+    case 'Y': { const uint8_t v[5]={5,5,2,2,2}; return v[row]; }
+    case 'M': { const uint8_t v[5]={5,7,7,5,5}; return v[row]; }
+    case 'O': return digits[0][row];
+    case 'S': { const uint8_t v[5]={7,4,7,1,7}; return v[row]; }
+    case 'T': { const uint8_t v[5]={7,2,2,2,2}; return v[row]; }
+    case 'I': { const uint8_t v[5]={7,2,2,2,7}; return v[row]; }
+    case 'U': { const uint8_t v[5]={5,5,5,5,7}; return v[row]; }
+    case 'D': { const uint8_t v[5]={6,5,5,5,6}; return v[row]; }
+    case 'V': { const uint8_t v[5]={5,5,5,5,2}; return v[row]; }
+    case ':': { const uint8_t v[5]={0,2,0,2,0}; return v[row]; }
+    case '-': { const uint8_t v[5]={0,0,7,0,0}; return v[row]; }
+    case ' ': return 0;
+    default: return 0;
+  }
+}
 
 struct Settings {
   int camera=1, seed=17, tapeType=0, tapeDir=0, overlayMode=0;
@@ -475,21 +535,28 @@ struct CameraProfileData {
   float noiseFloor;     // Native signal noise contribution
 };
 
-static const CameraProfileData kCameraProfiles[7] = {
-  // 1: Fxc6 Reference - Consumer 8mm/VHS camcorder
-  { 1.10f, 1.08f,  0.08f, -0.02f, 1.06f, 1.00f, 0.94f, 1.02f, 0.02f, 0.08f, 0.25f,  3.0f, 0.0f, 0.05f, 0.04f },
-  // 2: Gen 7 Reference - Multi-generation tape dub
-  { 0.75f, 1.18f,  0.05f,  0.06f, 0.96f, 1.05f, 0.88f, 1.12f, 0.08f, 0.16f, 0.50f,  6.0f, 1.0f, 0.08f, 0.12f },
-  // 3: JVC GR-C7U (1986) - Retro 80s camcorder (Back to the Future)
-  { 1.35f, 1.22f,  0.22f, -0.05f, 1.25f, 0.96f, 0.76f, 0.92f, 0.03f, 0.20f, 0.38f,  5.0f,-1.0f, 0.18f, 0.06f },
-  // 4: VHS-R20 Reference - Industrial / security deck
-  { 0.60f, 1.30f, -0.15f,  0.08f, 0.82f, 1.06f, 1.28f, 0.86f, 0.04f, 0.12f, 0.15f, -4.0f, 0.0f, 0.25f, 0.16f },
-  // 5: Fall-78 Reference - Early vintage 70s home tape
-  { 0.70f, 0.88f,  0.18f,  0.03f, 1.14f, 0.98f, 0.80f, 1.16f, 0.06f, 0.05f, 0.45f,  2.0f, 2.0f, 0.04f, 0.08f },
-  // 6: ERC-V2S Reference - Professional S-VHS
-  { 1.15f, 1.08f,  0.02f,  0.00f, 1.02f, 1.02f, 1.00f, 0.98f, 0.00f, 0.02f, 0.10f,  1.0f, 0.0f, 0.12f, 0.02f },
-  // 7: JVC GR-SXM740U - Compact VHS (S-VHS ET)
-  { 1.10f, 1.12f, -0.05f, -0.06f, 1.08f, 0.94f, 1.08f, 0.96f, 0.01f, 0.08f, 0.20f,  3.0f, 0.0f, 0.20f, 0.05f }
+static const CameraProfileData kCameraProfiles[20] = {
+  // Compact / consumer camera engines: separate color science and tonal response per model.
+  {1.22f,1.08f, 0.12f, 0.00f,1.08f,1.00f,0.92f,0.98f,0.015f,0.02f,0.24f, 2.0f,0.0f,0.10f,0.035f}, // Panasonic Lumix TZ7 / ZS3
+  {0.92f,1.22f,-0.12f, 0.02f,0.90f,1.02f,1.18f,0.94f,0.000f,0.01f,0.10f, 1.0f,0.0f,0.24f,0.045f}, // Sony DSC-W180
+  {1.30f,1.18f,-0.02f, 0.08f,0.92f,1.08f,0.98f,0.92f,0.010f,0.03f,0.16f, 1.0f,0.0f,0.16f,0.035f}, // Sony H7/H9
+  {1.08f,1.02f, 0.15f,-0.01f,1.08f,1.02f,0.88f,1.02f,0.060f,0.08f,0.48f, 5.0f,1.0f,0.04f,0.135f}, // Sony Handycam Video8/Hi8
+  {1.12f,1.08f, 0.10f, 0.00f,1.08f,1.00f,0.90f,0.98f,0.010f,0.02f,0.18f, 1.0f,0.0f,0.10f,0.025f}, // Canon PowerShot A-series
+  {0.98f,0.94f, 0.20f, 0.02f,1.14f,0.98f,0.84f,1.12f,0.030f,0.03f,0.12f, 1.0f,1.0f,0.08f,0.045f}, // Canon AE-1 film transfer
+  {1.02f,1.08f, 0.00f, 0.00f,0.98f,1.00f,1.04f,0.98f,0.000f,0.00f,0.08f, 0.0f,0.0f,0.24f,0.012f}, // Sony NEX-5
+  {1.06f,1.10f, 0.08f,-0.04f,1.08f,0.98f,1.02f,0.98f,0.020f,0.02f,0.12f, 1.0f,0.0f,0.12f,0.025f}, // Canon 400D/XTi
+  {1.14f,1.16f,-0.05f, 0.00f,0.92f,1.00f,1.12f,0.96f,0.000f,0.00f,0.06f, 0.0f,0.0f,0.30f,0.006f}, // Sony a6000
+  {0.96f,1.12f,-0.08f, 0.00f,0.94f,1.00f,1.10f,0.96f,0.000f,0.00f,0.14f, 2.0f,0.0f,0.05f,0.030f}, // Sony DSC-T70
+  {1.18f,1.20f, 0.12f, 0.04f,1.14f,1.06f,0.72f,0.94f,0.010f,0.02f,0.12f, 1.0f,0.0f,0.34f,0.025f}, // Kodak FZ55
+  {1.28f,1.18f,-0.08f, 0.02f,0.88f,1.02f,1.22f,0.92f,0.000f,0.00f,0.12f, 1.0f,0.0f,0.16f,0.030f}, // Olympus mju 5000
+  {1.04f,1.02f, 0.035f,0.005f,1.04f,1.01f,0.96f,0.99f,0.020f,0.02f,0.12f, 1.0f,0.0f,0.08f,0.020f}, // Excel 2 Balanced: intentionally not red-heavy
+  {1.10f,1.08f, 0.08f,-0.02f,1.06f,1.00f,0.94f,1.02f,0.02f,0.08f,0.25f,3.0f,0.0f,0.05f,0.04f}, // Fxc6 Reference
+  {0.75f,1.18f, 0.05f, 0.06f,0.96f,1.05f,0.88f,1.12f,0.08f,0.16f,0.50f,6.0f,1.0f,0.08f,0.12f}, // Gen 7 Reference
+  {1.35f,1.22f, 0.22f,-0.05f,1.25f,0.96f,0.76f,0.92f,0.03f,0.20f,0.38f,5.0f,-1.0f,0.18f,0.06f}, // JVC GR-C7U (1986)
+  {0.60f,1.30f,-0.15f, 0.08f,0.82f,1.06f,1.28f,0.86f,0.04f,0.12f,0.15f,-4.0f,0.0f,0.25f,0.16f}, // VHS-R20 Reference
+  {0.70f,0.88f, 0.18f, 0.03f,1.14f,0.98f,0.80f,1.16f,0.06f,0.05f,0.45f,2.0f,2.0f,0.04f,0.08f}, // Fall-78 Reference
+  {1.15f,1.08f, 0.02f, 0.00f,1.02f,1.02f,1.00f,0.98f,0.00f,0.02f,0.10f,1.0f,0.0f,0.12f,0.02f}, // ERC-V2S Reference
+  {1.10f,1.12f,-0.05f,-0.06f,1.08f,0.94f,1.08f,0.96f,0.01f,0.08f,0.20f,3.0f,0.0f,0.20f,0.05f}, // JVC GR-SXM740U
 };
 
 static PF_Err Render(PF_InData *in_data, PF_ParamDef *params[], PF_LayerDef *output) {
@@ -504,7 +571,7 @@ static PF_Err Render(PF_InData *in_data, PF_ParamDef *params[], PF_LayerDef *out
   Settings s = ReadSettings(params);
   const PF_Pixel *inBase = (const PF_Pixel*)src->data;
   PF_Pixel *outBase = (PF_Pixel*)output->data;
-  const int inStride = src->rowbytes / (int)sizeof(PF_Pixel);
+  int inStride = src->rowbytes / (int)sizeof(PF_Pixel);
   const int outStride = output->rowbytes / (int)sizeof(PF_Pixel);
   if (inStride <= 0 || outStride <= 0) return PF_Err_NONE;
 
@@ -527,8 +594,41 @@ static PF_Err Render(PF_InData *in_data, PF_ParamDef *params[], PF_LayerDef *out
     return PF_Err_NONE;
   }
 
-  // Camera profile selection (1 to 7)
-  const int ci = clampi(s.camera - 1, 0, 6);
+  // NTSC-RS is the base signal path, not an optional effect hidden under
+  // "Other VHS Engines". Build a separate, output-sized source buffer first,
+  // process it through the real ntsc-rs engine, and then let every VHS6RIFT
+  // stage read from that processed buffer. Keeping it separate avoids reading
+  // pixels that have already been overwritten by the later VHS render loop.
+  std::vector<PF_Pixel> ntscBaseBuffer((size_t)w * (size_t)h);
+  for (int y = 0; y < h; ++y) {
+    const int sy = clampi((int)((y + 0.5f) * inH / std::max(1, h)), 0, inH - 1);
+    const PF_Pixel *srcRow = (const PF_Pixel*)src->data + sy * (src->rowbytes / (int)sizeof(PF_Pixel));
+    PF_Pixel *baseRow = ntscBaseBuffer.data() + (size_t)y * (size_t)w;
+    for (int x = 0; x < w; ++x) {
+      const int sx = clampi((int)((x + 0.5f) * inW / std::max(1, w)), 0, inW - 1);
+      baseRow[x] = srcRow[sx];
+    }
+  }
+  NtscrsCParams baseNtscParams;
+  baseNtscParams.chroma_delay = getSlider(params, P_NTSC_CHROMA_DELAY, 100.0f);
+  baseNtscParams.head_switching = getSlider(params, P_NTSC_HEAD_SWITCH, 100.0f);
+  baseNtscParams.edge_wave = getSlider(params, P_NTSC_EDGE_WAVE, 100.0f);
+  baseNtscParams.composite_noise = getSlider(params, P_NTSC_COMPOSITE, 100.0f);
+  baseNtscParams.strength = 1.0f;
+  baseNtscParams.random_seed = getInt(params, P_SEED);
+  baseNtscParams.frame_num = (uint32_t)((in_data->time_step != 0)
+      ? (in_data->current_time / in_data->time_step) : 0);
+  const int32_t ntscResult = ntscrs_process_argb8(
+      &baseNtscParams, (uint8_t*)ntscBaseBuffer.data(), (uint32_t)w,
+      (uint32_t)h, (size_t)w * sizeof(PF_Pixel));
+  if (ntscResult == 0) {
+    inBase = ntscBaseBuffer.data();
+    inStride = w;
+  }
+
+  // Camera profile selection (1 to 20). The first 13 are compact/still/video camera looks; the final 7 are the original VHS reference engines.
+  const int ci = clampi(s.camera - 1, 0, 19);
+  const int legacyCameraIndex = ci >= 13 ? ci - 13 : -1;
   const CameraProfileData &prof = kCameraProfiles[ci];
 
   static const int cameraParamIds[7][4] = {
@@ -541,10 +641,10 @@ static PF_Err Render(PF_InData *in_data, PF_ParamDef *params[], PF_LayerDef *out
     {P_JVC_SXM_CHARACTER, P_JVC_SXM_COLOR, P_JVC_SXM_SIGNAL, P_JVC_SXM_GRAIN}
   };
 
-  const float cameraCharacter = getSlider(params, cameraParamIds[ci][0], 100.0f);
-  const float cameraColor     = getSlider(params, cameraParamIds[ci][1], 100.0f);
-  const float cameraSignal    = getSlider(params, cameraParamIds[ci][2], 100.0f);
-  const float cameraGrain     = getSlider(params, cameraParamIds[ci][3], 100.0f);
+  const float cameraCharacter = legacyCameraIndex >= 0 ? getSlider(params, cameraParamIds[legacyCameraIndex][0], 100.0f) : 65.0f;
+  const float cameraColor     = legacyCameraIndex >= 0 ? getSlider(params, cameraParamIds[legacyCameraIndex][1], 100.0f) : 55.0f;
+  const float cameraSignal    = legacyCameraIndex >= 0 ? getSlider(params, cameraParamIds[legacyCameraIndex][2], 100.0f) : 35.0f;
+  const float cameraGrain     = legacyCameraIndex >= 0 ? getSlider(params, cameraParamIds[legacyCameraIndex][3], 100.0f) : 28.0f;
 
   // Master strength is 0..20 (UI 0..2000). Preserve the established default
   // at 3.5 (UI 350) as drive=1.0. Above the default, use a bounded linear
@@ -650,6 +750,21 @@ static PF_Err Render(PF_InData *in_data, PF_ParamDef *params[], PF_LayerDef *out
   }
   const float overlayOpacity = getSlider(params, P_OVERLAY_OPACITY, 100.0f);
   const int overlayMode = params[P_OVERLAY_MODE]->u.pd.value - 1;
+  const int osdStyle = std::max(0, params[P_OSD_STYLE]->u.pd.value - 1);
+  const float osdOpacity = clamp01(getSlider(params, P_OSD_OPACITY, 100.0f));
+  const float osdScaleUi = getSlider(params, P_OSD_SCALE, 100.0f);
+  const int osdPixelScale = clampi((int)std::round((float)std::max(1,w) / 640.0f * osdScaleUi), 1, 12);
+  char osdText[32] = {0};
+  const int elapsed = std::max(0, (int)std::floor(timeSec));
+  const int hh = (elapsed / 3600) % 100, mm = (elapsed / 60) % 60, ss = elapsed % 60;
+  if (osdStyle == 1) std::snprintf(osdText, sizeof(osdText), "REC");
+  else if (osdStyle == 2) std::snprintf(osdText, sizeof(osdText), "PLAY %02d:%02d:%02d", hh, mm, ss);
+  else if (osdStyle == 3) std::snprintf(osdText, sizeof(osdText), "REC CAM01 %02d:%02d:%02d", hh, mm, ss);
+  else if (osdStyle == 4) std::snprintf(osdText, sizeof(osdText), "CAM01 %02d-%02d-%02d", hh, mm, ss);
+  const int bundledOverlayStyle = clampi(params[P_BUNDLED_OVERLAY_STYLE]->u.pd.value - 2, -1, kBundledOverlayCount - 1);
+  const float bundledOverlayOpacity = clamp01(getSlider(params, P_BUNDLED_OVERLAY_OPACITY, 100.0f));
+  const float bundledOverlaySpeed = getSlider(params, P_BUNDLED_OVERLAY_SPEED, 100.0f);
+  const int bundledOverlayFrame = ((int)std::floor(std::max(0.0f, timeSec * bundledOverlaySpeed / 100.0f * (float)kBundledOverlayFrames))) % kBundledOverlayFrames;
   const int overlayStride = overlayWorld ? overlayWorld->rowbytes / (int)sizeof(PF_Pixel) : 0;
   const PF_Pixel *overlayBase = overlayWorld ? (const PF_Pixel*)overlayWorld->data : nullptr;
 
@@ -904,6 +1019,56 @@ static PF_Err Render(PF_InData *in_data, PF_ParamDef *params[], PF_LayerDef *out
           r *= 1.0f - 0.92f * dropMix; g *= 1.0f - 0.92f * dropMix; b *= 1.0f - 0.92f * dropMix;
         }
         if (glitchCamMode == 4 && lineNoise < 0.08f * amount) { r = clamp01(r + 0.25f * amount); g *= 1.0f - 0.4f * amount; b = clamp01(b + 0.35f * amount); }
+
+        // Additional reference-inspired Glitch Cam modes (indices 5..14).
+        // Each mode has a different image operation; eventEnv makes them intermittent,
+        // while coordinate/time/seed hashes keep frame renders deterministic.
+        if (glitchCamMode == 5 && lineNoise < 0.30f * amount) { // RGB convergence burst
+          const int d = std::max(1, (int)std::round((1.0f + glitchCamChroma) * amount));
+          const PF_Pixel rp = inBase[sy * inStride + clampi(sx + d, 0, inW - 1)];
+          const PF_Pixel bp = inBase[sy * inStride + clampi(sx - d, 0, inW - 1)];
+          const float m = clamp01(amount * eventEnv * 0.85f);
+          r = clamp01(r * (1.0f-m) + (rp.red/255.0f)*m);
+          b = clamp01(b * (1.0f-m) + (bp.blue/255.0f)*m);
+        } else if (glitchCamMode == 6 && lineNoise < 0.22f * amount) { // vertical hold roll
+          const int roll = std::max(1, (int)std::round((h / 18.0f) * amount * (0.5f + rand01(eh+51u))));
+          const int ry = clampi(sy + ((eh & 1u) ? roll : -roll), 0, inH - 1);
+          const PF_Pixel rp = inBase[ry * inStride + sx];
+          const float m = clamp01(0.75f * amount * eventEnv);
+          r = clamp01(r*(1.0f-m)+(rp.red/255.0f)*m); g = clamp01(g*(1.0f-m)+(rp.green/255.0f)*m); b = clamp01(b*(1.0f-m)+(rp.blue/255.0f)*m);
+        } else if (glitchCamMode == 7 && lineNoise < 0.28f * amount) { // color smear
+          const int d = std::max(1, (int)std::round(glitchCamChroma + 2.0f * amount));
+          const PF_Pixel cp = inBase[sy * inStride + clampi(sx-d, 0, inW-1)];
+          const float m = clamp01(amount * eventEnv * 0.72f);
+          r = clamp01(r*(1.0f-m)+(cp.red/255.0f)*m); b = clamp01(b*(1.0f-m)+(cp.blue/255.0f)*m);
+        } else if (glitchCamMode == 8 && (float)y / (float)std::max(1,h) > 0.86f && lineNoise < 0.72f * amount) { // head-switch noise
+          const float noise = rand01(eh + (uint32_t)(x/3));
+          const float m = clamp01(amount * eventEnv * (0.35f + 0.65f*noise));
+          r = clamp01(r*(1.0f-m)+noise*m); g = clamp01(g*(1.0f-m)+noise*m); b = clamp01(b*(1.0f-m)+noise*m);
+        } else if (glitchCamMode == 9 && lineNoise < 0.24f * amount) { // horizontal fold
+          const int fold = std::max(1, (int)std::round((w/10.0f)*amount*(rand01(eh+61u)*2.0f-1.0f)));
+          const PF_Pixel fp = inBase[sy * inStride + clampi(sx+fold,0,inW-1)];
+          const float m = clamp01(amount*eventEnv*0.9f);
+          r=clamp01(r*(1.0f-m)+(fp.red/255.0f)*m); g=clamp01(g*(1.0f-m)+(fp.green/255.0f)*m); b=clamp01(b*(1.0f-m)+(fp.blue/255.0f)*m);
+        } else if (glitchCamMode == 10 && lineNoise < 0.18f * amount) { // brief solarized flash
+          const float l=0.2126f*r+0.7152f*g+0.0722f*b; const float inv=clamp01(1.0f-l);
+          const float m=clamp01(amount*eventEnv*0.8f);
+          r=clamp01(r*(1.0f-m)+inv*m); g=clamp01(g*(1.0f-m)+inv*m); b=clamp01(b*(1.0f-m)+inv*m);
+        } else if (glitchCamMode == 11 && lineNoise < 0.20f * amount) { // tape stretch / horizontal smear
+          const int d=std::max(1,(int)std::round((w/24.0f)*amount*(0.3f+rand01(eh+71u))));
+          const PF_Pixel sp=inBase[sy*inStride+clampi(sx-d,0,inW-1)]; const float m=clamp01(amount*eventEnv*0.65f);
+          r=clamp01(r*(1.0f-m)+(sp.red/255.0f)*m); g=clamp01(g*(1.0f-m)+(sp.green/255.0f)*m); b=clamp01(b*(1.0f-m)+(sp.blue/255.0f)*m);
+        } else if (glitchCamMode == 12 && lineNoise < 0.26f * amount) { // short ghost echo
+          const PF_Pixel gp=inBase[sy*inStride+clampi(sx-std::max(1,w/160),0,inW-1)]; const float m=clamp01(amount*eventEnv*0.45f);
+          r=clamp01(r*(1.0f-m)+(gp.red/255.0f)*m); g=clamp01(g*(1.0f-m)+(gp.green/255.0f)*m); b=clamp01(b*(1.0f-m)+(gp.blue/255.0f)*m);
+        } else if (glitchCamMode == 13 && lineNoise < 0.32f * amount) { // reduced-bit-depth signal crush
+          const int levels=std::max(2, 12-(int)std::round(amount*8.0f));
+          r=std::round(r*levels)/levels; g=std::round(g*levels)/levels; b=std::round(b*levels)/levels;
+        } else if (glitchCamMode == 14 && lineNoise < 0.24f * amount) { // chroma bar interference
+          const float phase=std::sin((float)y*0.43f+timeSec*18.0f+(float)(eh&255u)*0.02f);
+          const float m=clamp01(amount*eventEnv*0.38f);
+          r=clamp01(r+m*std::max(0.0f,phase)); g=clamp01(g-m*0.45f*std::fabs(phase)); b=clamp01(b+m*std::max(0.0f,-phase));
+        }
       }
 
       // Independent block corruption control (P_BLOCK_GLITCH).
@@ -1167,6 +1332,55 @@ static PF_Err Render(PF_InData *in_data, PF_ParamDef *params[], PF_LayerDef *out
         else { r = r * (1.0f - a) + orr * a; g = g * (1.0f - a) + og * a; b = b * (1.0f - a) + ob * a; }
       }
 
+      // Bundled assets are embedded in the source; the effect needs no external paths or layer.
+      if (bundledOverlayStyle >= 0 && bundledOverlayStyle < kBundledOverlayCount && bundledOverlayOpacity > 0.0f) {
+        const int sx = clampi((int)((int64_t)x * kBundledOverlayWidth / std::max(1, w)), 0, kBundledOverlayWidth - 1);
+        const int sy = clampi((int)((int64_t)y * kBundledOverlayHeight / std::max(1, h)), 0, kBundledOverlayHeight - 1);
+        const uint16_t packed = kBundledOverlayRGB565[bundledOverlayStyle][bundledOverlayFrame][sy][sx];
+        const float oa = bundledOverlayOpacity;
+        const float orr = ((packed >> 11) & 31) / 31.0f, og = ((packed >> 5) & 63) / 63.0f, ob = (packed & 31) / 31.0f;
+        if (overlayMode == 2) { r = clamp01(r + orr * oa); g = clamp01(g + og * oa); b = clamp01(b + ob * oa); }
+        else if (overlayMode == 3) { r = 1.0f - (1.0f-r)*(1.0f-orr*oa); g = 1.0f - (1.0f-g)*(1.0f-og*oa); b = 1.0f - (1.0f-b)*(1.0f-ob*oa); }
+        else if (overlayMode == 4) { r = clamp01(r*(1.0f-oa) + r*orr*oa); g = clamp01(g*(1.0f-oa) + g*og*oa); b = clamp01(b*(1.0f-oa) + b*ob*oa); }
+        else { r = clamp01(r*(1.0f-oa) + orr*oa); g = clamp01(g*(1.0f-oa) + og*oa); b = clamp01(b*(1.0f-oa) + ob*oa); }
+      }
+
+      // Native built-in camcorder OSD. It is independent of both overlay sources.
+      if (osdStyle > 0 && osdOpacity > 0.0f) {
+        const int ox0 = std::max(2, (int)std::round(w * 0.035f));
+        const int oy0 = (osdStyle == 4) ? std::max(2, h - osdPixelScale * 7 - (int)std::round(h * 0.06f)) : std::max(2, (int)std::round(h * 0.05f));
+        const int textAdvance = osdPixelScale * 4;
+        bool lit = false;
+        for (int ci = 0; osdText[ci] != '\0' && !lit; ++ci) {
+          const int gx = x - (ox0 + ci * textAdvance);
+          const int gy = y - oy0;
+          if (gx >= 0 && gx < osdPixelScale * 3 && gy >= 0 && gy < osdPixelScale * 5) {
+            const int col = gx / osdPixelScale, row = gy / osdPixelScale;
+            lit = (osdGlyphRow(osdText[ci], row) & (1u << (2 - col))) != 0;
+          }
+        }
+        // Blinking REC lamp, fixed to composition time for deterministic scrubbing.
+        if ((osdStyle == 1 || osdStyle == 3) && ((int)std::floor(timeSec * 2.0f) % 2 == 0)) {
+          const int dotX = ox0 + (int)std::strlen(osdText) * textAdvance + osdPixelScale;
+          const int dotY = oy0 + osdPixelScale * 2;
+          const int dx = x - dotX, dy = y - dotY;
+          if (dx * dx + dy * dy <= osdPixelScale * osdPixelScale) {
+            r = clamp01(r * (1.0f - osdOpacity) + osdOpacity);
+            g = g * (1.0f - osdOpacity); b = b * (1.0f - osdOpacity);
+          }
+        }
+        if (lit) {
+          float tr = 0.72f, tg = 1.0f, tb = 0.72f;
+          if (osdStyle == 1) { tr = 1.0f; tg = 0.12f; tb = 0.08f; }
+          else if (osdStyle == 2) { tr = 0.72f; tg = 1.0f; tb = 0.72f; }
+          else if (osdStyle == 3) { tr = 0.92f; tg = 0.95f; tb = 0.86f; }
+          else if (osdStyle == 4) { tr = 1.0f; tg = 0.88f; tb = 0.48f; }
+          r = clamp01(r * (1.0f - osdOpacity) + tr * osdOpacity);
+          g = clamp01(g * (1.0f - osdOpacity) + tg * osdOpacity);
+          b = clamp01(b * (1.0f - osdOpacity) + tb * osdOpacity);
+        }
+      }
+
       dst[x].red = (uint8_t)std::round(clamp01(r) * 255.0f);
       dst[x].green = (uint8_t)std::round(clamp01(g) * 255.0f);
       dst[x].blue = (uint8_t)std::round(clamp01(b) * 255.0f);
@@ -1174,19 +1388,8 @@ static PF_Err Render(PF_InData *in_data, PF_ParamDef *params[], PF_LayerDef *out
     }
   }
 
-  // Real ntsc-rs signal processing engine pass
-  if (otherEnabled && otherEngine == 3 && otherStrength > 0.0001f) {
-    NtscrsCParams np;
-    np.chroma_delay = ntscChroma;
-    np.head_switching = ntscHead;
-    np.edge_wave = ntscWave;
-    np.composite_noise = ntscComposite;
-    np.strength = otherStrength;
-    np.random_seed = s.seed;
-    np.frame_num = (uint32_t)frame;
-
-    ntscrs_process_argb8(&np, (uint8_t*)outBase, (uint32_t)w, (uint32_t)h, (size_t)output->rowbytes);
-  }
+  // The ntsc-rs signal stage has already generated the base image above;
+  // this final pass contains only the additional VHS6RIFT layers.
 
   if (overlayCheckedOut) PF_CHECKIN_PARAM(in_data, &overlayCheckout);
   return err;

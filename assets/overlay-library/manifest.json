@@ -1,0 +1,153 @@
+{
+  "title": "VHS6RIFT bundled overlay reference library",
+  "asset_count": 21,
+  "assets": [
+    {
+      "file": "assets/overlay-library/crt-tv/crt 1.gif",
+      "category": "crt-tv",
+      "bytes": 879777,
+      "sha256": "17a377c65a5cc0afae3a0177da4d5e3832360330734d83e30dbbd7baf41039aa",
+      "usage": "Import this source GIF/JPG as an After Effects layer, then choose it in Overlay Layer (optional). Source media is bundled for reference/manual use; it is not decoded by the plugin as an internal animated preset."
+    },
+    {
+      "file": "assets/overlay-library/crt-tv/crt2.gif",
+      "category": "crt-tv",
+      "bytes": 1535557,
+      "sha256": "72448291e8f312e68659aad3dccfbf08e673642df8844a69fd741694de9d6bb6",
+      "usage": "Import this source GIF/JPG as an After Effects layer, then choose it in Overlay Layer (optional). Source media is bundled for reference/manual use; it is not decoded by the plugin as an internal animated preset."
+    },
+    {
+      "file": "assets/overlay-library/glitch-cam/glitch cam 1.gif",
+      "category": "glitch-cam",
+      "bytes": 1888621,
+      "sha256": "cd9494a9c83c4b2c47dd9199269eada4b5d6b790138feaaf8c79790d2d7510d9",
+      "usage": "Import this source GIF/JPG as an After Effects layer, then choose it in Overlay Layer (optional). Source media is bundled for reference/manual use; it is not decoded by the plugin as an internal animated preset."
+    },
+    {
+      "file": "assets/overlay-library/glitch-cam/glitch cam 10.jpg",
+      "category": "glitch-cam",
+      "bytes": 52059,
+      "sha256": "7d95a99851511d6accddc53290f8280ce67e32d07f5879bfc1ed5b305a026499",
+      "usage": "Import this source GIF/JPG as an After Effects layer, then choose it in Overlay Layer (optional). Source media is bundled for reference/manual use; it is not decoded by the plugin as an internal animated preset."
+    },
+    {
+      "file": "assets/overlay-library/glitch-cam/glitch cam 11.gif",
+      "category": "glitch-cam",
+      "bytes": 961671,
+      "sha256": "4b9444d40f322d6c070af2147a66b45df040b613e418a0cd5ab47242dbc0f987",
+      "usage": "Import this source GIF/JPG as an After Effects layer, then choose it in Overlay Layer (optional). Source media is bundled for reference/manual use; it is not decoded by the plugin as an internal animated preset."
+    },
+    {
+      "file": "assets/overlay-library/glitch-cam/glitch cam 12.gif",
+      "category": "glitch-cam",
+      "bytes": 4434578,
+      "sha256": "1e5bad7e2017623b1841dae04b4d37e2b6343edbe805e46bf9852940006ecfe3",
+      "usage": "Import this source GIF/JPG as an After Effects layer, then choose it in Overlay Layer (optional). Source media is bundled for reference/manual use; it is not decoded by the plugin as an internal animated preset."
+    },
+    {
+      "file": "assets/overlay-library/glitch-cam/glitch cam 13.gif",
+      "category": "glitch-cam",
+      "bytes": 695217,
+      "sha256": "8c807e81cd29325508a33f95d4bb5d736827e590a7a6156ae79936304712d3b1",
+      "usage": "Import this source GIF/JPG as an After Effects layer, then choose it in Overlay Layer (optional). Source media is bundled for reference/manual use; it is not decoded by the plugin as an internal animated preset."
+    },
+    {
+      "file": "assets/overlay-library/glitch-cam/glitch cam 14.gif",
+      "category": "glitch-cam",
+      "bytes": 2715372,
+      "sha256": "4da6549473cbc0e86990a4eb7afa45238a814f4383f32482a3a229f59521d1e9",
+      "usage": "Import this source GIF/JPG as an After Effects layer, then choose it in Overlay Layer (optional). Source media is bundled for reference/manual use; it is not decoded by the plugin as an internal animated preset."
+    },
+    {
+      "file": "assets/overlay-library/glitch-cam/glitch cam 15.gif",
+      "category": "glitch-cam",
+      "bytes": 2076058,
+      "sha256": "90116f1f8f02f881467b686f18e8e4f12a5d16615350c6c169a94d1e460f7e94",
+      "usage": "Import this source GIF/JPG as an After Effects layer, then choose it in Overlay Layer (optional). Source media is bundled for reference/manual use; it is not decoded by the plugin as an internal animated preset."
+    },
+    {
+      "file": "assets/overlay-library/glitch-cam/glitch cam 2.gif",
+      "category": "glitch-cam",
+      "bytes": 432781,
+      "sha256": "55bfa1902774e2e305eca022330385677b879254d08494c6091a1cf249edd1a0",
+      "usage": "Import this source GIF/JPG as an After Effects layer, then choose it in Overlay Layer (optional). Source media is bundled for reference/manual use; it is not decoded by the plugin as an internal animated preset."
+    },
+    {
+      "file": "assets/overlay-library/glitch-cam/glitch cam 3.gif",
+      "category": "glitch-cam",
+      "bytes": 993439,
+      "sha256": "eec3a31b7ce3df1407d18fea1a34eafea837588b243fe4469c5f57b27927941a",
+      "usage": "Import this source GIF/JPG as an After Effects layer, then choose it in Overlay Layer (optional). Source media is bundled for reference/manual use; it is not decoded by the plugin as an internal animated preset."
+    },
+    {
+      "file": "assets/overlay-library/glitch-cam/glitch cam 4.gif",
+      "category": "glitch-cam",
+      "bytes": 452031,
+      "sha256": "b138d586b21739c16b329e91f19bdc86dd11eb1b3645a70512c9267f26978014",
+      "usage": "Import this source GIF/JPG as an After Effects layer, then choose it in Overlay Layer (optional). Source media is bundled for reference/manual use; it is not decoded by the plugin as an internal animated preset."
+    },
+    {
+      "file": "assets/overlay-library/glitch-cam/glitch cam 5.gif",
+      "category": "glitch-cam",
+      "bytes": 2048083,
+      "sha256": "9dd11646569a1ceb42aaaf4e3e30672b75b191b6fb37613da1da32bb1089c106",
+      "usage": "Import this source GIF/JPG as an After Effects layer, then choose it in Overlay Layer (optional). Source media is bundled for reference/manual use; it is not decoded by the plugin as an internal animated preset."
+    },
+    {
+      "file": "assets/overlay-library/glitch-cam/glitch cam 6.gif",
+      "category": "glitch-cam",
+      "bytes": 3355299,
+      "sha256": "023ce0a8310daa8abdfdcb4f082cd3a1856f9ecff9b6384da7089f3ec9721c7c",
+      "usage": "Import this source GIF/JPG as an After Effects layer, then choose it in Overlay Layer (optional). Source media is bundled for reference/manual use; it is not decoded by the plugin as an internal animated preset."
+    },
+    {
+      "file": "assets/overlay-library/glitch-cam/glitch cam 7.gif",
+      "category": "glitch-cam",
+      "bytes": 808873,
+      "sha256": "faafbe4654fd351c43f90c92f11431b006d42fdc19eacd558b0209ebb20bf927",
+      "usage": "Import this source GIF/JPG as an After Effects layer, then choose it in Overlay Layer (optional). Source media is bundled for reference/manual use; it is not decoded by the plugin as an internal animated preset."
+    },
+    {
+      "file": "assets/overlay-library/glitch-cam/glitch cam 8.jpg",
+      "category": "glitch-cam",
+      "bytes": 153636,
+      "sha256": "f1932ebd2017e431bced1c54b4ce153e271efec417ebbddce8cc51ff0b6b7e9d",
+      "usage": "Import this source GIF/JPG as an After Effects layer, then choose it in Overlay Layer (optional). Source media is bundled for reference/manual use; it is not decoded by the plugin as an internal animated preset."
+    },
+    {
+      "file": "assets/overlay-library/glitch-cam/glitch cam 9.gif",
+      "category": "glitch-cam",
+      "bytes": 1420055,
+      "sha256": "aab7ae6111ffd148dfded59b87195e1c6e68ce27527c95ca37a5e1d520c491a5",
+      "usage": "Import this source GIF/JPG as an After Effects layer, then choose it in Overlay Layer (optional). Source media is bundled for reference/manual use; it is not decoded by the plugin as an internal animated preset."
+    },
+    {
+      "file": "assets/overlay-library/retro-vhs/1a98f360833a9eab4e6707e17dc5375d.gif",
+      "category": "retro-vhs",
+      "bytes": 970709,
+      "sha256": "8412921aedf1da9b86906c7e557e8ed226a25dd2cefc97a0174e7d8d48954f4d",
+      "usage": "Import this source GIF/JPG as an After Effects layer, then choose it in Overlay Layer (optional). Source media is bundled for reference/manual use; it is not decoded by the plugin as an internal animated preset."
+    },
+    {
+      "file": "assets/overlay-library/retro-vhs/4de272dd99c292c84c8c352bf34cbb5d.gif",
+      "category": "retro-vhs",
+      "bytes": 3438786,
+      "sha256": "bc8fc97cbd59bed2792294dcfacd7dde86cd533167b70b781f67760b0ee79b7b",
+      "usage": "Import this source GIF/JPG as an After Effects layer, then choose it in Overlay Layer (optional). Source media is bundled for reference/manual use; it is not decoded by the plugin as an internal animated preset."
+    },
+    {
+      "file": "assets/overlay-library/retro-vhs/eb346f52c352720b5b5a058ce7f93803.jpg",
+      "category": "retro-vhs",
+      "bytes": 89193,
+      "sha256": "384ccd9af512746f2d8ea2665d68cefffebba305103f1739a903f7c90f54cdc4",
+      "usage": "Import this source GIF/JPG as an After Effects layer, then choose it in Overlay Layer (optional). Source media is bundled for reference/manual use; it is not decoded by the plugin as an internal animated preset."
+    },
+    {
+      "file": "assets/overlay-library/retro-vhs/fcb1a372c2f473c3fd4712053dd24975.gif",
+      "category": "retro-vhs",
+      "bytes": 937165,
+      "sha256": "5bd71c8abbf1a4097cfefda9eb1631a94516206d87df9af7ed83a4e6444a1915",
+      "usage": "Import this source GIF/JPG as an After Effects layer, then choose it in Overlay Layer (optional). Source media is bundled for reference/manual use; it is not decoded by the plugin as an internal animated preset."
+    }
+  ]
+}

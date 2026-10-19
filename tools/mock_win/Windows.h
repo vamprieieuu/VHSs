@@ -16,6 +16,7 @@ typedef void* HICON;
 typedef void* HCURSOR;
 typedef void* HBRUSH;
 typedef int BOOL;
+typedef unsigned char PF_Boolean;
 typedef int PF_Fixed;
 #ifndef TRUE
 #define TRUE 1

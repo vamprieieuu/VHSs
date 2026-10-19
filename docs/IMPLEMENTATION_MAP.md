@@ -3,7 +3,7 @@
 | Requirement | Current source path | Current status before first Windows build |
 |---|---|---|
 | Native AEX, not JSX / stacked built-in effects | `src/VHS6RIFT.cpp`, `resources/VHS6RIFTPiPL.r` | Implemented in source; not compiled yet |
-| Seven camera reference profiles | Camera selector + seven profile groups and four controls per profile | Implemented as distinct parameterized processing profiles; hardware calibration not verified |
+| 20 camera profiles | 20-entry camera selector + 20-entry native profile table; legacy VHS references retain per-profile fine-tuning groups | Profile table wired in source; device-accurate visual matching still requires AE render comparisons |
 | Per-camera Character / Color / Signal / Grain controls | `cameraParamIds` and profile-specific arrays in `Render` | Implemented in source; visual isolation tests pending |
 | Continuous treatment separate from event glitches | `P_CONTINUOUS`, `P_EVENTS` and separate render branches | Implemented in source; tests pending |
 | Deterministic events | `hash32`, `rand01`, timeline-based event slots | Implemented in source; frame-rate and scrubbing tests pending |
