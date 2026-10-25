@@ -32,6 +32,10 @@ jobs:
         shell: pwsh
         run: python tools/test_vhs6rift.py
 
+      - name: Verify SDK discovery logic across simulated layouts
+        shell: pwsh
+        run: python tools/test_sdk_discovery.py
+
   build:
     name: Native Windows x64 AEX Build
     needs: [validate]
@@ -61,26 +65,59 @@ jobs:
           AE_SDK_URL: ${{ secrets.AE_SDK_URL }}
         run: |
           $targetDir = Join-Path $env:GITHUB_WORKSPACE "extern\AfterEffectsSDK"
-          $zipPath = Join-Path $env:GITHUB_WORKSPACE "extern\AfterEffectsSDK.zip"
+          $tempZip = Join-Path $env:RUNNER_TEMP "AfterEffectsSDK_Secret.zip"
+
+          if (Test-Path $tempZip) { Remove-Item $tempZip -Force -ErrorAction SilentlyContinue }
 
           # 1. Provision via Base64 Secret (AE_SDK_ZIP_BASE64)
           if (-not [string]::IsNullOrWhiteSpace($env:AE_SDK_ZIP_BASE64)) {
             Write-Host "Provisioning Adobe AE SDK from repository secret AE_SDK_ZIP_BASE64..." -ForegroundColor Cyan
-            New-Item -ItemType Directory -Force (Split-Path $zipPath) | Out-Null
-            $bytes = [Convert]::FromBase64String($env:AE_SDK_ZIP_BASE64)
-            [IO.File]::WriteAllBytes($zipPath, $bytes)
-            Expand-Archive -Path $zipPath -DestinationPath $targetDir -Force
-            Remove-Item $zipPath -Force
-            Write-Host "Successfully extracted SDK to: $targetDir" -ForegroundColor Green
+            try {
+              $cleanB64 = $env:AE_SDK_ZIP_BASE64.Trim()
+              $bytes = [Convert]::FromBase64String($cleanB64)
+              [IO.File]::WriteAllBytes($tempZip, $bytes)
+
+              if ((Get-Item $tempZip).Length -lt 100) {
+                throw "Decoded AE_SDK_ZIP_BASE64 archive is too small or invalid."
+              }
+
+              # Test zip archive integrity
+              Add-Type -AssemblyName System.IO.Compression.FileSystem
+              $zipArchive = [System.IO.Compression.ZipFile]::OpenRead($tempZip)
+              $zipArchive.Dispose()
+
+              New-Item -ItemType Directory -Force $targetDir | Out-Null
+              Expand-Archive -Path $tempZip -DestinationPath $targetDir -Force
+              Write-Host "Successfully decoded and extracted SDK archive." -ForegroundColor Green
+            } catch {
+              Write-Error "Failed to process AE_SDK_ZIP_BASE64 secret: $_"
+            } finally {
+              if (Test-Path $tempZip) { Remove-Item $tempZip -Force -ErrorAction SilentlyContinue }
+            }
           }
           # 2. Provision via Secure URL Secret (AE_SDK_URL)
           elseif (-not [string]::IsNullOrWhiteSpace($env:AE_SDK_URL)) {
-            Write-Host "Downloading Adobe AE SDK from secure URL specified in AE_SDK_URL..." -ForegroundColor Cyan
-            New-Item -ItemType Directory -Force (Split-Path $zipPath) | Out-Null
-            Invoke-WebRequest -Uri $env:AE_SDK_URL -OutFile $zipPath
-            Expand-Archive -Path $zipPath -DestinationPath $targetDir -Force
-            Remove-Item $zipPath -Force
-            Write-Host "Successfully downloaded and extracted SDK to: $targetDir" -ForegroundColor Green
+            Write-Host "Downloading Adobe AE SDK from secure URL specified in AE_SDK_URL secret..." -ForegroundColor Cyan
+            try {
+              Invoke-WebRequest -Uri $env:AE_SDK_URL -OutFile $tempZip -UseBasicParsing
+              if ((Get-Item $tempZip).Length -lt 100) {
+                throw "Downloaded AE_SDK_URL archive is too small or invalid."
+              }
+
+              Add-Type -AssemblyName System.IO.Compression.FileSystem
+              $zipArchive = [System.IO.Compression.ZipFile]::OpenRead($tempZip)
+              $zipArchive.Dispose()
+
+              New-Item -ItemType Directory -Force $targetDir | Out-Null
+              Expand-Archive -Path $tempZip -DestinationPath $targetDir -Force
+              Write-Host "Successfully downloaded and extracted SDK archive." -ForegroundColor Green
+            } catch {
+              Write-Error "Failed to process AE_SDK_URL secret: $_"
+            } finally {
+              if (Test-Path $tempZip) { Remove-Item $tempZip -Force -ErrorAction SilentlyContinue }
+            }
+          } else {
+            Write-Host "No AE_SDK_ZIP_BASE64 or AE_SDK_URL secret provided. Checking repository/cached SDK..." -ForegroundColor Yellow
           }
 
       - name: Verify and Discover Adobe AE SDK
@@ -131,4 +168,4 @@ jobs:
           path: |
             configure.log
             build.log
-          if-no-files-found: warn
+          if-no-files-found: ignore
