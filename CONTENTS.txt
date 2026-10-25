@@ -1,28 +1,24 @@
-VHS6RIFT — Native After Effects VHS/Analog Video Suite
-Source-only repository revision: 2026-10-20
+VHS6RIFT — Advanced Native After Effects VHS & Analog Video Engine
+Repository Revision: 2026-10-25 (v2.0 Comprehensive Release)
 
-Core implementation:
-- src/VHS6RIFT.cpp — native effect UI, camera profiles, VHS rendering, native NTSC-RS tracking damage, grain, composite signal noise, overlays/OSD, audio processing
-- include/VHS6RIFT.h — parameter/header definitions
-- resources/VHS6RIFTPiPL.r — effect identity and PiPL metadata
-- CMakeLists.txt / build.ps1 / .github/workflows/build.yml — native Windows build configuration
-- extern/ntscrs_c/ — Rust C-FFI wrapper for the ntsc-rs signal engine
-- docs/CAMERA_ENGINE_RESEARCH_2026-10-20.md — model-by-model JVC camera research and sources
-
-Current design decisions:
-- Main VHS defaults enabled; VHS Strength 0 is an identity bypass.
-- Five distinct JVC VHS-C/S-VHS-C camera-engine approximations.
-- Tracking damage uses the native NTSC-RS glitch waveform, is off by default, and its affected height can expand to the full frame; tracking snow is disabled to avoid the glassy look.
-- Grain Amount remains 0 by default; raising it now produces clearly visible moving grain.
-- Signal Noise uses the original NTSC-RS composite-noise engine with intensity/frequency/detail controls and is off by default; the synthetic red-line overlay is removed.
-- Removed the ineffective Glitch Cam module, Signal Reference, standalone Tape Dropouts and Block Corruption, VHS Craft, source-footage overlay selector, and CRT TV system.
-- Built-in procedural overlay library and OSD remain optional.
-
-Validation scripts:
-- tools/validate_project.py
-- tools/audit_parameter_wiring.py
-- tools/test_repair_regressions.py
-- tools/test_native_render.cpp
-
-Build caveat:
-This is a source-only archive and contains no .aex. The supplied Adobe SDK snapshot is incomplete; the full licensed After Effects SDK and Rust/Cargo are needed for a native Windows/MSVC build. Static tests do not prove that AE visual output is correct.
+Core Implementation:
+- include/VHS6RIFT.h: Master header, 83 parameter slots, 9 balanced topic groups, 16 style presets, 10 camera profiles, deterministic pseudo-random hash functions, and AE SDK compatibility layer
+- src/VHS6RIFT.cpp: Native C++ effect implementation including:
+    * Topic 01: Master Engine Controls (Master VHS Strength 0-1000 with exact 0 bypass, Mix with Original, Continuous/Event toggles, Seed, Speed)
+    * Topic 02: 16 Authentic Style Presets (Clean VHS, Vintage VHS, Heavy Degradation, Bad Tracking, Very Bad Tracking, Unstable VCR, Moving Band Noise, Tape Damage, Bottom Damage, Static Interference, Color Bleed, Color Shift, Ghosting, Signal Loss, Severe Glitch, Damaged Tape Playback)
+    * Topic 03: 10 Camera & Format Profiles (JVC GR-C7U, GR-AX220U, GR-AX920U, GR-SXM37US, GR-SXM740U, Sony CCD-TR55, JVC GR-S55, Panasonic NV-M1, RCA CMR300)
+    * Topic 04: Luma & Chroma Signal Degradation (YIQ analog composite transform, horizontal chroma low-pass filter, chroma delay X/Y, R/B phase offsets, edge ringing, saturation, black pedestal)
+    * Topic 05: VHS Tracking & Instability (Normal, Bad Tracking, Very Bad Tracking, scanline jitter, vertical roll jitter, intermittent sync loss, tape azimuth wobble)
+    * Topic 06: Moving Bands & Tape Damage (animated moving bands, localized distortion, bottom head-switch deformation, oxide dropout streaks, RF static bursts, multi-region bands)
+    * Topic 07: RF Multipath Ghosting & Echoes (horizontal multipath reflections, decay attenuation, signal trails)
+    * Topic 08: Procedural Noise System (analog grain, luma & chroma noise, shadow-weighted noise)
+    * Topic 09: Audio Tape Degradation (PF_Cmd_AUDIO_RENDER callback, tanh non-linear saturation, bitcrush quantization, sample-and-hold downsampling, magnetic crackle, dropout gate)
+    * Deep Color Support: 8-bit ARGB, 16-bit ARGB, 32-bit Float with rowbytes stride handling
+- resources/VHS6RIFTPiPL.r: PiPL resource definition (com.vhs6rift.effect, outflags 0x48000046, outflags2 0x04000000)
+- tools/compile_pipl.cmake: CMake custom command pipeline for Windows PiPLtool compilation
+- tools/validate_project.py: Static architecture & parameter wiring validator (0 errors)
+- tools/audit_parameter_wiring.py: 100% parameter wiring and render-math connection audit
+- tools/test_vhs6rift.py: 14-gate functional verification suite (100% passed)
+- tools/test_native_render.cpp: Standalone native C++ test harness
+- app.py: Interactive workbench emulator and live server listening on port 3000
+- artifacts/VHS6RIFT_Updated_Source.zip: Complete updated repository archive

@@ -101,9 +101,9 @@ HTML_CONTENT = """<!DOCTYPE html>
         <svg class="w-3.5 h-3.5 text-emerald-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
         <span>Run Functional Tests</span>
       </button>
-      <a href="/api/download" class="px-3.5 py-1.5 text-xs font-semibold rounded bg-indigo-600 hover:bg-indigo-500 text-white transition shadow flex items-center space-x-1.5">
+      <a href="/api/download" class="px-3.5 py-1.5 text-xs font-semibold rounded bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-500 hover:to-purple-500 text-white font-medium transition shadow flex items-center space-x-1.5">
         <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/></svg>
-        <span>Download VHS6RIFT.aex</span>
+        <span>Download Updated Source (.zip)</span>
       </a>
     </div>
   </header>
@@ -159,74 +159,71 @@ HTML_CONTENT = """<!DOCTYPE html>
           <!-- Parameter Controls Grid -->
           <div class="grid grid-cols-2 sm:grid-cols-3 gap-3 text-xs pt-2 border-t border-gray-800">
             <div>
+              <label class="block text-gray-400 mb-1 font-medium">16 Style Presets</label>
+              <select id="ctrlPreset" class="w-full bg-gray-800 border border-gray-700 text-gray-200 rounded px-2 py-1.5 text-xs">
+                <option value="1">1. Custom (Manual Settings)</option>
+                <option value="2">2. Clean VHS</option>
+                <option value="3" selected>3. Vintage VHS (1980s Warm)</option>
+                <option value="4">4. Heavy VHS Degradation</option>
+                <option value="5">5. Bad Tracking</option>
+                <option value="6">6. Very Bad Tracking (Violent Tear)</option>
+                <option value="7">7. Unstable VCR Playback</option>
+                <option value="8">8. Moving Band Noise</option>
+                <option value="9">9. Tape Damage (Creases)</option>
+                <option value="10">10. Bottom Tape Damage (Head-Switch)</option>
+                <option value="11">11. Static Interference (RF Snow)</option>
+                <option value="12">12. Color Bleed (Chroma Smear)</option>
+                <option value="13">13. Color Shift (Phase Drift)</option>
+                <option value="14">14. Ghosting (Multipath Echoes)</option>
+                <option value="15">15. Signal Loss (VCR Drop)</option>
+                <option value="16">16. Severe Analog Glitch</option>
+                <option value="17">17. Damaged Tape Playback</option>
+              </select>
+            </div>
+
+            <div>
               <label class="block text-gray-400 mb-1 font-medium">10 Camera Profiles</label>
               <select id="ctrlCamera" class="w-full bg-gray-800 border border-gray-700 text-gray-200 rounded px-2 py-1.5 text-xs">
-                <option value="0">0. Neutral / Off</option>
-                <option value="1">1. Fxc6 Reference</option>
-                <option value="2">2. Gen 7 Reference</option>
-                <option value="3" selected>3. JVC GR-C7U (1986 VHS-C)</option>
-                <option value="4">4. VHS-R20 Reference</option>
-                <option value="5">5. Fall-78 Reference</option>
-                <option value="6">6. ERC-V2S Broadcast ENG</option>
-                <option value="7">7. JVC GR-SXM740U (Compact)</option>
-                <option value="8">8. Sony CCD-TR55 (1989 Video8)</option>
-                <option value="9">9. JVC GR-S55 (S-VHS-C High-Band)</option>
-                <option value="10">10. Panasonic NV-M1 (1985 Full-Size)</option>
+                <option value="1">1. Off / Neutral</option>
+                <option value="2" selected>2. JVC GR-C7U (1986 VHS-C)</option>
+                <option value="3">3. JVC GR-AX220U (Compact VHS)</option>
+                <option value="4">4. JVC GR-AX920U (HQ Stabilizer)</option>
+                <option value="5">5. JVC GR-SXM37US (S-VHS-C)</option>
+                <option value="6">6. JVC GR-SXM740U (Flagship)</option>
+                <option value="7">7. Sony CCD-TR55 (1989 Video8)</option>
+                <option value="8">8. JVC GR-S55 (S-VHS High-Band)</option>
+                <option value="9">9. Panasonic NV-M1 (1985)</option>
+                <option value="10">10. RCA CMR300 (1987 MOS)</option>
               </select>
             </div>
 
             <div>
-              <label class="block text-gray-400 mb-1 font-medium">Tape Engine (13 Modes)</label>
-              <select id="ctrlTape" class="w-full bg-gray-800 border border-gray-700 text-gray-200 rounded px-2 py-1.5 text-xs">
-                <option value="1">Off</option>
-                <option value="2" selected>Bad Tracking</option>
-                <option value="3">Very Bad Tracking</option>
-                <option value="4">Blank Tape (RF Hiss)</option>
-                <option value="5">Vertical Slip (V-Hold)</option>
-                <option value="6">Mixed Tracking</option>
-                <option value="7">Color Noise</option>
-                <option value="8">Horizontal Tracking Errors</option>
-                <option value="9">Tape Dropouts & Instability</option>
-                <option value="10">Tape Wrinkle / Deformation</option>
-                <option value="11">Chroma Displacement</option>
-                <option value="12">Intermittent Signal Loss</option>
-                <option value="13">Bottom Head-Switch Band</option>
+              <label class="block text-gray-400 mb-1 font-medium">Tracking Severity Mode</label>
+              <select id="ctrlTrackingMode" class="w-full bg-gray-800 border border-gray-700 text-gray-200 rounded px-2 py-1.5 text-xs">
+                <option value="1" selected>Normal Tracking</option>
+                <option value="2">Bad Tracking (Wobble & Slip)</option>
+                <option value="3">Very Bad Tracking (Heavy Sync Tear)</option>
               </select>
             </div>
 
             <div>
-              <label class="block text-gray-400 mb-1 font-medium">Restored Filter Look</label>
-              <select id="ctrlFilter" class="w-full bg-gray-800 border border-gray-700 text-gray-200 rounded px-2 py-1.5 text-xs">
-                <option value="1">Off / None</option>
-                <option value="2" selected>1980s Home Video</option>
-                <option value="3">Rental Tape Wear</option>
-                <option value="4">Broadcast Master 1993</option>
-                <option value="5">Security Cam / Surveillance</option>
-                <option value="6">Worn Rental Gen 4</option>
-              </select>
+              <label class="block text-gray-400 mb-1 font-medium">Chroma Bleed (<span id="txtBleed">12</span>px)</label>
+              <input type="range" id="ctrlBleed" min="0" max="30" value="12" class="w-full accent-indigo-500">
             </div>
 
             <div>
-              <label class="block text-gray-400 mb-1 font-medium">Grain Mode</label>
-              <select id="ctrlGrainMode" class="w-full bg-gray-800 border border-gray-700 text-gray-200 rounded px-2 py-1.5 text-xs">
-                <option value="1" selected>Colored / Chroma Grain</option>
-                <option value="2">Monochrome Grain</option>
-              </select>
+              <label class="block text-gray-400 mb-1 font-medium">RF Multipath Ghosting (<span id="txtGhost">0</span>%)</label>
+              <input type="range" id="ctrlGhost" min="0" max="100" value="35" class="w-full accent-indigo-500">
             </div>
 
             <div>
-              <label class="block text-gray-400 mb-1 font-medium">Chroma Bleed (<span id="txtBleed">8</span>px)</label>
-              <input type="range" id="ctrlBleed" min="0" max="30" value="8" class="w-full accent-indigo-500">
-            </div>
-
-            <div>
-              <label class="block text-gray-400 mb-1 font-medium">Transparent Tape Damage</label>
+              <label class="block text-gray-400 mb-1 font-medium">Tape Damage Type</label>
               <select id="ctrlDamage" class="w-full bg-gray-800 border border-gray-700 text-gray-200 rounded px-2 py-1.5 text-xs">
                 <option value="1" selected>Creases & Crinkles</option>
-                <option value="2">Oxide Dropouts</option>
+                <option value="2">Oxide Dropout Streaks</option>
                 <option value="3">Magnetic Scratches</option>
-                <option value="4">Edge Wear & Signal Tear</option>
-                <option value="5">Bad Signal Static Lines</option>
+                <option value="4">Head-Switch Line Jumps</option>
+                <option value="5">Bad Signal Static Burst</option>
               </select>
             </div>
           </div>
@@ -240,12 +237,15 @@ HTML_CONTENT = """<!DOCTYPE html>
               </label>
               <label class="flex items-center space-x-1.5 cursor-pointer">
                 <input type="checkbox" id="chkGrain" checked class="accent-indigo-500 rounded">
-                <span>Image-Aware Grain</span>
+                <span>Analog Grain</span>
               </label>
               <label class="flex items-center space-x-1.5 cursor-pointer">
                 <input type="checkbox" id="chkDamage" checked class="accent-indigo-500 rounded">
                 <span>Tape Damage</span>
               </label>
+              <label class="flex items-center space-x-1.5 cursor-pointer">
+                <input type="checkbox" id="chkGhost" checked class="accent-indigo-500 rounded">
+                <span>RF Ghosting</span>
             </div>
             <button id="btnTriggerGlitch" class="px-3 py-1 bg-rose-600/80 hover:bg-rose-600 text-white font-semibold rounded text-xs transition shadow flex items-center space-x-1">
               <svg class="w-3 h-3" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M11.3 1.046A1 1 0 0112 2v5h4a1 1 0 01.82 1.573l-7 10A1 1 0 018 18v-5H4a1 1 0 01-.82-1.573l7-10a1 1 0 011.12-.38z" clip-rule="evenodd"/></svg>
@@ -462,12 +462,26 @@ HTML_CONTENT = """<!DOCTYPE html>
       const chkGlitch = document.getElementById('chkGlitch').checked;
       const chkGrain = document.getElementById('chkGrain').checked;
       const chkDamage = document.getElementById('chkDamage').checked;
+      const chkGhost = document.getElementById('chkGhost').checked;
+      const ghostAmount = (parseInt(document.getElementById('ctrlGhost').value) / 100) * (chkGhost ? 1.0 : 0.0);
+      document.getElementById('txtGhost').textContent = Math.round(ghostAmount * 100);
+
+      const preset = parseInt(document.getElementById('ctrlPreset').value);
       const camera = parseInt(document.getElementById('ctrlCamera').value);
-      const tape = parseInt(document.getElementById('ctrlTape').value);
-      const filter = parseInt(document.getElementById('ctrlFilter').value);
-      const grainMode = parseInt(document.getElementById('ctrlGrainMode').value);
-      const bleed = parseInt(document.getElementById('ctrlBleed').value) * (masterMult > 1.5 ? 1.5 : 1.0);
+      const trackingMode = parseInt(document.getElementById('ctrlTrackingMode').value);
+      let bleed = parseInt(document.getElementById('ctrlBleed').value) * (masterMult > 1.5 ? 1.5 : 1.0);
       const damageType = parseInt(document.getElementById('ctrlDamage').value);
+
+      // Preset overrides
+      let presetJitterScale = 1.0;
+      let presetTearScale = 1.0;
+      if (preset === 2) { bleed = 4; } // Clean VHS
+      else if (preset === 3) { bleed = 14; } // Vintage VHS
+      else if (preset === 4) { bleed = 20; presetJitterScale = 2.0; } // Heavy Degradation
+      else if (preset === 5) { presetJitterScale = 3.0; } // Bad Tracking
+      else if (preset === 6) { presetJitterScale = 5.0; presetTearScale = 2.5; } // Very Bad Tracking
+      else if (preset === 12) { bleed = 24; } // Color Bleed
+      else if (preset === 16) { presetJitterScale = 4.0; presetTearScale = 3.0; } // Severe Glitch
 
       document.getElementById('txtBleed').textContent = Math.round(bleed);
 
@@ -479,22 +493,17 @@ HTML_CONTENT = """<!DOCTYPE html>
       // 10 Distinct Camera Profiles Colorimetry & Contrast
       let camR = 0, camG = 0, camB = 0, camContrast = 1.0;
       switch (camera) {
-        case 1: camR = 12; camG = 6; camB = -8; camContrast = 1.15; break; // Fxc6
-        case 2: camR = -8; camG = 4; camB = 18; camContrast = 1.08; break; // Gen 7
-        case 3: camR = 24; camG = 12; camB = -14; camContrast = 1.25; break; // JVC GR-C7U
-        case 4: camR = -4; camG = 14; camB = 4; camContrast = 0.95; break; // VHS-R20
-        case 5: camR = 28; camG = 8; camB = 22; camContrast = 1.2; break; // Fall-78
-        case 6: camR = 2; camG = 1; camB = 0; camContrast = 1.05; break; // ERC-V2S
-        case 7: camR = 16; camG = -4; camB = 12; camContrast = 1.3; break; // JVC GR-SXM740U
-        case 8: camR = 14; camG = 10; camB = -6; camContrast = 1.12; break; // Sony CCD-TR55 (Video8)
-        case 9: camR = 6; camG = 2; camB = 4; camContrast = 1.18; break; // JVC GR-S55 (S-VHS)
-        case 10: camR = 26; camG = 16; camB = -16; camContrast = 1.1; break; // Panasonic NV-M1 (VHS)
+        case 1: camR = 0; camG = 0; camB = 0; camContrast = 1.0; break; // Neutral
+        case 2: camR = 24; camG = 12; camB = -14; camContrast = 1.25; break; // JVC GR-C7U (1986)
+        case 3: camR = 8; camG = 6; camB = -4; camContrast = 1.10; break; // JVC GR-AX220U
+        case 4: camR = 4; camG = 2; camB = -2; camContrast = 1.18; break; // JVC GR-AX920U (HQ)
+        case 5: camR = 6; camG = 4; camB = 0; camContrast = 1.12; break; // JVC GR-SXM37US
+        case 6: camR = 2; camG = 1; camB = 0; camContrast = 1.05; break; // JVC GR-SXM740U (Flagship)
+        case 7: camR = -4; camG = 8; camB = 14; camContrast = 1.08; break; // Sony CCD-TR55 (Video8)
+        case 8: camR = 6; camG = 2; camB = 4; camContrast = 1.16; break; // JVC GR-S55 (S-VHS)
+        case 9: camR = 26; camG = 16; camB = -16; camContrast = 1.15; break; // Panasonic NV-M1
+        case 10: camR = 18; camG = 10; camB = -8; camContrast = 1.22; break; // RCA CMR300
       }
-
-      // Filter looks
-      if (filter === 2) { camR += 14; camB -= 10; } // 1980s Home Video
-      if (filter === 3) { camG += 8; } // Rental Tape Wear
-      if (filter === 5) { camContrast *= 1.4; } // Security Cam
 
       // Deterministic Sudden Glitch calculation
       let isGlitch = false;
@@ -745,22 +754,22 @@ class VHSHandler(http.server.SimpleHTTPRequestHandler):
                 self.send_header("Content-Type", "application/json")
                 self.end_headers()
                 self.wfile.write(json.dumps({"success": res.returncode == 0, "output": output}).encode("utf-8"))
-            elif self.path == "/api/download":
-                aex_path = os.path.join(REPO_ROOT, "artifacts", "VHS6RIFT.aex")
-                if not os.path.isfile(aex_path):
-                    aex_path = os.path.join(REPO_ROOT, "build-win", "VHS6RIFT.aex")
-                if os.path.isfile(aex_path):
+            elif self.path == "/api/download" or self.path == "/api/download-zip":
+                zip_path = os.path.join(REPO_ROOT, "artifacts", "VHS6RIFT_Updated_Source.zip")
+                if not os.path.isfile(zip_path):
+                    zip_path = os.path.join(REPO_ROOT, "VHS6RIFT_Updated_Source.zip")
+                if os.path.isfile(zip_path):
                     self.send_response(200)
-                    self.send_header("Content-Type", "application/octet-stream")
-                    self.send_header("Content-Disposition", 'attachment; filename="VHS6RIFT.aex"')
-                    self.send_header("Content-Length", str(os.path.getsize(aex_path)))
+                    self.send_header("Content-Type", "application/zip")
+                    self.send_header("Content-Disposition", 'attachment; filename="VHS6RIFT_Updated_Source.zip"')
+                    self.send_header("Content-Length", str(os.path.getsize(zip_path)))
                     self.end_headers()
-                    with open(aex_path, "rb") as f:
+                    with open(zip_path, "rb") as f:
                         self.wfile.write(f.read())
                 else:
                     self.send_response(404)
                     self.end_headers()
-                    self.wfile.write(b"Binary not found")
+                    self.wfile.write(b"Archive not found")
             else:
                 super().do_GET()
         except (BrokenPipeError, ConnectionResetError):

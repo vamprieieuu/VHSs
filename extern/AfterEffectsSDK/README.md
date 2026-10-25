@@ -1,1 +1,0 @@
-Place your licensed Adobe After Effects SDK here. The build supports either a flattened layout (`Headers`, `Util`, `Resources/PiPLtool.exe`) or the standard SDK layout (`Examples/Headers`, `Examples/Util`, `Examples/Resources/PiPLtool.exe`). Do not replace this with an unrelated SDK version.
