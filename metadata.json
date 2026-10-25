@@ -1,7 +1,0 @@
-{
-  "name": "VHS6RIFT Analog Video Suite",
-  "description": "Native Adobe After Effects plugin and comprehensive emulator suite for authentic VHS and analog video emulation, multi-camera profiling, signal and tape degradation, deterministic sudden glitch, and audio degradation.",
-  "capabilities": [
-    "MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"
-  ]
-}
