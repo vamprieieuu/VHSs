@@ -48,19 +48,27 @@ def simulate_find_sdk(candidate_path):
 
     headers_dir = os.path.dirname(found_header)
     include_root = os.path.dirname(headers_dir)
+    if os.path.basename(include_root) == "Examples":
+        sdk_root = os.path.dirname(include_root)
+    else:
+        sdk_root = include_root
 
     # Check required headers
     missing_headers = [h for h in REQUIRED_HEADERS if not os.path.isfile(os.path.join(headers_dir, h))]
 
     # Check PiPLtool.exe
     pipl_tool = None
-    pipl1 = os.path.join(candidate_path, "Resources", "PiPLtool.exe")
-    pipl2 = os.path.join(include_root, "Resources", "PiPLtool.exe")
-    if os.path.isfile(pipl1):
-        pipl_tool = pipl1
-    elif os.path.isfile(pipl2):
-        pipl_tool = pipl2
-    else:
+    pipl_locations = [
+        os.path.join(sdk_root, "Resources", "PiPLtool.exe"),
+        os.path.join(include_root, "Resources", "PiPLtool.exe"),
+        os.path.join(sdk_root, "Examples", "Resources", "PiPLtool.exe")
+    ]
+    for loc in pipl_locations:
+        if os.path.isfile(loc):
+            pipl_tool = loc
+            break
+
+    if not pipl_tool:
         for root, dirs, files in os.walk(candidate_path):
             if "PiPLtool.exe" in files:
                 pipl_tool = os.path.join(root, "PiPLtool.exe")
@@ -72,7 +80,7 @@ def simulate_find_sdk(candidate_path):
     if not pipl_tool:
         return False, "Missing PiPLtool.exe in SDK", []
 
-    return True, "Valid complete SDK", []
+    return True, f"Valid complete SDK (Root: {sdk_root}, PiPL: {pipl_tool})", []
 
 def run_tests():
     temp_dir = tempfile.mkdtemp(prefix="ae_sdk_test_")

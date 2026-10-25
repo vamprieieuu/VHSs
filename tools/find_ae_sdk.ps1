@@ -33,11 +33,12 @@ if (-not [string]::IsNullOrWhiteSpace($env:AE_SDK_PATH)) {
 $SearchList.Add((Join-Path $RepoRoot "extern\AfterEffectsSDK"))
 $SearchList.Add((Join-Path $RepoRoot "AfterEffectsSDK"))
 
-# Search for any unzipped SDK folders under extern
+# Search for any unzipped SDK folders under extern and its subdirectories
 $ExternDir = Join-Path $RepoRoot "extern"
 if (Test-Path $ExternDir) {
     Get-ChildItem -Path $ExternDir -Directory -ErrorAction SilentlyContinue | ForEach-Object {
-        if ($_.Name -like "*After*Effects*" -or $_.Name -like "*SDK*") {
+        $SearchList.Add($_.FullName)
+        Get-ChildItem -Path $_.FullName -Directory -ErrorAction SilentlyContinue | ForEach-Object {
             $SearchList.Add($_.FullName)
         }
     }
@@ -75,14 +76,19 @@ foreach ($cand in $SearchList) {
     } elseif (Test-Path $examples) {
         $effectHeader = Get-Item $examples
     } else {
-        # Search recursively up to 3 levels deep for nested zip extractions
+        # Search recursively up to 4 levels deep for nested zip extractions
         $effectHeader = Get-ChildItem -Path $norm -Filter "AE_Effect.h" -File -Recurse -Depth 4 -ErrorAction SilentlyContinue | Select-Object -First 1
     }
 
     if ($effectHeader) {
         $headersDir = $effectHeader.Directory.FullName
         $includeRoot = $effectHeader.Directory.Parent.FullName
-        $sdkRoot = $norm
+
+        if ($effectHeader.Directory.Parent.Name -eq "Examples") {
+            $sdkRoot = $effectHeader.Directory.Parent.Parent.FullName
+        } else {
+            $sdkRoot = $includeRoot
+        }
 
         # Check required headers
         $missingHeaders = @()
@@ -95,14 +101,27 @@ foreach ($cand in $SearchList) {
 
         # Locate PiPLtool.exe
         $piplCandidate = $null
-        $pipl1 = Join-Path $sdkRoot "Resources\PiPLtool.exe"
-        $pipl2 = Join-Path $includeRoot "Resources\PiPLtool.exe"
-        if (Test-Path $pipl1) {
-            $piplCandidate = (Get-Item $pipl1).FullName
-        } elseif (Test-Path $pipl2) {
-            $piplCandidate = (Get-Item $pipl2).FullName
-        } else {
+        $piplLocations = @(
+            (Join-Path $sdkRoot "Resources\PiPLtool.exe"),
+            (Join-Path $includeRoot "Resources\PiPLtool.exe"),
+            (Join-Path $sdkRoot "Examples\Resources\PiPLtool.exe")
+        )
+        foreach ($loc in $piplLocations) {
+            if (Test-Path $loc) {
+                $piplCandidate = (Get-Item $loc).FullName
+                break
+            }
+        }
+
+        if (-not $piplCandidate) {
             $foundPipl = Get-ChildItem -Path $sdkRoot -Filter "PiPLtool.exe" -File -Recurse -Depth 5 -ErrorAction SilentlyContinue | Select-Object -First 1
+            if ($foundPipl) {
+                $piplCandidate = $foundPipl.FullName
+            }
+        }
+
+        if (-not $piplCandidate -and $norm -ne $sdkRoot) {
+            $foundPipl = Get-ChildItem -Path $norm -Filter "PiPLtool.exe" -File -Recurse -Depth 5 -ErrorAction SilentlyContinue | Select-Object -First 1
             if ($foundPipl) {
                 $piplCandidate = $foundPipl.FullName
             }
