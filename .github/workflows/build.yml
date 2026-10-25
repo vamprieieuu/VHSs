@@ -12,6 +12,13 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
 
+      # Match the known-good MAJEED workflow: initialize the VS 2022 x64
+      # compiler environment explicitly before invoking CMake/MSBuild.
+      - name: Set up MSVC
+        uses: ilammy/msvc-dev-cmd@v1
+        with:
+          arch: x64
+
       - name: Set up Python
         uses: actions/setup-python@v5
         with:
@@ -25,13 +32,16 @@ jobs:
         shell: pwsh
         run: |
           $sdk = Join-Path $env:GITHUB_WORKSPACE 'extern\AfterEffectsSDK'
-          if (-not (Test-Path (Join-Path $sdk 'Headers\AE_Effect.h')) -and -not (Test-Path (Join-Path $sdk 'Examples\Headers\AE_Effect.h'))) {
-            throw "Adobe AE SDK headers are missing under extern/AfterEffectsSDK. Add your licensed SDK using the folder layout in README.md."
+          $headers = @(
+            (Join-Path $sdk 'Headers\AE_Effect.h'),
+            (Join-Path $sdk 'Examples\Headers\AE_Effect.h')
+          )
+          if (-not ($headers | Where-Object { Test-Path $_ })) {
+            throw "Adobe AE SDK headers are missing under extern/AfterEffectsSDK."
           }
-          # SDK distributions place PiPLtool.exe in different subfolders.
           $piplTool = Get-ChildItem -Path $sdk -Filter 'PiPLtool.exe' -File -Recurse -ErrorAction SilentlyContinue | Select-Object -First 1
           if (-not $piplTool) {
-            throw "PiPLtool.exe is missing from extern/AfterEffectsSDK. Add the PiPLtool.exe supplied with your Adobe After Effects SDK; searched all SDK subfolders."
+            throw "PiPLtool.exe is missing from extern/AfterEffectsSDK."
           }
           Write-Host "Using PiPLtool: $($piplTool.FullName)"
 
@@ -39,19 +49,19 @@ jobs:
         shell: pwsh
         run: |
           $sdk = Join-Path $env:GITHUB_WORKSPACE 'extern\AfterEffectsSDK'
-          cmake -S . -B build -G 'Visual Studio 17 2022' -A x64 "-DAE_SDK_ROOT=$sdk" 2>&1 | Tee-Object -FilePath configure.log
+          cmake -S . -B build -G "Visual Studio 17 2022" -A x64 "-DAE_SDK_ROOT=$sdk" 2>&1 | Tee-Object -FilePath configure.log
           if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
 
       - name: Build Release AEX
         shell: pwsh
         run: |
-          cmake --build build --config Release --parallel 2>&1 | Tee-Object -FilePath build.log
+          cmake --build build --config Release --parallel 2 2>&1 | Tee-Object -FilePath build.log
           if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
 
       - name: Verify and collect exactly one AEX
         shell: pwsh
         run: |
-          $files = @(Get-ChildItem build -Recurse -Filter 'VHS6RIFT.aex')
+          $files = @(Get-ChildItem build -Recurse -Filter 'VHS6RIFT.aex' -File)
           if ($files.Count -ne 1) { throw "Expected exactly one VHS6RIFT.aex, found $($files.Count)." }
           New-Item -ItemType Directory -Force artifacts | Out-Null
           Copy-Item $files[0].FullName artifacts\VHS6RIFT.aex
