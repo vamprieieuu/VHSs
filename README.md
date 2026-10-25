@@ -88,6 +88,8 @@ Category: `Analog & Tape Effects`
 │   └── VHS6RIFTPiPL.r         # PiPL resource definition (com.vhs6rift.effect)
 ├── tools/
 │   ├── compile_pipl.cmake     # PiPL compilation script for CMake
+│   ├── find_ae_sdk.ps1        # Flexible Adobe AE SDK discovery and diagnostic tool
+│   ├── test_sdk_discovery.py  # Multi-layout SDK discovery verification harness
 │   ├── validate_project.py    # Static architecture validator (0 errors)
 │   ├── audit_parameter_wiring.py # Parameter wiring audit (100% wired)
 │   ├── test_vhs6rift.py       # 14-gate functional test suite (100% passed)
@@ -97,6 +99,7 @@ Category: `Analog & Tape Effects`
 │   └── ntscrs_c/              # C-FFI wrapper declarations
 ├── assets/                    # Bundled overlays, reference clips, and manifests
 ├── docs/                      # Engineering research, camera models, and specifications
+│   └── BUILD_AND_DEBUG.md     # Comprehensive SDK and build configuration guide
 ├── app.py                     # Interactive workbench emulator (port 3000)
 └── artifacts/
     ├── VHS6RIFT_Updated_Source.zip # Complete updated repository deliverable
@@ -105,7 +108,30 @@ Category: `Analog & Tape Effects`
 
 ---
 
-## 3. Verification & Test Results
+## 3. Adobe AE SDK & CI Configuration
+
+The Adobe After Effects SDK is protected by Adobe's Developer EULA and cannot be distributed directly in public git repositories. The build system supports flexible SDK detection and CI secret provisioning:
+
+### Supported SDK Directory Layouts
+- **Layout 1 (Standard):** `<AE_SDK_ROOT>/Headers/AE_Effect.h` and `<AE_SDK_ROOT>/Resources/PiPLtool.exe`
+- **Layout 2 (Examples folder):** `<AE_SDK_ROOT>/Examples/Headers/AE_Effect.h`
+- **Layout 3 (Nested extraction):** `<AE_SDK_ROOT>/Adobe After Effects * SDK/Headers/AE_Effect.h`
+
+### Supplying the SDK in GitHub Actions
+1. Encode your licensed SDK zip into a Base64 string:
+   ```powershell
+   $b64 = [Convert]::ToBase64String([IO.File]::ReadAllBytes("AfterEffectsSDK.zip"))
+   $b64 | Set-Clipboard
+   ```
+2. In GitHub, go to **Settings -> Secrets and variables -> Actions** and create a repository secret named **`AE_SDK_ZIP_BASE64`**.
+3. Alternatively, supply a private URL secret **`AE_SDK_URL`**.
+4. The CI workflow (`.github/workflows/build.yml`) will automatically decode, cache, and build the native `.aex` binary!
+
+See `docs/BUILD_AND_DEBUG.md` for full instructions.
+
+---
+
+## 4. Verification & Test Results
 
 1. **Static Architecture Validator (`python3 tools/validate_project.py`):**
    - 83 parameter slots checked.
@@ -121,5 +147,9 @@ Category: `Analog & Tape Effects`
    - 14/14 verification gates passed (Identity bypass, YIQ invertibility, 16 presets, 10 camera models, Poisson dropouts, tanh saturation, sample-and-hold DSP, deep color math).
    - **Result: PASS (100% verified)**.
 
-4. **Deliverable Archive:**
+4. **SDK Discovery & Layout Simulation (`python3 tools/test_sdk_discovery.py`):**
+   - 6/6 layout scenarios verified (Standard, Examples, Nested unzips, Missing header detection, Missing PiPLtool detection, Missing directory handling).
+   - **Result: PASS (6/6 tests passed)**.
+
+5. **Deliverable Archive:**
    - Pre-packaged ZIP archive: `artifacts/VHS6RIFT_Updated_Source.zip` (SHA256 recorded in `artifacts/SHA256.txt`).

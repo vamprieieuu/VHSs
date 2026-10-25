@@ -8,30 +8,89 @@ if(NOT MSVC)
   message(FATAL_ERROR "Use Visual Studio 2022 / MSVC for the Windows PiPL build.")
 endif()
 
-set(AE_SDK_ROOT "${CMAKE_CURRENT_SOURCE_DIR}/extern/AfterEffectsSDK" CACHE PATH "Root of the Adobe After Effects SDK or its Examples folder")
+# Configurable Adobe After Effects SDK discovery
+if(NOT DEFINED AE_SDK_ROOT OR AE_SDK_ROOT STREQUAL "")
+  if(DEFINED ENV{AE_SDK_ROOT} AND NOT "$ENV{AE_SDK_ROOT}" STREQUAL "")
+    set(AE_SDK_ROOT "$ENV{AE_SDK_ROOT}" CACHE PATH "Root of Adobe After Effects SDK" FORCE)
+  elseif(DEFINED ENV{AE_SDK_PATH} AND NOT "$ENV{AE_SDK_PATH}" STREQUAL "")
+    set(AE_SDK_ROOT "$ENV{AE_SDK_PATH}" CACHE PATH "Root of Adobe After Effects SDK" FORCE)
+  else()
+    set(AE_SDK_ROOT "${CMAKE_CURRENT_SOURCE_DIR}/extern/AfterEffectsSDK" CACHE PATH "Root of Adobe After Effects SDK")
+  endif()
+endif()
+message(STATUS "Searching for Adobe AE SDK under: ${AE_SDK_ROOT}")
+
+# Layout 1: <AE_SDK_ROOT>/Headers/AE_Effect.h
+# Layout 2: <AE_SDK_ROOT>/Examples/Headers/AE_Effect.h
+# Layout 3: Nested zip extraction search
 if(EXISTS "${AE_SDK_ROOT}/Headers/AE_Effect.h")
   set(AE_INCLUDE_ROOT "${AE_SDK_ROOT}")
+  set(AE_HEADERS "${AE_SDK_ROOT}/Headers")
 elseif(EXISTS "${AE_SDK_ROOT}/Examples/Headers/AE_Effect.h")
   set(AE_INCLUDE_ROOT "${AE_SDK_ROOT}/Examples")
+  set(AE_HEADERS "${AE_INCLUDE_ROOT}/Headers")
 else()
-  message(FATAL_ERROR "Adobe AE SDK not found. Expected Headers/AE_Effect.h or Examples/Headers/AE_Effect.h under ${AE_SDK_ROOT}.")
+  file(GLOB_RECURSE AE_EFFECT_H_CANDIDATES LIST_DIRECTORIES FALSE "${AE_SDK_ROOT}/*/AE_Effect.h")
+  if(AE_EFFECT_H_CANDIDATES)
+    list(GET AE_EFFECT_H_CANDIDATES 0 AE_EFFECT_H_PATH)
+    get_filename_component(AE_HEADERS "${AE_EFFECT_H_PATH}" DIRECTORY)
+    get_filename_component(AE_INCLUDE_ROOT "${AE_HEADERS}" DIRECTORY)
+    message(STATUS "Found nested AE SDK headers at: ${AE_HEADERS}")
+  else()
+    message(FATAL_ERROR 
+      "\n================================================================================\n"
+      "Adobe After Effects SDK headers not found under: ${AE_SDK_ROOT}\n\n"
+      "Supported folder layouts:\n"
+      "  1. <AE_SDK_ROOT>/Headers/AE_Effect.h\n"
+      "  2. <AE_SDK_ROOT>/Examples/Headers/AE_Effect.h\n"
+      "  3. <AE_SDK_ROOT>/Adobe After Effects * SDK/Headers/AE_Effect.h\n\n"
+      "Configure via environment variable AE_SDK_ROOT or CMake argument -DAE_SDK_ROOT=<path>\n"
+      "See README.md for instructions on obtaining and configuring the licensed Adobe SDK.\n"
+      "================================================================================\n"
+    )
+  endif()
 endif()
-set(AE_HEADERS "${AE_INCLUDE_ROOT}/Headers")
+
+# Validate required core headers
+set(AE_REQUIRED_HEADERS AE_Effect.h AE_EffectCB.h AE_EffectCBSuites.h AE_EffectUI.h AE_Macros.h Param_Utils.h)
+set(AE_MISSING_HEADERS "")
+foreach(HEADER_NAME ${AE_REQUIRED_HEADERS})
+  if(NOT EXISTS "${AE_HEADERS}/${HEADER_NAME}")
+    list(APPEND AE_MISSING_HEADERS "${HEADER_NAME}")
+  endif()
+endforeach()
+
+if(AE_MISSING_HEADERS)
+  message(FATAL_ERROR 
+    "\n================================================================================\n"
+    "Incomplete Adobe AE SDK installation. Missing required headers in ${AE_HEADERS}:\n"
+    "  ${AE_MISSING_HEADERS}\n"
+    "Please provide a complete licensed Adobe After Effects SDK.\n"
+    "================================================================================\n"
+  )
+endif()
+
+# Locate PiPLtool.exe
 set(PIPL_TOOL "${AE_SDK_ROOT}/Resources/PiPLtool.exe")
 if(NOT EXISTS "${PIPL_TOOL}")
   set(PIPL_TOOL "${AE_INCLUDE_ROOT}/Resources/PiPLtool.exe")
 endif()
-# Adobe SDK packages differ in where they place PiPLtool.exe; search the SDK tree.
 if(NOT EXISTS "${PIPL_TOOL}")
-  file(GLOB_RECURSE PIPL_TOOL_CANDIDATES LIST_DIRECTORIES FALSE "${AE_SDK_ROOT}/PiPLtool.exe")
+  file(GLOB_RECURSE PIPL_TOOL_CANDIDATES LIST_DIRECTORIES FALSE "${AE_SDK_ROOT}/*/PiPLtool.exe")
   if(PIPL_TOOL_CANDIDATES)
     list(GET PIPL_TOOL_CANDIDATES 0 PIPL_TOOL)
   endif()
 endif()
 if(NOT EXISTS "${PIPL_TOOL}")
-  message(FATAL_ERROR "PiPLtool.exe not found anywhere under ${AE_SDK_ROOT}. Add the executable supplied with your Adobe After Effects SDK.")
+  message(FATAL_ERROR 
+    "\n================================================================================\n"
+    "PiPLtool.exe not found anywhere under: ${AE_SDK_ROOT}\n"
+    "Add the PiPLtool.exe executable supplied with your licensed Adobe After Effects SDK.\n"
+    "================================================================================\n"
+  )
 endif()
-message(STATUS "Using PiPLtool: ${PIPL_TOOL}")
+message(STATUS "Using AE Headers: ${AE_HEADERS}")
+message(STATUS "Using PiPLtool:   ${PIPL_TOOL}")
 
 set(PIPL_R "${CMAKE_CURRENT_SOURCE_DIR}/resources/VHS6RIFTPiPL.r")
 set(PIPL_RR "${CMAKE_CURRENT_BINARY_DIR}/VHS6RIFTPiPL.rr")
