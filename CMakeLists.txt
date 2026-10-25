@@ -52,13 +52,19 @@ else()
 endif()
 
 # Validate required core headers
-set(AE_REQUIRED_HEADERS AE_Effect.h AE_EffectCB.h AE_EffectCBSuites.h AE_EffectUI.h AE_Macros.h Param_Utils.h)
+set(AE_REQUIRED_HEADERS AE_Effect.h AE_EffectCB.h AE_EffectCBSuites.h AE_EffectUI.h AE_Macros.h)
 set(AE_MISSING_HEADERS "")
 foreach(HEADER_NAME ${AE_REQUIRED_HEADERS})
   if(NOT EXISTS "${AE_HEADERS}/${HEADER_NAME}")
     list(APPEND AE_MISSING_HEADERS "${HEADER_NAME}")
   endif()
 endforeach()
+
+# Param_Utils.h is shipped in the SDK's Util directory (as in Dithering MAJEED),
+# not in Headers. Validate its real SDK location separately.
+if(NOT EXISTS "${AE_INCLUDE_ROOT}/Util/Param_Utils.h")
+  list(APPEND AE_MISSING_HEADERS "Util/Param_Utils.h")
+endif()
 
 if(AE_MISSING_HEADERS)
   message(FATAL_ERROR 
@@ -114,13 +120,13 @@ add_custom_command(OUTPUT "${PIPL_RC}"
   VERBATIM)
 add_custom_target(VHS6RIFT_PiPL DEPENDS "${PIPL_RC}")
 
-# The current VHS6RIFT renderer is implemented in C++ and does not call the
-# optional ntscrs_c bridge. Do not make the AEX build depend on a Cargo project
-# that is not present in this repository archive.
+# The current VHS6RIFT native source does not call the optional ntscrs_c bridge.
+# Keep the public include path, but do not make the AEX build depend on an absent Cargo project.
 add_library(VHS6RIFT MODULE src/VHS6RIFT.cpp "${PIPL_RC}")
 add_dependencies(VHS6RIFT VHS6RIFT_PiPL)
 target_include_directories(VHS6RIFT PRIVATE
   "${CMAKE_CURRENT_SOURCE_DIR}/include"
+  "${CMAKE_CURRENT_SOURCE_DIR}/extern/ntscrs_c/include"
   "${AE_HEADERS}"
   "${AE_HEADERS}/SP"
   "${AE_INCLUDE_ROOT}/Util"

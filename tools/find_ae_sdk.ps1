@@ -95,6 +95,17 @@ foreach ($cand in $SearchList) {
         # Check required headers
         $missingHeaders = @()
         foreach ($h in $RequiredHeaders) {
+            # Adobe ships Param_Utils.h in Util, while the other core headers live in Headers.
+            if ($h -eq "Param_Utils.h") {
+                $utilCandidates = @(
+                    (Join-Path $sdkRoot "Util\Param_Utils.h"),
+                    (Join-Path $includeRoot "Util\Param_Utils.h")
+                )
+                if (-not ($utilCandidates | Where-Object { Test-Path $_ })) {
+                    $missingHeaders += "Util/Param_Utils.h"
+                }
+                continue
+            }
             $hPath = Join-Path $headersDir $h
             if (-not (Test-Path $hPath)) {
                 $missingHeaders += $h
