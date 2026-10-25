@@ -44,10 +44,10 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
 
-      - name: Set up Python
-        uses: actions/setup-python@v5
+      - name: Set up MSVC x64
+        uses: ilammy/msvc-dev-cmd@v1
         with:
-          python-version: '3.12'
+          arch: x64
 
       - name: Cache Adobe AE SDK
         id: cache-ae-sdk
