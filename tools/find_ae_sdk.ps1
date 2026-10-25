@@ -33,13 +33,15 @@ if (-not [string]::IsNullOrWhiteSpace($env:AE_SDK_PATH)) {
 $SearchList.Add((Join-Path $RepoRoot "extern\AfterEffectsSDK"))
 $SearchList.Add((Join-Path $RepoRoot "AfterEffectsSDK"))
 
-# Search for any unzipped SDK folders under extern and its subdirectories
+# Search for any unzipped SDK folders under extern
 $ExternDir = Join-Path $RepoRoot "extern"
 if (Test-Path $ExternDir) {
     Get-ChildItem -Path $ExternDir -Directory -ErrorAction SilentlyContinue | ForEach-Object {
-        $SearchList.Add($_.FullName)
-        Get-ChildItem -Path $_.FullName -Directory -ErrorAction SilentlyContinue | ForEach-Object {
+        if ($_.Name -like "*After*Effects*" -or $_.Name -like "*SDK*") {
             $SearchList.Add($_.FullName)
+            Get-ChildItem -Path $_.FullName -Directory -ErrorAction SilentlyContinue | ForEach-Object {
+                $SearchList.Add($_.FullName)
+            }
         }
     }
 }
@@ -243,7 +245,7 @@ SUPPORTED SDK DIRECTORY LAYOUTS:
 ================================================================================
 "@
 
-    Write-Error $errBanner
+    Write-Host $errBanner -ForegroundColor Red
 
     if ($FailFast) {
         throw "Adobe AE SDK validation failed. See diagnosis above."
