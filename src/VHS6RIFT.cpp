@@ -35,34 +35,20 @@ static PF_Err GlobalSetup(PF_InData *in_data, PF_OutData *out_data, PF_ParamDef 
 static PF_Err ParamsSetup(PF_InData *in_data, PF_OutData *out_data, PF_ParamDef *params[], PF_LayerDef *output) {
   PF_ParamDef def;
 
-  #define ADD_TOPIC_START(name, id) \
-    AEFX_CLR_STRUCT(def); \
-    std::strncpy(def.name, name, sizeof(def.name) - 1); \
-    def.param_type = PF_Param_GROUP_START; \
-    /* In real SDK: PF_ADD_TOPIC(name, id); */
+  #define ADD_TOPIC_START(label, id) \
+    do { AEFX_CLR_STRUCT(def); PF_ADD_TOPIC((label), (id)); } while (0);
 
   #define ADD_TOPIC_END(id) \
-    AEFX_CLR_STRUCT(def); \
-    def.param_type = PF_Param_GROUP_END; \
-    /* In real SDK: PF_END_TOPIC(id); */
+    do { AEFX_CLR_STRUCT(def); PF_END_TOPIC((id)); } while (0);
 
-  #define ADD_SLIDER(name, minV, maxV, dfltV, id) \
-    AEFX_CLR_STRUCT(def); \
-    std::strncpy(def.name, name, sizeof(def.name) - 1); \
-    def.param_type = PF_Param_SLIDER; \
-    def.u.sd.value = dfltV;
+  #define ADD_SLIDER(label, minV, maxV, dfltV, id) \
+    do { AEFX_CLR_STRUCT(def); PF_ADD_SLIDER((label), (minV), (maxV), (minV), (maxV), (dfltV), (id)); } while (0);
 
-  #define ADD_CHECKBOX(name, dfltV, id) \
-    AEFX_CLR_STRUCT(def); \
-    std::strncpy(def.name, name, sizeof(def.name) - 1); \
-    def.param_type = PF_Param_CHECKBOX; \
-    def.u.bd.value = dfltV;
+  #define ADD_CHECKBOX(label, dfltV, id) \
+    do { AEFX_CLR_STRUCT(def); PF_ADD_CHECKBOXX((label), (dfltV), PF_ParamFlag_NONE, (id)); } while (0);
 
-  #define ADD_POPUP(name, numChoices, dfltChoice, choicesStr, id) \
-    AEFX_CLR_STRUCT(def); \
-    std::strncpy(def.name, name, sizeof(def.name) - 1); \
-    def.param_type = PF_Param_POPUP; \
-    def.u.pd.value = dfltChoice;
+  #define ADD_POPUP(label, numChoices, dfltChoice, choicesStr, id) \
+    do { AEFX_CLR_STRUCT(def); PF_ADD_POPUP((label), (numChoices), (dfltChoice), (choicesStr), (id)); } while (0);
 
   // Topic 1: Master Engine Controls
   ADD_TOPIC_START("01 | MASTER ENGINE CONTROLS", P_TOPIC_MASTER_START)
@@ -178,6 +164,7 @@ static PF_Err ParamsSetup(PF_InData *in_data, PF_OutData *out_data, PF_ParamDef 
   #undef ADD_CHECKBOX
   #undef ADD_POPUP
 
+  out_data->num_params = P_AUDIO_DROPOUT + 1;
   return PF_Err_NONE;
 }
 
@@ -938,7 +925,36 @@ static PF_Err RenderPixel32(PF_EffectWorld *input, PF_EffectWorld *output, const
 
 // Audio Render Callback (PF_Cmd_AUDIO_RENDER)
 static PF_Err RenderAudio(PF_InData *in_data, PF_ParamDef *params[], PF_SoundWorld *sound) {
-  if (!sound || sound->num_samples <= 0 || !sound->data[0]) return PF_Err_NONE;
+  if (!in_data || !params || !sound || sound->num_samples <= 0 || !sound->dataP) return PF_Err_NONE;
+
+  PF_Err err = PF_Err_NONE;
+  PF_LayerAudio sourceAudio = NULL;
+  PF_SndSamplePtr sourceData = NULL;
+  A_long sourceSamples = 0;
+  PF_UFixed sourceRate = 0;
+  A_long sourceBytesPerSample = 0;
+  A_long sourceChannels = 0;
+  A_long sourceSigned = 0;
+  ERR(PF_CHECKOUT_LAYER_AUDIO(
+    in_data, P_INPUT, in_data->start_sampL, in_data->dur_sampL,
+    in_data->time_scale, static_cast<PF_UFixed>(sound->fi.rateF * 65536.0), sound->fi.sample_size,
+    sound->fi.num_channels, PF_SIGNED_FLOAT, &sourceAudio));
+  if (!err) {
+    ERR(PF_GET_AUDIO_DATA(in_data, sourceAudio, &sourceData, &sourceSamples,
+      &sourceRate, &sourceBytesPerSample, &sourceChannels, &sourceSigned));
+  }
+  if (!err && sourceData && sound->dataP) {
+    const A_long samplesToCopy = std::min<A_long>(sourceSamples, sound->num_samples);
+    const size_t bytesToCopy = static_cast<size_t>(samplesToCopy) *
+      static_cast<size_t>(std::max<A_long>(1, sourceChannels)) * sizeof(PF_FpShort);
+    std::memcpy(sound->dataP, sourceData, bytesToCopy);
+    sound->num_samples = samplesToCopy;
+  }
+  if (sourceAudio) {
+    PF_Err checkinErr = PF_CHECKIN_LAYER_AUDIO(in_data, sourceAudio);
+    if (!err) err = checkinErr;
+  }
+  if (err) return err;
   if (!params[P_AUDIO_ENABLE]->u.bd.value) return PF_Err_NONE;
 
   float wet = static_cast<float>(params[P_AUDIO_WET_DRY]->u.sd.value) / 100.0f;
@@ -949,17 +965,19 @@ static PF_Err RenderAudio(PF_InData *in_data, PF_ParamDef *params[], PF_SoundWor
   float dropoutRate = static_cast<float>(params[P_AUDIO_DROPOUT]->u.sd.value) * 0.0001f;
 
   int32_t targetRate = std::clamp(params[P_AUDIO_DOWNSAMPLE_RATE]->u.sd.value, 4000, 48000);
-  int32_t nativeRate = (sound->rate > 0) ? sound->rate : 48000;
+  int32_t nativeRate = (sound->fi.rateF > 0.0) ? static_cast<int32_t>(sound->fi.rateF) : 48000;
+  int32_t channels = std::max(1, static_cast<int32_t>(sound->fi.num_channels));
   int32_t holdStep = std::max(1, nativeRate / targetRate);
+  PF_FpShort *samples = static_cast<PF_FpShort *>(sound->dataP);
 
-  for (int32_t ch = 0; ch < sound->num_channels; ++ch) {
-    PF_FpShort *samples = sound->data[ch];
+  for (int32_t ch = 0; ch < channels; ++ch) {
     float heldSample = 0.0f;
     for (int32_t i = 0; i < sound->num_samples; ++i) {
+      const int32_t sampleIndex = i * channels + ch;
       if (i % holdStep == 0) {
-        heldSample = samples[i];
+        heldSample = samples[sampleIndex];
       }
-      float orig = samples[i];
+      float orig = samples[sampleIndex];
       float s = heldSample;
 
       // Tape saturation: non-linear tanh compression
@@ -980,7 +998,7 @@ static PF_Err RenderAudio(PF_InData *in_data, PF_ParamDef *params[], PF_SoundWor
       }
 
       // Wet/Dry mix
-      samples[i] = orig * (1.0f - wet) + s * wet;
+      samples[sampleIndex] = orig * (1.0f - wet) + s * wet;
     }
   }
 
@@ -993,8 +1011,7 @@ extern "C" PF_Err EffectMain(
   PF_InData       *in_data,
   PF_OutData      *out_data,
   PF_ParamDef     *params[],
-  PF_LayerDef     *output,
-  void            *extra
+  PF_LayerDef     *output
 ) {
   PF_Err err = PF_Err_NONE;
 
@@ -1025,24 +1042,27 @@ extern "C" PF_Err EffectMain(
 
         PF_EffectWorld *input = reinterpret_cast<PF_EffectWorld *>(&params[P_INPUT]->u);
 
-        // Dispatch based on layer data format
-        if (output->data_type == 0 || output->rowbytes == output->width * sizeof(PF_Pixel8)) {
-          err = RenderPixel8(input, output, ctx);
-        } else if (output->data_type == 1) { // 16-bit
-          err = RenderPixel16(input, output, ctx);
-        } else if (output->data_type == 2) { // 32-bit float
-          err = RenderPixel32(input, output, ctx);
-        } else {
-          err = RenderPixel8(input, output, ctx);
+        // Query the host's pixel format through the official World Suite.
+        AEFX_SuiteScoper<PF_WorldSuite2> worldSuite(
+          in_data, kPFWorldSuite, kPFWorldSuiteVersion2, out_data);
+        PF_PixelFormat pixelFormat = PF_PixelFormat_INVALID;
+        ERR(worldSuite->PF_GetPixelFormat(output, &pixelFormat));
+        if (!err) {
+          if (pixelFormat == PF_PixelFormat_ARGB32) {
+            err = RenderPixel8(input, output, ctx);
+          } else if (pixelFormat == PF_PixelFormat_ARGB64) {
+            err = RenderPixel16(input, output, ctx);
+          } else if (pixelFormat == PF_PixelFormat_ARGB128) {
+            err = RenderPixel32(input, output, ctx);
+          } else {
+            err = PF_Err_BAD_CALLBACK_PARAM;
+          }
         }
         break;
       }
 
       case PF_Cmd_AUDIO_RENDER:
-        if (extra) {
-          PF_SoundWorld *sound = reinterpret_cast<PF_SoundWorld *>(extra);
-          err = RenderAudio(in_data, params, sound);
-        }
+        err = RenderAudio(in_data, params, &out_data->dest_snd);
         break;
 
       default:
@@ -1055,12 +1075,24 @@ extern "C" PF_Err EffectMain(
   return err;
 }
 
-// PluginDataEntryFunction2 (AE 23.x+ Entry Point)
-extern "C" PF_Err PluginDataEntryFunction2(
-  void *in_data,
-  void *out_data,
-  void *cmd,
-  void *extra
+// Adobe After Effects plug-in registration entry point (SDK ABI).
+extern "C" DllExport PF_Err PluginDataEntryFunction2(
+  PF_PluginDataPtr inPtr,
+  PF_PluginDataCB2 inPluginDataCallBackPtr,
+  SPBasicSuite* inSPBasicSuitePtr,
+  const char* inHostName,
+  const char* inHostVersion
 ) {
-  return PF_Err_NONE;
+  PF_Err result = PF_Err_INVALID_CALLBACK;
+  result = PF_REGISTER_EFFECT_EXT2(
+    inPtr,
+    inPluginDataCallBackPtr,
+    EFFECT_NAME,
+    EFFECT_MATCH_NAME,
+    EFFECT_CATEGORY,
+    AE_RESERVED_INFO,
+    "EffectMain",
+    ""
+  );
+  return result;
 }

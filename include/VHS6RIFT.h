@@ -21,9 +21,11 @@
 #if defined(__has_include)
   #if __has_include("AE_Effect.h")
     #include "AEConfig.h"
+    #include "entry.h"
     #include "AE_Effect.h"
     #include "AE_EffectCB.h"
     #include "AE_EffectCBSuites.h"
+    #include "AEFX_SuiteHandlerTemplate.h"
     #include "AE_Macros.h"
     #include "Param_Utils.h"
     #include "String_Utils.h"
