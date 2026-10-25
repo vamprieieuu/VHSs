@@ -1,0 +1,23 @@
+file,size_bytes,duration_s,container,video_codec,width,height,fps_nominal,fps_average,pixel_format,video_frames,audio,audio_codec,audio_channels,audio_sample_rate,alpha_channel
+Vhs cams /Erc-v2s/ScreenRecording_10-14-2026 18-24-52_1.mov,23895966,12.348333,"mov,mp4,m4a,3gp,3g2,mj2",hevc,662,814,60/1,373800/7409,yuvj420p,623,False,,,,False
+Vhs cams /Fall-78 /ScreenRecording_10-14-2026 18-31-08_1.mov,16383315,11.346667,"mov,mp4,m4a,3gp,3g2,mj2",hevc,772,394,30/1,25575/851,yuvj420p,341,False,,,,False
+Vhs cams /Fxc6/ScreenRecording_10-14-2026 18-22-43_1.mov,11117975,6.733333,"mov,mp4,m4a,3gp,3g2,mj2",hevc,828,1050,60/1,3870/101,yuvj420p,258,False,,,,False
+Vhs cams /Fxc6/ScreenRecording_10-14-2026 18-23-02_1.mov,10495129,6.8,"mov,mp4,m4a,3gp,3g2,mj2",hevc,828,1068,60/1,630/17,yuvj420p,252,False,,,,False
+Vhs cams /Gen 7/After vhs /ScreenRecording_10-14-2026 17-30-46_1.mov,13958010,8.96,"mov,mp4,m4a,3gp,3g2,mj2",hevc,828,1078,60/1,59800/1789,yuvj420p,299,True,aac,2,44100,False
+Vhs cams /Gen 7/before vhs/IMG_3621.MP4,850389,1.516667,"mov,mp4,m4a,3gp,3g2,mj2",hevc,828,1086,30/1,2700/91,yuvj420p,45,False,,,,False
+Vhs cams /Jvc  gr-sxm740u/ScreenRecording_10-14-2026 17-39-15_1.mov,19096263,9.203333,"mov,mp4,m4a,3gp,3g2,mj2",hevc,828,1060,60/1,165300/2761,yuvj420p,551,False,,,,False
+Vhs cams /Jvc gr-c7u ( 1986)/Filters /Capture codes /ScreenRecording_10-14-2026 17-38-11_1 2.mov,2906172,2.46,"mov,mp4,m4a,3gp,3g2,mj2",hevc,828,1092,60/1,3650/123,yuvj420p,73,False,,,,False
+Vhs cams /Jvc gr-c7u ( 1986)/Filters /Capture codes /ScreenRecording_10-14-2026 17-38-11_1 3.mov,3774216,3.17,"mov,mp4,m4a,3gp,3g2,mj2",hevc,828,1092,60/1,9800/317,yuvj420p,98,False,,,,False
+Vhs cams /Jvc gr-c7u ( 1986)/Filters /Capture codes /ScreenRecording_10-14-2026 17-38-11_1.mov,3045519,2.25,"mov,mp4,m4a,3gp,3g2,mj2",hevc,828,1092,60/1,1065/34,yuvj420p,71,False,,,,False
+Vhs cams /Jvc gr-c7u ( 1986)/Filters /Crt-Tv /ScreenRecording_10-14-2026 17-38-11_1 2.mov,3736675,2.693333,"mov,mp4,m4a,3gp,3g2,mj2",hevc,828,1092,60/1,6225/202,yuvj420p,83,False,,,,False
+Vhs cams /Jvc gr-c7u ( 1986)/Filters /Crt-Tv /ScreenRecording_10-14-2026 17-38-11_1 3.mov,5798278,4.22,"mov,mp4,m4a,3gp,3g2,mj2",hevc,828,1092,60/1,6350/211,yuvj420p,127,False,,,,False
+Vhs cams /Jvc gr-c7u ( 1986)/Filters /Crt-Tv /ScreenRecording_10-14-2026 17-38-11_1.mov,2907641,2.061667,"mov,mp4,m4a,3gp,3g2,mj2",hevc,828,1092,60/1,37200/1247,yuvj420p,62,False,,,,False
+Vhs cams /Jvc gr-c7u ( 1986)/Vhs-v1/ScreenRecording_10-14-2026 17-37-39_1.mov,11669454,8.216667,"mov,mp4,m4a,3gp,3g2,mj2",hevc,828,1328,60/1,14820/493,yuvj420p,247,False,,,,False
+Vhs cams /vhs-r20/After/ScreenRecording_10-14-2026 17-34-29_1.mov,4991560,4.45,"mov,mp4,m4a,3gp,3g2,mj2",hevc,828,1084,60/1,1920/67,yuvj420p,128,True,aac,2,44100,False
+Vhs cams /vhs-r20/Before/ScreenRecording_10-14-2026 17-34-14_1.mov,325223,1.016667,"mov,mp4,m4a,3gp,3g2,mj2",hevc,828,1578,60/1,1800/61,yuvj420p,30,False,,,,False
+overlays as effects/Model 1 .mp4,185497,1.528333,"mov,mp4,m4a,3gp,3g2,mj2",h264,848,476,100/3,30600/917,yuv420p,51,False,,,,False
+overlays as effects/Model 2 .mp4,61789,0.15,"mov,mp4,m4a,3gp,3g2,mj2",h264,848,636,20/1,20/1,yuv420p,3,False,,,,False
+overlays as effects/Model 3 .mp4,235794,1.758333,"mov,mp4,m4a,3gp,3g2,mj2",h264,848,652,25/2,2640/211,yuv420p,22,False,,,,False
+overlays as effects/Model 4 .mp4,390213,1.798333,"mov,mp4,m4a,3gp,3g2,mj2",h264,848,476,100/3,36000/1079,yuv420p,60,False,,,,False
+overlays as effects/Model 5 .mp4,450755,1.678333,"mov,mp4,m4a,3gp,3g2,mj2",h264,848,634,25/1,25200/1007,yuv420p,42,False,,,,False
+overlays as effects/More than 12+ modesl for vhs effect .mov,43478197,63.3,"mov,mp4,m4a,3gp,3g2,mj2",h264,1280,720,30/1,30/1,yuv420p,1899,True,aac,2,44100,False
