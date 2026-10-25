@@ -1,23 +1,19 @@
-name: VHS6RIFT Windows Build
+name: VHS6RIFT Windows Build & Validation
 
 on:
   push:
     branches: [main]
+  pull_request:
+    branches: [main]
   workflow_dispatch:
 
 jobs:
-  build:
+  validate:
+    name: Architecture & Parameter Validation
     runs-on: windows-2022
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
-
-      # Match the known-good MAJEED workflow: initialize the VS 2022 x64
-      # compiler environment explicitly before invoking CMake/MSBuild.
-      - name: Set up MSVC
-        uses: ilammy/msvc-dev-cmd@v1
-        with:
-          arch: x64
 
       - name: Set up Python
         uses: actions/setup-python@v5
@@ -28,40 +24,130 @@ jobs:
         shell: pwsh
         run: python tools/validate_project.py
 
-      - name: Verify Adobe SDK and PiPLtool
+      - name: Audit parameter wiring and render-math connections
+        shell: pwsh
+        run: python tools/audit_parameter_wiring.py
+
+      - name: Run 14-gate functional test suite
+        shell: pwsh
+        run: python tools/test_vhs6rift.py
+
+      - name: Verify SDK discovery logic across simulated layouts
+        shell: pwsh
+        run: python tools/test_sdk_discovery.py
+
+  build:
+    name: Native Windows x64 AEX Build
+    needs: [validate]
+    runs-on: windows-2022
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Cache Adobe AE SDK
+        id: cache-ae-sdk
+        uses: actions/cache@v4
+        with:
+          path: extern/AfterEffectsSDK
+          key: ae-sdk-${{ runner.os }}-${{ hashFiles('tools/find_ae_sdk.ps1') }}
+          restore-keys: |
+            ae-sdk-${{ runner.os }}-
+
+      - name: Provision Adobe AE SDK from Secrets (if provided)
+        shell: pwsh
+        env:
+          AE_SDK_ZIP_BASE64: ${{ secrets.AE_SDK_ZIP_BASE64 }}
+          AE_SDK_URL: ${{ secrets.AE_SDK_URL }}
+        run: |
+          $targetDir = Join-Path $env:GITHUB_WORKSPACE "extern\AfterEffectsSDK"
+          $tempZip = Join-Path $env:RUNNER_TEMP "AfterEffectsSDK_Secret.zip"
+
+          if (Test-Path $tempZip) { Remove-Item $tempZip -Force -ErrorAction SilentlyContinue }
+
+          # 1. Provision via Base64 Secret (AE_SDK_ZIP_BASE64)
+          if (-not [string]::IsNullOrWhiteSpace($env:AE_SDK_ZIP_BASE64)) {
+            Write-Host "Provisioning Adobe AE SDK from repository secret AE_SDK_ZIP_BASE64..." -ForegroundColor Cyan
+            try {
+              $cleanB64 = $env:AE_SDK_ZIP_BASE64.Trim()
+              $bytes = [Convert]::FromBase64String($cleanB64)
+              [IO.File]::WriteAllBytes($tempZip, $bytes)
+
+              if ((Get-Item $tempZip).Length -lt 100) {
+                throw "Decoded AE_SDK_ZIP_BASE64 archive is too small or invalid."
+              }
+
+              # Test zip archive integrity
+              Add-Type -AssemblyName System.IO.Compression.FileSystem
+              $zipArchive = [System.IO.Compression.ZipFile]::OpenRead($tempZip)
+              $zipArchive.Dispose()
+
+              New-Item -ItemType Directory -Force $targetDir | Out-Null
+              Expand-Archive -Path $tempZip -DestinationPath $targetDir -Force
+              Write-Host "Successfully decoded and extracted SDK archive." -ForegroundColor Green
+            } catch {
+              Write-Error "Failed to process AE_SDK_ZIP_BASE64 secret: $_"
+            } finally {
+              if (Test-Path $tempZip) { Remove-Item $tempZip -Force -ErrorAction SilentlyContinue }
+            }
+          }
+          # 2. Provision via Secure URL Secret (AE_SDK_URL)
+          elseif (-not [string]::IsNullOrWhiteSpace($env:AE_SDK_URL)) {
+            Write-Host "Downloading Adobe AE SDK from secure URL specified in AE_SDK_URL secret..." -ForegroundColor Cyan
+            try {
+              Invoke-WebRequest -Uri $env:AE_SDK_URL -OutFile $tempZip -UseBasicParsing
+              if ((Get-Item $tempZip).Length -lt 100) {
+                throw "Downloaded AE_SDK_URL archive is too small or invalid."
+              }
+
+              Add-Type -AssemblyName System.IO.Compression.FileSystem
+              $zipArchive = [System.IO.Compression.ZipFile]::OpenRead($tempZip)
+              $zipArchive.Dispose()
+
+              New-Item -ItemType Directory -Force $targetDir | Out-Null
+              Expand-Archive -Path $tempZip -DestinationPath $targetDir -Force
+              Write-Host "Successfully downloaded and extracted SDK archive." -ForegroundColor Green
+            } catch {
+              Write-Error "Failed to process AE_SDK_URL secret: $_"
+            } finally {
+              if (Test-Path $tempZip) { Remove-Item $tempZip -Force -ErrorAction SilentlyContinue }
+            }
+          } else {
+            Write-Host "No AE_SDK_ZIP_BASE64 or AE_SDK_URL secret provided. Checking repository/cached SDK..." -ForegroundColor Yellow
+          }
+
+      - name: Verify and Discover Adobe AE SDK
         shell: pwsh
         run: |
-          $sdk = Join-Path $env:GITHUB_WORKSPACE 'extern\AfterEffectsSDK'
-          $headers = @(
-            (Join-Path $sdk 'Headers\AE_Effect.h'),
-            (Join-Path $sdk 'Examples\Headers\AE_Effect.h')
-          )
-          if (-not ($headers | Where-Object { Test-Path $_ })) {
-            throw "Adobe AE SDK headers are missing under extern/AfterEffectsSDK."
+          $sdk = & "$env:GITHUB_WORKSPACE\tools\find_ae_sdk.ps1" -FailFast
+          if (-not $sdk -or -not $sdk.IsValid) {
+            throw "Adobe AE SDK is unavailable or incomplete. See detailed instructions in the job log above."
           }
-          $piplTool = Get-ChildItem -Path $sdk -Filter 'PiPLtool.exe' -File -Recurse -ErrorAction SilentlyContinue | Select-Object -First 1
-          if (-not $piplTool) {
-            throw "PiPLtool.exe is missing from extern/AfterEffectsSDK."
-          }
-          Write-Host "Using PiPLtool: $($piplTool.FullName)"
+          # Write resolved paths to GitHub Actions environment
+          "AE_SDK_ROOT=$($sdk.SdkRoot)" | Out-File -FilePath $env:GITHUB_ENV -Append
+          "AE_HEADERS=$($sdk.HeadersDir)" | Out-File -FilePath $env:GITHUB_ENV -Append
+          "PIPL_TOOL=$($sdk.PiPLtool)" | Out-File -FilePath $env:GITHUB_ENV -Append
 
       - name: Configure CMake
         shell: pwsh
         run: |
-          $sdk = Join-Path $env:GITHUB_WORKSPACE 'extern\AfterEffectsSDK'
-          cmake -S . -B build -G "Visual Studio 17 2022" -A x64 "-DAE_SDK_ROOT=$sdk" 2>&1 | Tee-Object -FilePath configure.log
+          cmake -S . -B build -G "Visual Studio 17 2022" -A x64 "-DAE_SDK_ROOT=$env:AE_SDK_ROOT" 2>&1 | Tee-Object -FilePath configure.log
           if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
 
       - name: Build Release AEX
         shell: pwsh
         run: |
-          cmake --build build --config Release --parallel 2 2>&1 | Tee-Object -FilePath build.log
+          cmake --build build --config Release --parallel 2>&1 | Tee-Object -FilePath build.log
           if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
 
       - name: Verify and collect exactly one AEX
         shell: pwsh
         run: |
-          $files = @(Get-ChildItem build -Recurse -Filter 'VHS6RIFT.aex' -File)
+          $files = @(Get-ChildItem build -Recurse -Filter "VHS6RIFT.aex")
           if ($files.Count -ne 1) { throw "Expected exactly one VHS6RIFT.aex, found $($files.Count)." }
           New-Item -ItemType Directory -Force artifacts | Out-Null
           Copy-Item $files[0].FullName artifacts\VHS6RIFT.aex
@@ -74,7 +160,7 @@ jobs:
           path: artifacts/*
           if-no-files-found: error
 
-      - name: Upload configure/build logs
+      - name: Upload configure and build logs
         if: always()
         uses: actions/upload-artifact@v4
         with:
@@ -82,4 +168,4 @@ jobs:
           path: |
             configure.log
             build.log
-          if-no-files-found: warn
+          if-no-files-found: ignore

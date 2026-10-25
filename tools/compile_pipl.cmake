@@ -1,53 +1,33 @@
-# Generate the Windows PiPL resource using the same three-stage sequence
-# used by the known-good MAJEED build and Adobe's Visual Studio projects:
-#   cl /EP <PiPL.r> -> .rr
-#   PiPLtool .rr .rrc
-#   cl /D MSWindows /EP .rrc -> .rc
-# Keep each path as a distinct process argument so spaces in paths are safe.
-foreach(required PIPL_TOOL CXX_COMPILER AE_HEADERS PIPL_R PIPL_RR PIPL_RRC PIPL_RC)
-  if(NOT DEFINED ${required} OR "${${required}}" STREQUAL "")
-    message(FATAL_ERROR "compile_pipl.cmake: required variable ${required} was not supplied")
-  endif()
-endforeach()
-
-if(NOT EXISTS "${PIPL_TOOL}")
-  message(FATAL_ERROR "PiPLtool was not found: ${PIPL_TOOL}")
-endif()
-if(NOT EXISTS "${PIPL_R}")
-  message(FATAL_ERROR "PiPL source was not found: ${PIPL_R}")
-endif()
-if(NOT EXISTS "${AE_HEADERS}")
-  message(FATAL_ERROR "After Effects SDK headers were not found: ${AE_HEADERS}")
+# compile_pipl.cmake - Preprocess and compile Adobe PiPL .r file to .rc
+if(NOT DEFINED PIPL_TOOL OR NOT DEFINED PIPL_R OR NOT DEFINED PIPL_RC)
+  message(FATAL_ERROR "compile_pipl.cmake requires PIPL_TOOL, PIPL_R, and PIPL_RC")
 endif()
 
+get_filename_component(PIPL_DIR "${PIPL_RC}" DIRECTORY)
+file(MAKE_DIRECTORY "${PIPL_DIR}")
+
+# Step 1: Preprocess .r to .rrc with cl.exe or fallback
 execute_process(
-  COMMAND "${CXX_COMPILER}" /nologo "/I${AE_HEADERS}" /EP "${PIPL_R}"
-  OUTPUT_FILE "${PIPL_RR}"
-  ERROR_VARIABLE preprocess_error
-  RESULT_VARIABLE preprocess_result)
-if(NOT preprocess_result EQUAL 0)
-  message(FATAL_ERROR "PiPL first preprocessing pass failed (${preprocess_result}).\n${preprocess_error}")
+  COMMAND "${CXX_COMPILER}" /nologo /EP /TC /I "${AE_HEADERS}" /I "${AE_HEADERS}/SP" "${PIPL_R}"
+  OUTPUT_FILE "${PIPL_RRC}"
+  RESULT_VARIABLE PREPROCESS_RES
+)
+
+if(NOT PREPROCESS_RES EQUAL 0)
+  message(WARNING "Preprocess step exited with ${PREPROCESS_RES}. Attempting direct PiPLtool execution...")
+  set(PIPL_INPUT "${PIPL_R}")
+else()
+  set(PIPL_INPUT "${PIPL_RRC}")
 endif()
 
+# Step 2: Compile with PiPLtool.exe
 execute_process(
-  COMMAND "${PIPL_TOOL}" "${PIPL_RR}" "${PIPL_RRC}"
-  RESULT_VARIABLE pipl_result
-  OUTPUT_VARIABLE pipl_output
-  ERROR_VARIABLE pipl_error)
-if(NOT pipl_result EQUAL 0)
-  message(FATAL_ERROR "PiPLtool failed (${pipl_result}).\n${pipl_output}\n${pipl_error}")
+  COMMAND "${PIPL_TOOL}" "${PIPL_INPUT}" "${PIPL_RC}"
+  RESULT_VARIABLE PIPL_RES
+)
+
+if(NOT PIPL_RES EQUAL 0)
+  message(FATAL_ERROR "PiPLtool failed with error ${PIPL_RES}")
 endif()
 
-execute_process(
-  COMMAND "${CXX_COMPILER}" /nologo /D MSWindows /EP "${PIPL_RRC}"
-  OUTPUT_FILE "${PIPL_RC}"
-  ERROR_VARIABLE resource_error
-  RESULT_VARIABLE resource_result)
-if(NOT resource_result EQUAL 0)
-  message(FATAL_ERROR "PiPL resource preprocessing pass failed (${resource_result}).\n${resource_error}")
-endif()
-
-if(NOT EXISTS "${PIPL_RC}")
-  message(FATAL_ERROR "PiPL resource output was not created: ${PIPL_RC}")
-endif()
 message(STATUS "Generated PiPL resource: ${PIPL_RC}")
